@@ -1,0 +1,3 @@
+"firestore": {
+			"port": 8080
+		},
