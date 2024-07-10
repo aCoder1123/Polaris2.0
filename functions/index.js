@@ -1,17 +1,43 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { logger } = require("firebase-functions/v2");
+const { initializeApp } = require("firebase-admin/app");
+const nodemailer = require("nodemailer");
 
-const {onRequest} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
+initializeApp();
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+
+exports.sendEmail = onCall(
+	// { cors: [/firebase\.com$/, "127.0.0.1"] },
+	(request) => {
+		const text = request.data.text;
+
+		const transporter = nodemailer.createTransport({
+			host: "smtp.gmail.com",
+			port: 465,
+			secure: true, // Use `true` for port 465, `false` for all other ports
+			auth: {
+				user: "bailey.tuckman@gmail.com",
+				pass: "umqb elua enws jbgb",
+			},
+		});
+
+		async function main() {
+			// send mail with defined transport object
+			const info = await transporter.sendMail({
+				from: '"Bailey Tuckman" <bailey.tuckman@gmail.com>', // sender address
+				to: "bailey.tuckman@westtown.edu", // robert.frazier@westtown.edu,
+				subject: "Coffee Order", // Subject line
+				text: "Hello world?", // plain text body
+				html: `<b>Your Coffee good sir:</b><img src="coffeGig.gif"><p>${text}</p>`, // html body
+			});
+		}
+		let errorMsg;
+		main().catch((error) => {
+			errorMsg = error;
+		});
+		return errorMsg ? { text: "Error" } : { text: "Message Sent Succesfully" };
+	}
+);
 
 // exports.helloWorld = onRequest((request, response) => {
 //   logger.info("Hello logs!", {structuredData: true});

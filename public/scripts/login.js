@@ -44,6 +44,7 @@ function toggleSignIn() {
                 document.getElementById("photoHolder").append(img);
                 document.getElementById("signInButton").innerText =
 									"Sign Out";
+                window.location.href = "../coffeeMachine.html"
 			})
 			.catch(function (error) {
 				// Handle Errors here.
@@ -83,3 +84,5 @@ document.getElementById("signInButton").addEventListener("click", toggleSignIn, 
 //         "destination": "/index.html"
 //       }
 //     ]
+
+// "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run lint"]
