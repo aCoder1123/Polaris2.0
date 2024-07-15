@@ -14,7 +14,9 @@ import { firebaseConfig } from "./config.js";
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const functions = getFunctions(app);
-connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+if (window.location.hostname === '127.0.0.1') {
+    connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+}
 
 // if (!auth.user) {
 //     window.location.href = "../index.html"
@@ -28,7 +30,7 @@ connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 // 	console.log(data);
 // });
 
-const sendEmail = httpsCallable(functions, "sendEmail");
+const sendEmail = httpsCallable(functions, "sendInvite");
 
 const orderCoffee = () => {
 	let emailIn = document.getElementById("emailIn");
@@ -36,7 +38,6 @@ const orderCoffee = () => {
 		alert("Enter a valid email address.");
 		return;
 	}
-
 	sendEmail({ email: emailIn.value }).then((result) => {
 		const data = result.data.messageStatus;
 		if (data != "Message Sent Succesfully") {
@@ -48,6 +49,7 @@ const orderCoffee = () => {
 		alert(
 			"Order Placed:\n\n Your coffee order will arrive in your inbox shortly."
 		);
+        console.log(result.data)
 	});
 };
 

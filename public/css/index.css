@@ -1,0 +1,107 @@
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Dosis:wght@200..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Syne:wght@400..800&display=swap");
+
+html {
+	/* font-family: "Syne", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 250;
+  font-style: normal; */
+
+	font-family: "Roboto", sans-serif;
+	font-weight: 400;
+	font-style: normal;
+	width: 100%;
+	flex-shrink: 0;
+	background-color: black;
+
+	--header-blue: #01597b;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: "Dosis", sans-serif;
+	font-optical-sizing: auto;
+	font-weight: 300;
+	font-style: normal;
+}
+
+.material-symbols-outlined {
+	font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+@keyframes twist1 {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(90deg);
+	}
+}
+
+@keyframes twist2 {
+	from {
+		transform: rotate(90deg);
+	}
+	to {
+		transform: rotate(0deg);
+	}
+}
+
+@keyframes drop1 {
+	from {
+		/* transform: scaleY(0) translateY(-100%); */
+		max-height: 0;
+	}
+	to {
+		/* transform: scaleY(100%) translateY(0%); */
+		max-height: 100vh;
+	}
+}
+
+@keyframes drop2 {
+	from {
+		max-height: 100vh;
+	}
+	to {
+		height: 0;
+	}
+}
+
+.collapse {
+	cursor: pointer;
+	transition: transform;
+	transition: linear 2s transform;
+	transition: linear 0.2s fill;
+	animation: forwards twist2 linear var(--collapseTime);
+}
+
+.collapse:hover {
+	color: hsl(0, 0%, 33%);
+	fill: hsl(0, 0%, 33%) !important;
+}
+
+.collapse.open {
+	animation: forwards twist1 linear var(--collapseTime);
+}
+
+#polarisLogoLink {
+	width: 65%;
+	margin-right: 3%;
+	height: 70%;
+	margin-bottom: 2%;
+}
+
+#polarisLogo * {
+	transition: 0.35s fill ease;
+}
+
+#polarisLogo:hover .change {
+	fill: rgb(0, 0, 139);
+}
+
+#polarisLogo:hover #accent {
+	fill: white;
+}
