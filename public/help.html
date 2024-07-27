@@ -61,49 +61,51 @@
 			<h1>Help Center</h1>
 			<div id="content">
 				<div id="leftWrap">
-                    <form action="some action" method="post">
-                        <fieldset>
-                            <legend><h2>Bug Report Form</h2></legend>
-                            <div class="inputWrap">
-                                <label for="pageSelect">Page on which the error occurred:</label>
-                                <select name="page" id="pageSelect" required>
-                                    <option value="login.html">Log In Page</option>
-                                    <option value="schedule.html">Main Schedule Page</option>
-                                    <option value="profile.html">Profile</option>
-                                    <option value="help.html">Help (this) Page</option>
-                                    <option value="404.html">404 Page</option>
-                                    <option value="admin/builder.html">Weekend Builder Page (admin)</option>
-                                    <option value="admin/weekendLog.html">Weekend Log Viewer (admin)</option>
-                                    <option value="admin/dashboard.html">Weekend Dashboard (admin)</option>
-                                </select>
-                            </div>
-                            <div class="inputWrap">
-                                <label for="description">Description of error:</label>
-                                <input type="text" id="description" name="description" placeholder="Description of error, the more detailed the better." required>
-                            </div>
-                            <div class="inputWrap">
-                                <label for="repro">Steps to reproduce:</label>
-                                <input type="text" id="repro" name="repro" placeholder="Steps to reproduce the error if possible and relevant.">
-                            </div>
-                            <div class="inputWrap">
+					<form action="" method="post" id="reportForm">
+						<fieldset>
+							<legend><h2>Bug Report Form</h2></legend>
+							<div class="inputWrap">
+								<label for="pageSelect">Page on which the error occurred:</label>
+								<select name="page" id="pageSelect" required>
+									<option value="" selected disabled hidden>Select an Option:</option>
+									<option value="login.html">Log In Page</option>
+									<option value="schedule.html">Main Schedule Page</option>
+									<option value="profile.html">Profile</option>
+									<option value="help.html">Help (this) Page</option>
+									<option value="404.html">404 Page</option>
+									<option value="admin/builder.html">Weekend Builder Page (admin)</option>
+									<option value="admin/weekendLog.html">Weekend Log Viewer (admin)</option>
+									<option value="admin/dashboard.html">Weekend Dashboard (admin)</option>
+								</select>
+							</div>
+							<div class="inputWrap">
+								<label for="description">Description of error:</label>
+								<input type="text" id="description" name="description" placeholder="Description of error, the more detailed the better." required />
+							</div>
+							<div class="inputWrap">
+								<label for="repro">Steps to reproduce:</label>
+								<input type="text" id="repro" name="repro" placeholder="Steps to reproduce the error if possible and relevant." />
+							</div>
+							<!-- <div class="inputWrap">
                                 <label for="image">Screenshot (if possible): </label>
                                 <input type="file" name="image" id="image" accept="image/*">
-                            </div>
-                            <div class="inputWrap">
-                                <label for="emailIn">Email for followup. Leave blank to report anonymously.</label>
-                                <br>
-                                <input type="email" name="email" id="emailIn" placeholder="first.last@westtown.edu" autocomplete="email">
-                            </div>
-                            <input type="submit" value="Submit" name="submit" id="submitBtn">
-                        </fieldset>
-                    </form>
-                </div>
+                            </div> -->
+							<div class="inputWrap">
+								<label for="emailIn">Email for followup(leave blank to report anonymously):</label>
+								<br />
+								<input type="email" name="email" id="emailIn" placeholder="first.last@westtown.edu" autocomplete="email" />
+							</div>
+							<input type="submit" value="Submit" name="submit" id="submitBtn" />
+						</fieldset>
+					</form>
+				</div>
 				<div id="rightWrap">
-                    <span id="helpBlurb">For weekend program help <a href="mailto:robert.frazier@westtown.edu">email T. Robert</a> or <a href="tel:+16103997971">call the DA</a>. For Polaris help watch the explanation video below (coming, soon?) or <a href="mailto:bailey.tuckman@westtown.edu">email (designaed help person)</a>.</span>
+					<span id="helpBlurb">For weekend program help <a href="mailto:robert.frazier@westtown.edu">email T. Robert</a> or <a href="tel:+16103997971">call the DA</a>. For Polaris help watch the explanation video below (coming, soon?) or <a href="mailto:bailey.tuckman@westtown.edu">email (designaed help person)</a>.</span>
 					<iframe width="560" height="315" src="https://www.youtube.com/embed/b_t1l9eNvjM?si=7fKmer5YIc0bjgNR" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 				</div>
 			</div>
 		</section>
-		<script src="scripts/index.js"></script>
+		<script type="module" src="scripts/index.js"></script>
+		<script type="module" src="scripts/help.js"></script>
 	</body>
 </html>

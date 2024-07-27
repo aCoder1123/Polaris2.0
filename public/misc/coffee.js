@@ -9,7 +9,7 @@ import {
 	httpsCallable,
 	connectFunctionsEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
-import { firebaseConfig } from "./config.js";
+import { firebaseConfig } from "../scripts/config.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();

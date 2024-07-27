@@ -1,0 +1,43 @@
+{
+	"user": {
+		"userId": 123,
+		"userEmail": "first.last@westtown.edu",
+		"events": ["Wawa 10/19/24"],
+		"emailPreferences": {
+			"advLottery": true,
+			"eventConf":true,
+			"eventFeedback":true,
+			"newEvent": true
+		}
+	},
+	"eventTemplate": {
+		"templateId": 1,
+		"title": "Event Title",
+		"numSpots": 18,
+		"location": "123 Somewhere Rd.",
+		"description": "some description for some event in some place"
+	},
+	"event": {
+		"title": "Event Title",
+        "timeStart": "time",
+        "timeEnd": "time",
+		"location": "123 Somewhere Rd.",
+        "rideDuration": 0,
+		"description": "some description for some event in some place",
+		"faculty": [{ "first": "Robert", "last": "Frazier", "userId": "uId" }],
+        "numSpots": 18,
+        "signups": [
+            {"first":"Robert", "last":"Frazier", "uId":"", "signpTime":"", "status":"pending, present, or no-show"}
+        ]
+
+	},
+	"weekend": {
+		"startDate": "date",
+		"endDate": "date",
+		"days": {
+			"Friday": [],
+			"Saturday": [],
+			"Sunday": []
+		}
+	}
+}
