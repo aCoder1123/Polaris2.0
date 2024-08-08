@@ -1,19 +1,17 @@
-@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Dosis:wght@200..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Syne:wght@400..800&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Dosis:wght@200..800&family=Wittgenstein:ital,wght@0,400..900;1,400..900&display=swap');
 
 html {
-	/* font-family: "Syne", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 250;
-  font-style: normal; */
-
-	font-family: "Roboto", sans-serif;
-	font-weight: 400;
+	font-family: "Wittgenstein", serif;
+	font-optical-sizing: auto;
+	font-weight: 450;
 	font-style: normal;
+
 	width: 100%;
 	flex-shrink: 0;
 	background-color: black;
 
-	--header-blue: #01597b;
+	--header-blue: hsl(206, 100%, 35%);
+	--accent-blue: hsl(226, 100%, 56%);
 }
 
 h1,
@@ -53,17 +51,17 @@ h6 {
 @keyframes drop1 {
 	from {
 		/* transform: scaleY(0) translateY(-100%); */
-		max-height: 0;
+		height: 0;
 	}
 	to {
 		/* transform: scaleY(100%) translateY(0%); */
-		max-height: 100vh;
+		height: 32vh;
 	}
 }
 
 @keyframes drop2 {
 	from {
-		max-height: 100vh;
+		height: 32vh;
 	}
 	to {
 		height: 0;

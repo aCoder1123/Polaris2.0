@@ -22,7 +22,7 @@
         "timeStart": "time",
         "timeEnd": "time",
 		"location": "123 Somewhere Rd.",
-        "rideDuration": 0,
+        "travelDuration": 0,
 		"description": "some description for some event in some place",
 		"faculty": [{ "first": "Robert", "last": "Frazier", "userId": "uId" }],
         "numSpots": 18,
@@ -34,10 +34,12 @@
 	"weekend": {
 		"startDate": "date",
 		"endDate": "date",
-		"days": {
-			"Friday": [],
-			"Saturday": [],
-			"Sunday": []
-		}
+		"collectFeedback": true,
+		"days": [
+			[],
+			[],
+			[],
+			[]
+		]
 	}
 }

@@ -9,127 +9,122 @@ body {
 	background-image: url("../images/starrySky.jpeg");
 	background-position: bottom;
 	background-size: cover;
-    position: static;
+	position: static;
 }
 
 /* start of side menu */
 
 #sideMenuWrap {
-    border-right: black 0 solid;
-    position: absolute;
-    top: 0;
-    height: 100%;
-    max-height: 100%;
-    width: 0;
-    background-color: whitesmoke;
-    z-index: 100;
-    transition: width .3s ease-out;
-    
+	position: absolute;
+	top: 0;
+	height: 100%;
+	max-height: 100%;
+	width: 0;
+	background-color: whitesmoke;
+	z-index: 100;
+	transition: width 0.3s ease-out;
 
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
 }
 
-#sideMenuWrap div, #sideMenuWrap a {
-    display: none;
+#sideMenuWrap div,
+#sideMenuWrap a {
+	display: none;
 }
 
 #sideMenuWrap.open {
-    width: 20vw;
-    border-width: .1vw;
-    box-shadow: 0vh 0vh 3vh rgb(0, 0, 0);
+	width: 20vw;
+	border-width: 0.1vw;
+	box-shadow: 0vh 0vh 3vh rgb(0, 0, 0);
 }
-
 
 #sideMenuWrap.open ~ * {
-    filter: brightness(.6);
+	filter: brightness(0.6);
 }
 
-#sideMenuWrap.open div, #sideMenuWrap.open a {
-    display: flex;
+#sideMenuWrap.open div,
+#sideMenuWrap.open a {
+	display: flex;
 }
 
 #menuToggle {
-    position: absolute;
-    top: .5vh;
-    left: .5vw;
-    height: 5vh;
-    /* max-width: 50%; */
-    fill: white;
-    transition: fill .3 ease-out;
+	position: absolute;
+	top: 0.5vh;
+	left: 0.5vw;
+	height: 5vh;
+	/* max-width: 50%; */
+	fill: white;
+	transition: fill 0.3 ease-out;
 }
 
 #menuToggle.open {
-    fill: black;
+	fill: black;
 }
 
 #menuHead {
-    background-color: gray;
-    width: 100%;
-    display: flex !important;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    height: 6vh !important;
-	border-bottom: 0.5vh solid black;
-
+	background-color: gray;
+	width: 100%;
+	display: flex !important;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-end;
+	height: 6vh !important;
+	border-bottom: 0.15vh solid black;
 }
 
 .menuWrap {
-    width: 80%;
-    /* height: 5%; */
-    padding: 0 20%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    color: black;
-    transition: color .2s ease;
-    transition: text-decoration .2s ease;
-    text-decoration: none;
-    margin-bottom: 5%;
+	width: 80%;
+	/* height: 5%; */
+	padding: 0 20%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	color: black;
+	transition: color 0.2s ease;
+	transition: text-decoration 0.2s ease;
+	text-decoration: none;
+	margin-bottom: 5%;
 }
 
 .menuWrap:hover {
-    color: darkblue;
+	color: darkblue;
 }
 
-.menuWrap:hover .menuText, .menuWrap:hover h2 {
-        text-decoration: underline;
+.menuWrap:hover .menuText,
+.menuWrap:hover h2 {
+	text-decoration: underline;
 }
 
 .menuText {
-    margin-left: 5%;
+	margin-left: 5%;
 }
 
 #menuPF {
-    margin-top: 5%;
+	margin-top: 5%;
 }
 
 #menuPF img {
-    border-radius: 50%;
-    margin-right: 5%;
+	border-radius: 50%;
+	margin-right: 5%;
 }
 
 #menuFooter {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    font-size: smaller;
-    width: 100%;
-    transition: none;
-    position: absolute;
-    bottom: 1%;
-    text-align: center;
-    text-wrap: wrap;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	font-size: smaller;
+	width: 100%;
+	transition: none;
+	position: absolute;
+	bottom: 1%;
+	text-align: center;
+	text-wrap: wrap;
 }
-
-
-
-
 
 /* Start of Schedule */
 
@@ -138,18 +133,18 @@ body {
 	height: 100vh;
 	/* overflow-y: scroll; */
 	background-color: rgb(255, 255, 255);
-	border-right: 0.2vw solid black;
-    flex-shrink: 0;
-    flex-grow: 0;
+	border-right: 0.15vw solid black;
+	flex-shrink: 0;
+	flex-grow: 0;
 }
 
 #scheduleHead,
 .dayHeadWrap {
 	width: 100%;
 	height: 6vh;
-    min-height: 6vh;
-    max-height: 6vh;
-	border-bottom: 0.5vh solid black;
+	min-height: 6vh;
+	max-height: 6vh;
+	border-bottom: 0.15vh solid black;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -161,12 +156,6 @@ body {
 	color: white;
 }
 
-
-
-
-
-
-
 /* Start of event days */
 
 #daysContainer {
@@ -175,105 +164,115 @@ body {
 	flex-direction: row;
 	align-items: center;
 	justify-content: start;
-    overflow-x: scroll;
-    overflow-y: hidden;
+	overflow-x: scroll;
+	overflow-y: hidden;
 }
 
 .dayWrap {
-    max-height: 100%;
-    overflow: auto;
+	max-height: 100vh;
+	overflow: auto;
 	height: 100%;
-    width: 3vw;
+	width: 3vw;
 	background-color: white;
-	
-	border-right: 0.2vw solid black;
-    flex-shrink: 0;
-    flex-grow: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-	--collapseTime: 0s;
-    --dayCollapseTime: .2s;
-    transition: width var(--dayCollapseTime) ease-out;
+
+	border-right: 0.15vw solid black;
+	flex-shrink: 0;
+	flex-grow: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	--collapseTime: 0.2s;
+	--dayCollapseTime: 0.2s;
+	transition: width var(--dayCollapseTime) ease-out;
+
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
+.dayWrap::-webkit-scrollbar {
+	display: none;
 }
 
 .dayWrap.open {
-    
-    width: 24.8vw;
+	width: 24.8vw;
 }
 
 .dayHeadWrap {
-    display: flex;
+	display: flex;
 	flex-direction: row;
 	justify-content: center;
-    align-items: center;
+	align-items: center;
 	position: sticky;
-    left: 0;
-    top: 0;
+	left: 0;
+	top: 0;
 	z-index: 100;
 }
 
-
 .dayHead {
 	font-size: 4vh;
-    display: none;
-
+	display: none;
 }
 
 .dayWrap.open .dayHead {
-    display: contents;
+	display: contents;
 }
 
 .eventsContainer {
-    width: 100%;
-    overflow: scroll !important;
-    height: 93.5vh;
+	width: 100%;
+	overflow: scroll !important;
+	min-height: 93.5vh;
+	/* flex-shrink: 0; */
+	background-color: pink;
 }
-
-
 
 .eventWrap {
-	width: 100%;
 	height: fit-content;
-    display: none;
-    overflow: hidden;
+	display: none;
+	overflow: hidden;
+	max-width: 98% !important;
+	margin: 1px auto;
+	border-radius: 1.5vh;
+	background-color: rgb(243, 243, 243);
+	border: 0.1vw solid black;
+	flex-shrink: 0;
 }
+/* 
+.eventWrap.open {
+    height: 37vh;
+} */
 
 .dayWrap.open .eventWrap {
-    display: contents;
+	display: block;
+    
 }
 
 .eventInfoWrap {
-	width: 95%;
+	width: 90%;
 	padding-left: 5%;
 	overflow: hidden;
-	background-color: rgb(234, 234, 234);
-	animation: forwards drop2 linear 0s;
-    
+	font-size: 2vh;
+	animation: forwards drop2 linear var(--collapseTime);
 }
 
 .eventWrap.open .eventInfoWrap {
 	animation: forwards drop1 linear var(--collapseTime);
-    border-bottom: 0.1vh solid black;
+	/* border-bottom: 0.1vh solid black; */
 }
 
 .dayCollapse {
-    position: absolute;
-	left: .5vw;
-    /* width: 2vw; */
-    height: 7vh;
-    flex-shrink: 0;
+	position: absolute;
+	left: 0.5vw;
+	/* width: 2vw; */
+	height: 7vh;
+	flex-shrink: 0;
 
-
-    animation: forwards twist1 ease-out var(--dayCollapseTime) !important;
+	animation: forwards twist1 ease-out var(--dayCollapseTime) !important;
 }
 
 .dayCollapse.open {
 	animation: forwards twist2 ease-out var(--dayCollapseTime) !important;
-    
 }
-
 
 .eIWrap {
 	display: flex;
@@ -288,13 +287,16 @@ body {
 
 .eventHeadWrap {
 	width: 98%;
-    /* max-width: 100%; */
+	/* max-width: 100%; */
 	height: 5vh;
 	padding-left: 2%;
-	border-bottom: 0.1vh solid black;
-	background-color: hsl(240, 0%, 75%);
-    overflow: hidden;
 
+	background-color: hsl(220, 93%, 80%);
+	overflow: hidden;
+}
+
+.eventWrap.open .eventHeadWrap {
+	border-bottom: 0.1vh solid black;
 }
 
 .eventTitle {
@@ -329,6 +331,7 @@ body {
 
 .descWrap {
 	margin: -1.5vh 0;
+	font-size: 1.75vh;
 }
 
 .descIcon {
@@ -341,15 +344,51 @@ body {
 	cursor: pointer;
 }
 
+.eventSpots {
+	font-weight: bold;
+}
+
 .attendeesWrap {
 	flex-wrap: wrap;
+    width: 100%;
 }
 
 .attendeesList {
-	width: 100%;
+	width: 80%;
+	overflow-y: scroll;
+
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+    
+	height: 11vh;
+	list-style-position: inside;
+	list-style-type: decimal;
+	margin-top: 0;
+	margin-bottom: 0;
+    padding: 0;
+    border: 1px solid black;
+    border-radius: 1vh;
+    margin-left: 10%;
+    background-color: hsl(230, 100%, 95%);
+}
+
+.attendeesList::-webkit-scrollbar {
+  display: none;
 }
 
 .attendee {
-	width: 80%;
-	margin: 0.1vh 10%;
+	width: 96%;
+	/* height: 2.5vh; */
+    margin-left: 2%;
 }
+
+.attendee span,
+.attendee::marker {
+	margin: auto 0;
+	font-size: 1.75vh;
+}
+/* .attendee img {
+    max-height: 100%;
+    border-radius: 50%;
+    margin-right: 1%;
+} */

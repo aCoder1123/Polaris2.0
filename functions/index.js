@@ -1,7 +1,12 @@
 const { onCall, HttpsError, onRequest } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions/v2");
-const { sendMail, emailOptions } = require("./gmail/send");
-const { createICS } = require("./icsGen");
+const { sendMail, emailOptions } = require("./gmail/main");
+const {createEventFromJSON, addAttendees} = require('./calendar/main');
+const { getFirestore, collection, query, where, doc, getDoc } = require("firebase/firestore");
+const { userDoc } = require("./db/main");
+
+const db = getFirestore(app);
+
 
 exports.sendEmail = onCall((request) => {
 	let messageOptions = emailOptions;
@@ -30,3 +35,21 @@ exports.bugReport = onCall((request) => {
 
 	return send(messageOptions);
 });
+
+exports.getUserData = onCall((request) => {
+	let userEmail = request.data.email
+	return getDoc(doc(db, "users", userEmail)).then((docSnap) => {
+		if (docSnap.exists()) {return docSnap.data()}
+		let newUser = userDoc
+		newUser.email = request.data.email
+		return newUser
+	}).catch((error) => {
+		return {status: "error", info: error}
+	})
+})
+
+exports.saveWeekend = onCall((request) => {
+	let collection = request.data.template ? "weekendTemplates" : "weekends"
+	let information = request.data.weekendInfo
+	
+})
