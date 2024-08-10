@@ -78,7 +78,7 @@
 						</div>
 						<div class="setting">
 							<label for="template">Select a template: </label>
-							<select name="template" id="template">
+							<select name="template" id="weekendTemplateSelector">
 								<option value="">No Template</option>
 							</select>
 						</div>
@@ -86,13 +86,15 @@
 				</div>
 				<div id="eventCreatorWrap">
 					<h3 id="eventCreatorHead">Event Creator</h3>
-
 					<div class="setting">
 						<label for="eventTemplateSelector">Select a template: </label>
 						<select name="eventTemplateSelector" id="eventTemplateSelector">
 							<option value="">No Template</option>
-							<option value="wawa">Wawa</option>
 						</select>
+					</div>
+					<div class="setting">
+						<label for="saveAsTemplate">Save as template: </label>
+						<input type="checkbox" id="saveAsTemplate">
 					</div>
 					<div class="setting">
 						<label for="daySelect">Day: </label>
@@ -106,6 +108,16 @@
 					<div class="setting">
 						<label for="eventEnd">End Time: </label>
 						<input type="time" name="eventEnd" id="eventEnd" value="12:00"/>
+					</div>
+					<div class="setting">
+						<label for="admissionCriteria">Admission Criteria: </label>
+						<select id="criteriaSelector">
+							<option value="Normal Signup">Normal Signup</option>
+							<option value="Advanced Lottery">Advanced Lottery</option>
+							<option value="Credit Lottery">Credit Lottery</option>
+							<option value="Pure Credit">Pure Credit</option>
+							<option value="Random Lottery">Random Lottery</option>
+						</select>
 					</div>
 
 					<div class="eventMakerWrap">
@@ -140,7 +152,8 @@
 					
 				</div>
 				<div id="buttonsWrap">
-					<button type="button">Save Weekend</button>
+					<button type="button" id="saveWeekendButton">Save Weekend</button>
+					<button type="button" id="saveWeekendAsTemplateButton">Save Weekend as Template</button>
 					<button type="button" id="debugCodeButton">View Debug</button>
 				</div>
 				<pre id="debugCode"></pre>

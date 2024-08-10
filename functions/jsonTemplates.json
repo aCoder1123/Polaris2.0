@@ -1,14 +1,15 @@
 {
 	"user": {
-		"userId": 123,
-		"userEmail": "first.last@westtown.edu",
+		"email": "first.last@westtown.edu",
 		"events": ["Wawa 10/19/24"],
 		"emailPreferences": {
 			"advLottery": true,
 			"eventConf":true,
 			"eventFeedback":true,
 			"newEvent": true
-		}
+		},
+		"first": "name",
+		"last": "name"
 	},
 	"eventTemplate": {
 		"templateId": 1,
