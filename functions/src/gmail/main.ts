@@ -13,22 +13,22 @@ const getGmailService = () => {
 	return gmail;
 };
 
-const createMail = async (options) => {
+const createMail = async (options: any) => {
 	const mailComposer = new MailComposer(options);
 	const message = await mailComposer.compile().build();
 	return Buffer.from(message).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 };
 
-exports.sendMail = async (options) => {
+exports.sendMail = async (options: any) => {
 	const gmail = getGmailService();
 	const rawMessage = await createMail(options);
-	const { data: { id } = {} } = await gmail.users.messages.send({
+	const data = await gmail.users.messages.send({
 		userId: "me",
 		resource: {
 			raw: rawMessage,
 		},
 	});
-	return id;
+	return data;
 };
 
 exports.emailOptions = {

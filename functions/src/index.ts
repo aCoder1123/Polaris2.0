@@ -1,7 +1,7 @@
 const { onCall, HttpsError, onRequest } = require("firebase-functions/v2/https");
 const { logger } = require("firebase-functions/v2");
-const { sendMail, emailOptions } = require("/gmail/main.ts");
-const { createEventFromJSON, addAttendees } = require("/calendar/main.ts");
+const { sendMail, emailOptions } = require("./gmail/main");
+const { createEventFromJSON, addAttendees } = require("./calendar/main");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, collection, query, where, doc, getDoc } = require("firebase-admin/firestore");
 // const { userDoc } = require("/db/main");
