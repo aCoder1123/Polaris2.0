@@ -1,6 +1,6 @@
 const userDoc = {
     isAdmin: false,
-	userEmail: "",
+	email: "",
 	events: [],
 	credit: 0,
 	emailPreferences: {

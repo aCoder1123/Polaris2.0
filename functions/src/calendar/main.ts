@@ -3,9 +3,9 @@
 
 const fs = require("fs").promises;
 const path = require("path");
-const process = require("process");
+// const process = require("process");
 const { authenticate } = require("@google-cloud/local-auth");
-const { google } = require("googleapis");
+// const { google } = require("googleapis");
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ["https://www.googleapis.com/auth/calendar.events"];
@@ -37,7 +37,7 @@ async function loadSavedCredentialsIfExist() {
  * @param {OAuth2Client} client
  * @return {Promise<void>}
  */
-async function saveCredentials(client) {
+async function saveCredentials(client: any) {
 	const content = await fs.readFile(CREDENTIALS_PATH);
 	const keys = JSON.parse(content);
 	const key = keys.installed || keys.web;
@@ -99,7 +99,7 @@ exports.eventTemplate = {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 
-async function listEvents(auth) {
+async function listEvents(auth: object) {
 	const calendar = google.calendar({ version: "v3", auth });
 	const res = await calendar.events.list({
 		calendarId: "primary",
@@ -114,7 +114,7 @@ async function listEvents(auth) {
 		return;
 	}
 	console.log("Upcoming 10 events:");
-	events.map((event, i) => {
+	events.map((event: any, i: any) => {
 		const start = event.start.dateTime || event.start.date;
 		console.log(`${start} - ${event.summary}`);
 	});
@@ -126,7 +126,7 @@ async function listEvents(auth) {
 
 
 
-exports.createEventFromJSON = async (eventDetails) => {
+exports.createEventFromJSON = async (eventDetails: object) => {
 	let eventData;
 	let eventError;
 	let auth = await authorize();
@@ -138,7 +138,7 @@ exports.createEventFromJSON = async (eventDetails) => {
 			resource: eventDetails,
 			sendUpdates: "all",
 		},
-		function (err, event) {
+		function (err: any, event: any) {
 			if (err) {
 				eventError = err;
 				return;
@@ -154,7 +154,7 @@ exports.createEventFromJSON = async (eventDetails) => {
 	}
 };
 
-exports.addAttendees = async (data) => {
+exports.addAttendees = async (data: any) => {
 	let eventData;
 	let eventError;
 	let auth = await authorize();
@@ -164,9 +164,9 @@ exports.addAttendees = async (data) => {
 			calendarId: data.calID,
 			eventId: data.eID,
 		})
-		.then((res) => {
+		.then((res:any) => {
 			// console.log(res);
-			data.attendees.array.forEach((element) => {
+			data.attendees.array.forEach((element:any) => {
 				res.data.attendees.push(element);
 			});
 			calendar.events
@@ -175,15 +175,15 @@ exports.addAttendees = async (data) => {
 					eventId: res.data.id,
 					requestBody: res.data,
 				})
-				.then((resp) => {
+				.then((resp:any) => {
 					eventData = resp;
 					// console.log("Event updated: %s", resp);
 				})
-				.catch((error) => {
+				.catch((error: any) => {
 					eventError = error;
 				});
 		})
-		.catch((err) => {
+		.catch((err: any) => {
 			eventError = err;
 		});
 	if (eventData) {
