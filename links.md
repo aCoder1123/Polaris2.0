@@ -30,5 +30,10 @@
 
 * [Calling Functions](https://firebase.google.com/docs/functions/callable?hl=en&authuser=0&gen=2nd)
 
+##Webpack
 
+
+* [Setup](https://webpack.js.org/guides/getting-started/#basic-setup)
+* [Working with TS](https://webpack.js.org/guides/typescript/)
+* [Output Config](https://webpack.js.org/guides/output-management/)
 

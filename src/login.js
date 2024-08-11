@@ -1,9 +1,9 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js";
+import { initializeApp } from "firebase/auth";
+// import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js";
 // import firebase from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js";
 
 // import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-import { GoogleAuthProvider, getAuth, signInWithPopup, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+import { GoogleAuthProvider, getAuth, signInWithPopup, signOut, setPersistence, browserSessionPersistence } from "firebase/auth";
 import { firebaseConfig } from "./config.js";
 
 const app = initializeApp(firebaseConfig);

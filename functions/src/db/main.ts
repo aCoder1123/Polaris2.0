@@ -1,4 +1,4 @@
-const userDoc = {
+exports.userDoc = {
     isAdmin: false,
 	email: "",
 	events: [],

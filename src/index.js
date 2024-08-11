@@ -40,8 +40,8 @@ document.getElementById("sideMenuWrap").addEventListener("mouseleave", (ev) => {
 	document.getElementById("menuToggle").classList.toggle("open");
 });
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { GoogleAuthProvider, getAuth, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+import { initializeApp } from "firebase/app";
+import { GoogleAuthProvider, getAuth, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { firebaseConfig } from "./config.js";
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

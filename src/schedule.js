@@ -1,11 +1,11 @@
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js";
+// import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js";
 // import firebase from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js";
-import { getFirestore, doc, onSnapshot, query, limit, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import { getFirestore, doc, onSnapshot, query, limit, collection, getDocs } from "firebase/firestore";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { GoogleAuthProvider, getAuth, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+import { initializeApp } from "firebase/app";
+import { GoogleAuthProvider, getAuth, signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { firebaseConfig } from "./config.js";
-import { dataToFullHTML } from "./htmlFromJSON.js";
+import { dataToFullHTML } from "./utils.js";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -22,9 +22,8 @@ onAuthStateChanged(auth, (user) => {
 	}
 });
 
-
 const handleScheduleUpdate = (doc) => {
-	console.log(`Doc is: ${doc}`)
+	console.log(`Doc is: ${doc}`);
 	let weekendInformation = JSON.parse(doc.data().information);
 
 	let wrap = document.getElementById("daysContainer");
@@ -36,17 +35,17 @@ const handleScheduleUpdate = (doc) => {
 };
 
 let querySnap = await getDocs(collection(db, "weekends"));
-let docs = []
-querySnap.forEach(doc => {
-	docs.push(doc.data().information)
+let docs = [];
+querySnap.forEach((doc) => {
+	docs.push(doc.data().information);
 });
 
-console.log(JSON.parse(docs[0]))
+console.log(JSON.parse(docs[0]));
 let id = JSON.parse(docs[0]).startDate + ":" + JSON.parse(docs[0]).endDate;
-console.log(id)
+console.log(id);
 
 const unsub = onSnapshot(doc(db, "weekends", id), handleScheduleUpdate);
 
 // handleScheduleUpdate(firstScheduleDoc)
 
-console.log("running")
+console.log("running");
