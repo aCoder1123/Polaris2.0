@@ -12,11 +12,9 @@ body {
 	position: static;
 }
 
-/* start of side menu */
-
 /* Start of Schedule */
 
-#mySchedule {
+#weekendInfo {
 	width: 24.8vw;
 	height: 100vh;
 	/* overflow-y: scroll; */
@@ -26,7 +24,7 @@ body {
 	flex-grow: 0;
 }
 
-#scheduleHead,
+#infoHead,
 .dayHeadWrap {
 	width: 100%;
 	height: 6vh;
@@ -44,4 +42,53 @@ body {
 	color: white;
 }
 
-/* Start of event days */
+#infoConatiner {
+	width: 90%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	margin: 0 auto;
+}
+
+#selectorWrap {
+	margin: 2vh 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+#selectorHead {
+	font-size: 2.5vh;
+}
+
+#infoWrap {
+	display: flex;
+	flex-direction: column;
+	align-items: start;
+	justify-content: flex-start;
+	width: 100%;
+	font-size: 2vh;
+}
+
+.info {
+	color: blue;
+}
+
+.trip {
+	background-color: aquamarine;
+	border: 0.2vh solid black;
+	border-radius: 0.5vh;
+	text-align: center;
+	margin: 0.1vh 10%;
+	width: max-content;
+	padding: 0 2%;
+	cursor: pointer;
+}
+
+#editorLink {
+	width: 100%;
+	text-align: center;
+	margin-top: 3vh;
+}

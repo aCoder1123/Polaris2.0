@@ -1,4 +1,3 @@
-// Import the functions you need from the SDKs you need
 export const firebaseConfig = {
 	apiKey: "AIzaSyB63H-EFCTZgmVmlxPmIyEmy-TLevxfFLU",
 	authDomain: "polaris-60dce.firebaseapp.com",

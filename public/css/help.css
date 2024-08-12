@@ -11,120 +11,6 @@ body {
 	justify-content: center;
 }
 
-/* start of side menu */
-
-#sideMenuWrap {
-	border-right: black 0 solid;
-	position: absolute;
-	left: 0;
-	height: 100%;
-	max-height: 100%;
-	width: 0;
-	background-color: whitesmoke;
-	z-index: 100;
-	transition: width 0.3s ease-out;
-
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	justify-content: flex-start;
-}
-
-#sideMenuWrap div,
-#sideMenuWrap a {
-	display: none;
-}
-
-#sideMenuWrap.open {
-	width: 20vw;
-	border-width: 0.1vw;
-	box-shadow: 0vh 0vh 3vh rgb(0, 0, 0);
-}
-
-#sideMenuWrap.open ~ * {
-	filter: brightness(0.6);
-}
-
-#sideMenuWrap.open div,
-#sideMenuWrap.open a {
-	display: flex;
-}
-
-#menuToggle {
-	position: absolute;
-	top: 0.5vh;
-	left: 0.5vw;
-	height: 5vh;
-	/* max-width: 50%; */
-	fill: white;
-	transition: fill 0.3 ease-out;
-}
-
-#menuToggle.open {
-	fill: black;
-}
-
-#menuHead {
-	background-color: gray;
-	width: 100%;
-	display: flex !important;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-end;
-	height: 6vh !important;
-	border-bottom: 0.5vh solid black;
-}
-
-.menuWrap {
-	width: 80%;
-	/* height: 5%; */
-	padding: 0 20%;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-start;
-	color: black;
-	transition: color 0.2s ease;
-	transition: text-decoration 0.2s ease;
-	text-decoration: none;
-	margin-bottom: 5%;
-}
-
-.menuWrap:hover {
-	color: darkblue;
-}
-
-.menuWrap:hover .menuText,
-.menuWrap:hover h2 {
-	text-decoration: underline;
-}
-
-.menuText {
-	margin-left: 5%;
-}
-
-#menuPF {
-	margin-top: 5%;
-}
-
-#menuPF img {
-	border-radius: 50%;
-	margin-right: 5%;
-}
-
-#menuFooter {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	font-size: smaller;
-	width: 100%;
-	transition: none;
-	position: absolute;
-	bottom: 1%;
-	text-align: center;
-	text-wrap: wrap;
-}
 
 /* start page content */
 
@@ -166,7 +52,7 @@ form {
 	width: 90%;
 	border: 0.25vh solid black;
 	padding: 1vh;
-	background-color: rgb(182, 196, 211);
+	background-color: hsl(228, 63%, 84%);
 	border-radius: 1.5vh;
 }
 
@@ -183,9 +69,11 @@ legend h2 {
 }
 
 input,
-select {
+select,
+textarea {
 	margin-top: 0.75%;
 	margin-left: 2%;
+	font-family: inherit;
 }
 
 input[type="text"] {

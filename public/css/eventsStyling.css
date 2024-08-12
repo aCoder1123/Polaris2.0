@@ -1,0 +1,258 @@
+@keyframes twist1 {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(90deg);
+	}
+}
+
+@keyframes twist2 {
+	from {
+		transform: rotate(90deg);
+	}
+	to {
+		transform: rotate(0deg);
+	}
+}
+
+#daysContainer {
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: start;
+	overflow-x: scroll;
+	overflow-y: hidden;
+}
+
+.dayWrap {
+	max-height: 100vh;
+	overflow: auto;
+	height: 100%;
+	width: 3vw;
+	background-color: white;
+
+	border-right: 0.15vw solid black;
+	flex-shrink: 0;
+	flex-grow: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	--collapseTime: 0.2s;
+	--dayCollapseTime: 0.2s;
+	transition: width var(--dayCollapseTime) ease-out;
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
+.dayWrap::-webkit-scrollbar {
+	display: none;
+}
+
+.dayWrap.open {
+	width: 24.8vw;
+}
+
+.dayHeadWrap {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	position: sticky;
+	left: 0;
+	top: 0;
+	z-index: 100;
+}
+
+.dayHead {
+	font-size: 4vh;
+	display: none;
+}
+
+.dayWrap.open .dayHead {
+	display: contents;
+}
+
+.eventsContainer {
+	min-width: 100%;
+	min-height: 93.5vh;
+}
+
+.eventWrap {
+	height: fit-content;
+	display: none;
+	overflow: hidden;
+	max-width: 98% !important;
+	margin: 1px auto;
+	border-radius: 1.5vh;
+	background-color: rgb(240, 240, 240);
+	border: 0.1vw solid black;
+	flex-shrink: 0;
+}
+
+.dayWrap.open .eventWrap {
+	display: block;
+}
+
+.eventInfoWrap {
+	width: 90%;
+	padding-left: 5%;
+	overflow: hidden;
+	font-size: 2vh;
+	height: 0;
+	transition: height var(--collapseTime) ease;
+}
+
+.eventWrap.open .eventInfoWrap {
+	height: 32vh;
+}
+
+.dayCollapse {
+	position: absolute;
+	left: 0.5vw;
+	height: 7vh;
+	flex-shrink: 0;
+	transform: rotate(90deg);
+	transition: var(--dayCollapseTime) ease transform;
+}
+
+.dayCollapse.open {
+	transform: rotate(0deg);
+}
+
+.collapse:hover,
+.dayCollapse:hover {
+	color: hsl(0, 0%, 40%);
+	fill: hsl(0, 0%, 80%) !important;
+}
+
+.collapse {
+	cursor: pointer;
+	transition: linear 0.2s fill;
+	animation: forwards twist2 ease var(--collapseTime);
+}
+
+.collapse.open {
+	animation: forwards twist1 ease var(--collapseTime);
+}
+
+.eIWrap {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+.eIWrap .material-symbols-outlined {
+	margin-right: 1%;
+}
+
+.eventHeadWrap {
+	width: 96%;
+	height: fit-content;
+	padding: 1% 2%;
+	background-color: hsl(220, 93%, 80%);
+	overflow: hidden;
+}
+.eventHeadWrap * {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.eventWrap.open .eventHeadWrap {
+	border-bottom: 0.1vh solid black;
+}
+
+.eventTitle {
+	margin-right: auto;
+	flex-shrink: 1;
+	max-height: 100%;
+	text-wrap: wrap;
+	font-size: 1.4em;
+	width: auto;
+	font-weight: 400;
+}
+
+.locationCopy {
+	display: none !important;
+	cursor: pointer;
+}
+
+.eventLocationWrap:hover .locationCopy {
+	display: block !important;
+}
+
+.locationCopy:hover,
+.addIcon:hover {
+	color: grey !important;
+}
+
+.locationCopy:active,
+.addIcon:active {
+	color: darkgray !important;
+}
+
+.eventInfoWrap > * {
+	margin: 0.3vh 0;
+}
+.travelTime {
+	margin: 0 1%;
+}
+
+.descWrap {
+	margin: -1.5vh 0;
+	font-size: 1.75vh;
+}
+
+.descIcon {
+	align-items: flex-start;
+	justify-content: flex-start;
+	height: 100%;
+}
+
+.addIcon {
+	cursor: pointer;
+}
+
+.eventSpots {
+	font-weight: bold;
+}
+
+.attendeesWrap {
+	flex-wrap: wrap;
+	width: 100%;
+}
+
+.attendeesList {
+	width: 80%;
+	overflow-y: scroll;
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+	height: 11vh;
+	list-style-position: inside;
+	list-style-type: decimal;
+	margin-top: 0;
+	margin-bottom: 0;
+	padding: 0;
+	border: 1px solid black;
+	border-radius: 1vh;
+	margin-left: 10%;
+	background-color: hsl(230, 100%, 95%);
+}
+
+.attendeesList::-webkit-scrollbar {
+	display: none;
+}
+
+.attendee {
+	width: 96%;
+	margin-left: 2%;
+}
+
+.attendee span,
+.attendee::marker {
+	margin: auto 0;
+	font-size: 1.75vh;
+}

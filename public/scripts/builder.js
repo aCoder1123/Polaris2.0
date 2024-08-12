@@ -1,45 +1,53 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+import {
+	getFirestore,
+	doc,
+	onSnapshot,
+	collection,
+	getDocs,
+	setDoc,
+} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+
 import { dataToFullHTML, daysOfTheWeek as weekDays } from "./htmlFromJSON.js";
 import { addListeners } from "./index.js";
 import { firebaseConfig } from "./config.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { getFirestore, doc, onSnapshot, collection, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import { handleAuth } from "./authHandling.js";
 
-const app = initializeApp(firebaseConfig);
+class WeekendEvent {
+	constructor(id) {
+		(this.saveAsTemplate = document.getElementById("saveAsTemplate").checked),
+			(this.id = id),
+			(this.title = document.getElementById("titleIn").value);
+		this.timeStart = document.getElementById("eventStart").value;
+		this.timeEnd = document.getElementById("eventEnd").value;
+		this.location = document.getElementById("eventLocation").value;
+		this.travelTime = Number(document.getElementById("travelTime").value);
+		this.description = document.getElementById("desc").value;
+		this.faculty = document.getElementById("eventFaculty").value;
+		this.numSpots = Number(document.getElementById("slotsIn").value);
+		this.signups = [];
+		this.admissionCriteria = document.getElementById("criteriaSelector").value;
+	}
 
-const db = getFirestore(app, 'maindb');
+	get asInformation() {
+		return {
+			saveAsTemplate: this.saveAsTemplate,
+			id: this.id,
+			title: this.title,
+			timeStart: this.timeStart,
+			timeEnd: this.timeEnd,
+			location: this.location,
+			travelTime: this.travelTime,
+			description: this.description,
+			faculty: this.faculty,
+			numSpots: this.numSpots,
+			signups: this.numSpots,
+			admissionCriteria: this.admissionCriteria,
+		};
+	}
+}
 
-
-let eventTemplates = {};
-
-const eventTemplateSnapshot = await getDocs(collection(db, "eventTemplates"));
-eventTemplateSnapshot.forEach((doc) => {
-	let docData = doc.data()
-	eventTemplates[docData.title] = docData;
-	let option = document.createElement("option");
-	option.value = docData.title
-	option.innerText = docData.title
-	document.getElementById("eventTemplateSelector").appendChild(option)
-});
-
-console.log(eventTemplates)
-
-let weekendTemplates = {};
-
-const weekendTemplateSnapshot = await getDocs(collection(db, "weekendTemplates"));
-weekendTemplateSnapshot.forEach((doc) => {
-	let docData = doc.data().information;
-	if (!docData) {return}
-	docData = JSON.parse(docData);
-	weekendTemplates[doc.data().title] = docData;
-	let option = document.createElement("option");
-	option.value = docData.title;
-	option.innerText = docData.title;
-	document.getElementById("weekendTemplateSelector").appendChild(option);
-});
-
-console.log(weekendTemplates)
-
-class weekendInformation {
+class Weekend {
 	constructor() {
 		this.startDate = document.getElementById("startDate").value;
 		this.endDate = document.getElementById("endDate").value;
@@ -102,7 +110,11 @@ class weekendInformation {
 
 	sortDay(day = 0) {
 		this.days[day].sort((a, b) => {
-			return Number(a.timeStart.slice(0, 2)) * 60 + Number(a.timeStart.slice(3)) - (Number(b.timeStart.slice(0, 2)) * 60 + Number(b.timeStart.slice(3)));
+			return (
+				Number(a.timeStart.slice(0, 2)) * 60 +
+				Number(a.timeStart.slice(3)) -
+				(Number(b.timeStart.slice(0, 2)) * 60 + Number(b.timeStart.slice(3)))
+			);
 		});
 	}
 
@@ -111,28 +123,27 @@ class weekendInformation {
 			alert("Please enter valid information before saving.");
 			return;
 		}
-		return {information: JSON.stringify(this)};
+		return { information: JSON.stringify(this) };
 	}
 
 	saveSelf(name = null) {
 		for (let day of this.days) {
 			for (let event of day) {
 				if (event.saveAsTemplate) {
-					delete event.saveAsTemplate
-					let eventData = Object.assign({}, event)
-					eventData.faculty = null
-					setDoc(doc(db, "eventTemplates", eventData.title), eventData)
-						.catch((e) => {
-							alert("Error in saving weekend. Please try again.");
-							console.log(e);
-							return
-						});
+					delete event.saveAsTemplate;
+					let eventData = Object.assign({}, event);
+					eventData.faculty = null;
+					setDoc(doc(db, "eventTemplates", eventData.title), eventData).catch((e) => {
+						alert("Error in saving weekend. Please try again.");
+						console.log(e);
+						return;
+					});
 				}
 			}
 		}
 		if (name) {
-			let temp = {information: JSON.stringify(this.days), title: name}
-			console.log(temp)
+			let temp = { information: JSON.stringify(this.days), title: name };
+			console.log(temp);
 			setDoc(doc(db, "weekendTemplates", this.id), temp)
 				.then(() => alert("Template Saved Succesfully"))
 				.catch((e) => {
@@ -147,7 +158,6 @@ class weekendInformation {
 					console.log(e);
 				});
 		}
-		
 	}
 
 	get isValid() {
@@ -158,27 +168,65 @@ class weekendInformation {
 	}
 }
 
-let currentWorkingWeekend = new weekendInformation();
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app, "maindb");
+// const [user, userinformation] = handleAuth(app);
+
+let eventTemplates = {};
+let weekendTemplates = {};
+let workingWeekend = new Weekend();
+
+let currentEventNum = 0;
+
+getDocs(collection(db, "eventTemplates")).then((eventTemplateSnapshot) => {
+	eventTemplateSnapshot.forEach((doc) => {
+		let docData = doc.data();
+		if (!docData) {
+			return;
+		}
+		eventTemplates[docData.title] = docData;
+		let option = document.createElement("option");
+		option.value = docData.title;
+		option.innerText = docData.title;
+		document.getElementById("eventTemplateSelector").appendChild(option);
+	});
+});
+
+getDocs(collection(db, "weekendTemplates")).then((weekendTemplateSnapshot) => {
+	weekendTemplateSnapshot.forEach((doc) => {
+		let docData = doc.data();
+		if (!docData.title) {
+			return;
+		}
+		let title = docData.title;
+		docData = JSON.parse(docData.information);
+		weekendTemplates[title] = docData;
+		let option = document.createElement("option");
+		option.value = title;
+		option.innerText = title;
+		document.getElementById("weekendTemplateSelector").appendChild(option);
+	});
+});
 
 const updateWeekend = () => {
-	let valid = currentWorkingWeekend.updateSelf();
+	let valid = workingWeekend.updateSelf();
 
 	if (valid) {
 		let wrap = document.getElementById("daysContainer");
 		wrap.replaceChildren();
-		let elements = dataToFullHTML(currentWorkingWeekend, true).querySelectorAll(".dayWrap");
+		let elements = dataToFullHTML(workingWeekend, true).querySelectorAll(".dayWrap");
 		for (let i = 0; i < elements.length; i++) {
 			wrap.append(elements[i]);
 		}
 
-		const startDate = new Date(currentWorkingWeekend.startDate + "T00:00:00");
+		const startDate = new Date(workingWeekend.startDate + "T00:00:00");
 		const startDay = startDate.getDay();
 
 		let select = document.getElementById("daySelect");
 		select.replaceChildren();
 		let option = document.createElement("option");
 
-		for (let i = 0; i < currentWorkingWeekend.days.length; i++) {
+		for (let i = 0; i < workingWeekend.days.length; i++) {
 			option = document.createElement("option");
 
 			option.value = i;
@@ -187,20 +235,25 @@ const updateWeekend = () => {
 		}
 	}
 
-	document.getElementById("debugCode").innerText = JSON.stringify(currentWorkingWeekend);
+	document.getElementById("debugCode").innerText = JSON.stringify(workingWeekend);
 	addListeners();
 	for (let deleteButton of document.querySelectorAll(".deleteButton")) {
 		deleteButton.onclick = (e) => {
 			let eventNode = e.target.parentElement.parentElement;
-			let eventDay = currentWorkingWeekend.days[Number(eventNode.id.slice(0, 1))];
-			eventDay.splice(Number(eventNode.id.slice(2)));
+			for (let day of workingWeekend) {
+				for (let i = 0; i < day.length; i++) {
+					if (day[i].id === eventNode.id) {
+						day.splice(i);
+					}
+				}
+			}
 			eventNode.remove();
 			updateWeekend();
 		};
 	}
 };
 
-for (let el of document.querySelectorAll("#settingsWrap>*")) {
+for (let el of document.querySelectorAll("#settingsWrap input")) {
 	el.onchange = updateWeekend;
 }
 
@@ -212,29 +265,27 @@ const toggleDebug = (e) => {
 document.getElementById("debugCodeButton").onclick = toggleDebug;
 
 const updateEventFromTemplate = (e) => {
-	let val = e.target.value
-	let data = eventTemplates[val]
-	document.getElementById("eventStart").value = data.timeStart
-	document.getElementById("eventEnd").value = data.timeEnd
-	document.getElementById("titleIn").value = data.title
-	document.getElementById("eventLocation").value = data.location
-	document.getElementById("travelTime").value = data.travelDuration
-	document.getElementById("desc").value = data.description
-	document.getElementById("slotsIn").value = data.numSpots
-}
+	let val = e.target.value;
+	let data = eventTemplates[val];
+	document.getElementById("eventStart").value = data.timeStart;
+	document.getElementById("eventEnd").value = data.timeEnd;
+	document.getElementById("titleIn").value = data.title;
+	document.getElementById("eventLocation").value = data.location;
+	document.getElementById("travelTime").value = data.travelDuration;
+	document.getElementById("desc").value = data.description;
+	document.getElementById("slotsIn").value = data.numSpots;
+};
 
-document.getElementById("eventTemplateSelector").onchange = updateEventFromTemplate
+document.getElementById("eventTemplateSelector").onchange = updateEventFromTemplate;
 
 const updateWeekendFromTemplate = (e) => {
 	let val = e.target.value;
 	let data = weekendTemplates[val];
-	currentWorkingWeekend.updateFromTemplate(data)
-	updateWeekend()
+	workingWeekend.updateFromTemplate(data);
+	updateWeekend();
 };
 
 document.getElementById("weekendTemplateSelector").onchange = updateWeekendFromTemplate;
-
-
 
 const saveEvent = () => {
 	let inputs = document.querySelectorAll("#eventCreatorWrap input, #eventCreatorWrap select");
@@ -247,7 +298,10 @@ const saveEvent = () => {
 		}
 		if (input.id === "eventEnd") {
 			let inputTwo = document.getElementById("eventStart");
-			let diff = Number(input.value.slice(0, 2)) * 60 + Number(input.value.slice(3)) - (Number(inputTwo.value.slice(0, 2)) * 60 + Number(inputTwo.value.slice(3)));
+			let diff =
+				Number(input.value.slice(0, 2)) * 60 +
+				Number(input.value.slice(3)) -
+				(Number(inputTwo.value.slice(0, 2)) * 60 + Number(inputTwo.value.slice(3)));
 			if (diff < 0) {
 				valid = false;
 				alert("Please enter valid times.");
@@ -257,53 +311,53 @@ const saveEvent = () => {
 	}
 
 	let dayNum = Number(document.getElementById("daySelect").value);
-	let eventToAdd = {
-		saveAsTemplate: document.getElementById("saveAsTemplate").checked,
-		id: `${dayNum}-${currentWorkingWeekend.days[dayNum].length}`,
-		title: document.getElementById("titleIn").value,
-		timeStart: document.getElementById("eventStart").value,
-		timeEnd: document.getElementById("eventEnd").value,
-		location: document.getElementById("eventLocation").value,
-		travelDuration: Number(document.getElementById("travelTime").value),
-		description: document.getElementById("desc").value,
-		faculty: document.getElementById("eventFaculty").value,
-		numSpots: Number(document.getElementById("slotsIn").value),
-		signups: [],
-		admissionCriteria: document.getElementById("criteriaSelector").value
-	};
+	let eventToAdd = new WeekendEvent(currentEventNum);
+	currentEventNum++;
 
-	currentWorkingWeekend.addEvent(eventToAdd, dayNum);
+	workingWeekend.addEvent(eventToAdd, dayNum);
 	updateWeekend();
 };
 
 document.getElementById("eventSaveButton").onclick = saveEvent;
+document.addEventListener("keypress", (e) => {
+	if (e.key === "Enter") {
+		saveEvent();
+	}
+});
 
 const saveWeekend = () => {
-	if (!currentWorkingWeekend.isValid) {
+	if (!workingWeekend.isValid) {
 		alert("Please enter valid weekend information.");
 		return;
 	}
-	if (!confirm("Are you sure you want to save the current weekend? It will write over any weekend with identical dates.")) {
+	if (
+		!confirm(
+			"Are you sure you want to save the current weekend? It will write over any weekend with identical dates."
+		)
+	) {
 		return;
 	}
 
-	currentWorkingWeekend.saveSelf()
-
+	workingWeekend.saveSelf();
 };
 
 document.getElementById("saveWeekendButton").onclick = saveWeekend;
 
 const saveWeekendAsTemplate = () => {
-	if (!currentWorkingWeekend.isValid) {
+	if (!workingWeekend.isValid) {
 		alert("Please enter valid weekend information.");
 		return;
 	}
-	if (!confirm("Are you sure you want to save the current weekend template? It will write over any template with the same name.")) {
+	if (
+		!confirm(
+			"Are you sure you want to save the current weekend template? It will write over any template with the same name."
+		)
+	) {
 		return;
 	}
-	let name = prompt("Please enter a name for this template: ")
+	let name = prompt("Please enter a name for this template: ");
 
-	currentWorkingWeekend.saveSelf(name);
-}
+	workingWeekend.saveSelf(name);
+};
 
-document.getElementById("saveWeekendAsTemplateButton").onclick = saveWeekendAsTemplate
+document.getElementById("saveWeekendAsTemplateButton").onclick = saveWeekendAsTemplate;

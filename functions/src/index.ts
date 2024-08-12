@@ -2,12 +2,13 @@ const { onCall, HttpsError, onRequest } = require("firebase-functions/v2/https")
 const { logger } = require("firebase-functions/v2");
 const { sendMail, emailOptions } = require("./gmail/main");
 const { createEventFromJSON, addAttendees } = require("./calendar/main");
-const { initializeApp } = require("firebase-admin/app");
-const { getFirestore, collection, query, where, doc, getDoc } = require("firebase-admin/firestore");
-// const { userDoc } = require("/db/main");
+const { initializeApp } = require("firebase/app");
+const { getFirestore, collection, query, where, doc, getDoc, setDoc } = require("firebase/firestore");
+const { userDoc } = require("./db/main");
 const { firebaseConfig } = require("../config");
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = getFirestore(app, 'maindb');
+// const userTemplate = userDoc
 
 const send = async (options: object) => {
 	let messageId = await sendMail(options);
@@ -32,18 +33,3 @@ exports.bugReport = onCall((request: any) => {
 	return send(messageOptions);
 });
 
-exports.getUserData = onCall((request: any) => {
-	let userEmail = request.data.email;
-	return getDoc(doc(db, "users", userEmail))
-		.then((docSnap: any) => {
-			if (docSnap.exists()) {
-				return docSnap.data();
-			}
-			let newUser = userDoc;
-			newUser.email = request.data.email;
-			return newUser;
-		})
-		.catch((error: object) => {
-			return { status: "error", info: error };
-		});
-});

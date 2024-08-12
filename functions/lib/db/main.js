@@ -1,5 +1,5 @@
 "use strict";
-const userDoc = {
+exports.userDoc = {
     isAdmin: false,
     email: "",
     events: [],
@@ -10,5 +10,6 @@ const userDoc = {
         eventFeedback: true,
         newEvent: true,
     },
+    displayName: ""
 };
 //# sourceMappingURL=main.js.map

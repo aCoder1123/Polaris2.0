@@ -1,14 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-analytics.js";
-// import firebase from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js";
-
-// import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-import { GoogleAuthProvider, getAuth, signInWithPopup, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+import {
+	GoogleAuthProvider,
+	getAuth,
+	signInWithPopup,
+	signOut,
+	setPersistence,
+	browserSessionPersistence,
+} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 import { firebaseConfig } from "./config.js";
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
@@ -34,7 +35,10 @@ const signIn = () => {
 			// The signed-in user info.
 			const user = result.user;
 
-			if (user.email.slice(user.email.length - 13) != "@westtown.edu" && user.email != "bailey.tuckman@gmail.com") {
+			if (
+				user.email.slice(user.email.length - 13) != "@westtown.edu" &&
+				user.email != "bailey.tuckman@gmail.com"
+			) {
 				signOut(auth)
 					.then(() => {})
 					.catch((error) => {
