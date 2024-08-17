@@ -8,13 +8,23 @@ import {
 	getDocs,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { firebaseConfig } from "./config.js";
+import {
+	initializeAppCheck,
+	ReCaptchaV3Provider,
+} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app-check.js";
+
+import { firebaseConfig, siteKey } from "./config.js";
 import { dataToFullHTML } from "./htmlFromJSON.js";
 import { handleAuth } from "./authHandling.js";
 import { addListeners } from "./index.js";
 
 
 const app = initializeApp(firebaseConfig);
+const appCheck = initializeAppCheck(app, {
+	provider: new ReCaptchaV3Provider(siteKey),
+	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
+	isTokenAutoRefreshEnabled: true,
+});
 // const [user, userInformation] = handleAuth(app);
 const db = getFirestore(app, "maindb");
 
