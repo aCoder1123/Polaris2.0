@@ -28,7 +28,7 @@
 		"faculty": [{ "first": "Robert", "last": "Frazier", "userId": "uId" }],
         "numSpots": 18,
         "signups": [
-            {"first":"Robert", "last":"Frazier", "uId":"", "signpTime":"", "status":"pending, present, or no-show"}
+            {"displayName": "name", "email": "", "status":"pending, present, or no-show"}
         ]
 
 	},

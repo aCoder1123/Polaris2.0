@@ -60,9 +60,10 @@ h6 {
 	height: 100%;
 	max-height: 100%;
 	width: 0;
+	min-width: 0;
 	background-color: whitesmoke;
 	z-index: 100;
-	transition: width 0.3s ease-out;
+	transition: width 0.3s ease-out, min-width 0.3s ease-out;
 
 	display: flex;
 	flex-direction: column;
@@ -77,6 +78,7 @@ h6 {
 
 #sideMenuWrap.open {
 	width: 20vw;
+	min-width: 200px;
 	border-width: 0.1vw;
 	box-shadow: 0vh 0vh 3vh rgb(0, 0, 0);
 }
@@ -124,6 +126,7 @@ h6 {
 	transition: text-decoration 0.2s ease;
 	text-decoration: none;
 	margin-bottom: 5%;
+	cursor: pointer;
 }
 
 .menuWrap:hover {
@@ -146,10 +149,11 @@ h6 {
 #menuPF img {
 	border-radius: 50%;
 	margin-right: 5%;
+	max-width: 40%;
 }
 
 #menuPF * {
-	font-size: 3vw;
+	font-size: 2.8vw;
 }
 
 #menuFooter {

@@ -256,3 +256,25 @@
 	margin: auto 0;
 	font-size: 1.75vh;
 }
+
+.approved {
+	color: green;
+}
+/* 
+@media all and (orientation: portrait) {
+	body {
+		flex-direction: column !important; 
+		overflow-y: scroll;
+		display: none;
+	}
+	#daysContainer {
+		overflow: scroll;
+		width: 100vw;
+		height: 100vh;
+	}
+
+	body section {
+		width: 100vw;
+		
+	}
+} */

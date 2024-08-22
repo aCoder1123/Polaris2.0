@@ -6,7 +6,7 @@
 		<link rel="shortcut icon" href="../images/favicon.ico" type="image/x-icon" />
 
 		<link rel="stylesheet" href="../css/index.css" />
-		<link rel="stylesheet" href="../css/eventsStyling.css">
+		<link rel="stylesheet" href="../css/eventsStyling.css" />
 		<link rel="stylesheet" href="../css/dashbaord.css" />
 		<link
 			rel="stylesheet"
@@ -20,7 +20,7 @@
 				<path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
 			</svg>
 			<div id="menuHead">
-				<a href="schedule.html" id="polarisLogoLink">
+				<a href="../schedule.html" id="polarisLogoLink">
 					<svg
 						id="polarisLogo"
 						width="176"
@@ -62,9 +62,17 @@
 					</svg>
 				</a>
 			</div>
-			<a id="menuPF" class="menuWrap" href="profile.html">
-				<img src="" alt="PFP" />
-				<h2 id="userName">Bailey Tuckman</h2>
+			<a id="menuPF" class="menuWrap" href="../profile.html">
+				<img src="../images/blankUser.svg" alt="PFP" />
+				<h2 id="userName"></h2>
+			</a>
+			<a id="dashWrap" class="menuWrap" href="index.html">
+				<span class="material-symbols-outlined"> monitoring </span>
+				<span class="menuText">Admin Dashboard</span>
+			</a>
+			<a id="builderWrap" class="menuWrap" href="builder.html">
+				<span class="material-symbols-outlined"> edit_calendar </span>
+				<span class="menuText">Weekend Builder</span>
 			</a>
 			<a id="callDAWrap" class="menuWrap" href="tel:+16103997971">
 				<span class="material-symbols-outlined"> phone_in_talk </span>
@@ -74,546 +82,41 @@
 				<span class="material-symbols-outlined"> security </span>
 				<span class="menuText">Call Campus Security</span>
 			</a>
-			<a id="helpWrap" class="menuWrap" href="help.html"
+			<a id="helpWrap" class="menuWrap" href="../help.html"
 				><span class="material-symbols-outlined"> help_center </span>
-				<span class="menuText">Polaris Help</span></a
-			>
-
+				<span class="menuText">Polaris Help</span>
+			</a>
 			<div id="signOutWrap" class="menuWrap">
 				<span class="material-symbols-outlined"> logout </span><span class="menuText">Sign Out</span>
 			</div>
-
 			<div id="menuFooter">
 				<a href="https://westtown.edu">Westtown School</a>
 				<span>975 Westtown Rd. West Chester, PA</span>
 			</div>
-
-			<address></address>
 		</div>
 		<section id="weekendInfo">
 			<h2 id="infoHead">Weekend Info</h2>
-			<div id="infoConatiner">
+			<div id="infoContainer">
 				<div id="selectorWrap">
-					<label for="dateSelect" id="selectorHead">Select weekend: </label>
-					<select name="" id="dateSelect">
-						<option value="">Current Weekend</option>
-					</select>
+					<span id="weekendBack" class="material-symbols-outlined arrow"> arrow_back </span>
+					<select name="" id="dateSelect"></select>
+					<span id="weekendForward" class="material-symbols-outlined arrow"> arrow_forward </span>
 				</div>
-				<div id="infoWrap">
-					<span class="wkdInfo">Currently Active: <span class="info">Yes</span></span>
-					<span class="wkdInfo">Total Trips: <span class="info">10</span></span>
-					<span class="wkdInfo">Total Signups: <span class="info">100</span></span>
-					<span class="wkdInfo">Completed Trips: <span class="info">4</span></span>
-					<span class="wkdInfo">Remaining Trips: <span class="info">3</span></span>
+				<div id="infoWrap" class="active">
+					<span class="wkdInfo">Total Trips: <span id="tripNum" class="info">0</span></span>
+					<span class="wkdInfo">Total Sign-ups: <span id="signupNum" class="info">0</span></span>
+					<!-- <span id="completedTrips" class="wkdInfo">Completed Trips: <span class="info">4</span></span>
+					<span id="remainingTrips" class="wkdInfo">Remaining Trips: <span class="info">3</span></span>
 					<div id="currentTrips">
 						<div>Currently Active Trips: <span class="info">3</span></div>
 						<div class="trip">Wawa - 7:00-8:00pm</div>
-					</div>
-					<a id="editorLink" href="./builder.html">Weekend Editor</a>
+					</div> -->
 				</div>
 			</div>
 		</section>
 
-		<div id="daysContainer">
-			<section class="dayWrap open">
-				<div class="dayHeadWrap">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="collapse dayCollapse open"
-						viewBox="0 -960 960 960"
-						width="24px"
-						fill="white"
-					>
-						<path
-							d="m480-340 180-180-57-56-123 123-123-123-57 56 180 180Zm0 260q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-						/>
-					</svg>
-					<h2 class="dayHead">Friday</h2>
-				</div>
-				<div class="eventsConatiner">
-					<div class="eventWrap">
-						<div class="eventHeadWrap eIWrap">
-							<span class="material-symbols-outlined collapse open"> expand_circle_right </span>
-							<h2 class="eventTitle">Wawa</h2>
-							<!-- <span class="material-symbols-outlined"> schedule  </span> -->
-							<span class="eventTime">7:00pm-8:00pm</span>
-						</div>
+		<div id="daysContainer"></div>
 
-						<div class="eventInfoWrap">
-							<div class="eventLocationWrap eIWrap">
-								<span class="material-symbols-outlined"> location_on </span
-								><span class="eventAddress">1050 West Chester Pike</span
-								><span class="material-symbols-outlined locationCopy"> content_copy </span>
-							</div>
-							<div class="travelWrap eIWrap">
-								<span class="material-symbols-outlined"> airport_shuttle </span>
-								<span class="travelTime">5 min</span>
-							</div>
-							<div class="eventLeadWrap eIWrap">
-								<span class="material-symbols-outlined"> person </span
-								><span class="eventLeader">T. Robert</span>
-							</div>
-							<div class="descWrap eIWrap">
-								<span class="material-symbols-outlined descIcon"> description </span>
-								<p class="eventDesc">
-									Vans to wawa to get food and other random things of dubious necesity.
-								</p>
-							</div>
-
-							<!-- <div class="addWrap eIWrap">
-								<span class="material-symbols-outlined addIcon"> add_circle </span>
-								<span class="addLabel">Join waitlist</span>
-							</div> -->
-							<div class="attendeesWrap eIWrap">
-								<span class="singedUpNum">90</span>/<span class="eventSpots">18</span>
-								<!--<span class="material-symbols-outlined"> all_inclusive </span>-->
-								<ol class="attendeesList">
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-								</ol>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-			<section class="dayWrap open">
-				<div class="dayHeadWrap">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="collapse dayCollapse open"
-						viewBox="0 -960 960 960"
-						width="24px"
-						fill="white"
-					>
-						<path
-							d="m480-340 180-180-57-56-123 123-123-123-57 56 180 180Zm0 260q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-						/>
-					</svg>
-					<h2 class="dayHead">Day 1</h2>
-				</div>
-				<div class="eventsConatiner">
-					<div class="eventWrap">
-						<div class="eventHeadWrap eIWrap">
-							<span class="material-symbols-outlined collapse open"> expand_circle_right </span>
-							<h2 class="eventTitle">Wawa</h2>
-							<!-- <span class="material-symbols-outlined"> schedule  </span> -->
-							<span class="eventTime">7:00pm-8:00pm</span>
-						</div>
-
-						<div class="eventInfoWrap">
-							<div class="eventLocationWrap eIWrap">
-								<span class="material-symbols-outlined"> location_on </span
-								><span class="eventAddress">1050 West Chester Pike</span
-								><span class="material-symbols-outlined locationCopy"> content_copy </span>
-							</div>
-							<div class="travelWrap eIWrap">
-								<span class="material-symbols-outlined"> airport_shuttle </span>
-								<span class="travelTime">5 min</span>
-							</div>
-							<div class="eventLeadWrap eIWrap">
-								<span class="material-symbols-outlined"> person </span
-								><span class="eventLeader">T. Robert</span>
-							</div>
-							<div class="descWrap eIWrap">
-								<span class="material-symbols-outlined descIcon"> description </span>
-								<p class="eventDesc">
-									Vans to wawa to get food and other random things of dubious necesity.
-								</p>
-							</div>
-
-							<!-- <div class="addWrap eIWrap">
-								<span class="material-symbols-outlined addIcon"> add_circle </span>
-								<span class="addLabel">Join waitlist</span>
-							</div> -->
-							<div class="attendeesWrap eIWrap">
-								<span class="singedUpNum">90</span>/<span class="eventSpots">18</span>
-								<!--<span class="material-symbols-outlined"> all_inclusive </span>-->
-								<ol class="attendeesList">
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-								</ol>
-							</div>
-						</div>
-					</div>
-					<div class="eventWrap">
-						<div class="eventHeadWrap eIWrap">
-							<span class="material-symbols-outlined collapse open"> expand_circle_right </span>
-							<h2 class="eventTitle">Wawa</h2>
-							<!-- <span class="material-symbols-outlined"> schedule  </span> -->
-							<span class="eventTime">7:00pm-8:00pm</span>
-						</div>
-
-						<div class="eventInfoWrap">
-							<div class="eventLocationWrap eIWrap">
-								<span class="material-symbols-outlined"> location_on </span
-								><span class="eventAddress">1050 West Chester Pike</span
-								><span class="material-symbols-outlined locationCopy"> content_copy </span>
-							</div>
-							<div class="travelWrap eIWrap">
-								<span class="material-symbols-outlined"> airport_shuttle </span>
-								<span class="travelTime">5 min</span>
-							</div>
-							<div class="eventLeadWrap eIWrap">
-								<span class="material-symbols-outlined"> person </span
-								><span class="eventLeader">T. Robert</span>
-							</div>
-							<div class="descWrap eIWrap">
-								<span class="material-symbols-outlined descIcon"> description </span>
-								<p class="eventDesc">
-									Vans to wawa to get food and other random things of dubious necesity.
-								</p>
-							</div>
-
-							<!-- <div class="addWrap eIWrap">
-								<span class="material-symbols-outlined addIcon"> add_circle </span>
-								<span class="addLabel">Join waitlist</span>
-							</div> -->
-							<div class="attendeesWrap eIWrap">
-								<span class="singedUpNum">90</span>/<span class="eventSpots">18</span>
-								<!--<span class="material-symbols-outlined"> all_inclusive </span>-->
-								<ol class="attendeesList">
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-								</ol>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-			<section class="dayWrap open">
-				<div class="dayHeadWrap">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="collapse dayCollapse open"
-						viewBox="0 -960 960 960"
-						width="24px"
-						fill="white"
-					>
-						<path
-							d="m480-340 180-180-57-56-123 123-123-123-57 56 180 180Zm0 260q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-						/>
-					</svg>
-					<h2 class="dayHead">Day 1</h2>
-				</div>
-				<div class="eventsConatiner">
-					<div class="eventWrap">
-						<div class="eventHeadWrap eIWrap">
-							<span class="material-symbols-outlined collapse open"> expand_circle_right </span>
-							<h2 class="eventTitle">Wawa</h2>
-							<!-- <span class="material-symbols-outlined"> schedule  </span> -->
-							<span class="eventTime">7:00pm-8:00pm</span>
-						</div>
-
-						<div class="eventInfoWrap">
-							<div class="eventLocationWrap eIWrap">
-								<span class="material-symbols-outlined"> location_on </span
-								><span class="eventAddress">1050 West Chester Pike</span
-								><span class="material-symbols-outlined locationCopy"> content_copy </span>
-							</div>
-							<div class="travelWrap eIWrap">
-								<span class="material-symbols-outlined"> airport_shuttle </span>
-								<span class="travelTime">5 min</span>
-							</div>
-							<div class="eventLeadWrap eIWrap">
-								<span class="material-symbols-outlined"> person </span
-								><span class="eventLeader">T. Robert</span>
-							</div>
-							<div class="descWrap eIWrap">
-								<span class="material-symbols-outlined descIcon"> description </span>
-								<p class="eventDesc">
-									Vans to wawa to get food and other random things of dubious necesity.
-								</p>
-							</div>
-
-							<!-- <div class="addWrap eIWrap">
-								<span class="material-symbols-outlined addIcon"> add_circle </span>
-								<span class="addLabel">Join waitlist</span>
-							</div> -->
-							<div class="attendeesWrap eIWrap">
-								<span class="singedUpNum">90</span>/<span class="eventSpots">18</span>
-								<!--<span class="material-symbols-outlined"> all_inclusive </span>-->
-								<ol class="attendeesList">
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-								</ol>
-							</div>
-						</div>
-					</div>
-					<div class="eventWrap">
-						<div class="eventHeadWrap eIWrap">
-							<span class="material-symbols-outlined collapse open"> expand_circle_right </span>
-							<h2 class="eventTitle">Wawa</h2>
-							<!-- <span class="material-symbols-outlined"> schedule  </span> -->
-							<span class="eventTime">7:00pm-8:00pm</span>
-						</div>
-
-						<div class="eventInfoWrap">
-							<div class="eventLocationWrap eIWrap">
-								<span class="material-symbols-outlined"> location_on </span
-								><span class="eventAddress">1050 West Chester Pike</span
-								><span class="material-symbols-outlined locationCopy"> content_copy </span>
-							</div>
-							<div class="travelWrap eIWrap">
-								<span class="material-symbols-outlined"> airport_shuttle </span>
-								<span class="travelTime">5 min</span>
-							</div>
-							<div class="eventLeadWrap eIWrap">
-								<span class="material-symbols-outlined"> person </span
-								><span class="eventLeader">T. Robert</span>
-							</div>
-							<div class="descWrap eIWrap">
-								<span class="material-symbols-outlined descIcon"> description </span>
-								<p class="eventDesc">
-									Vans to wawa to get food and other random things of dubious necesity.
-								</p>
-							</div>
-
-							<!-- <div class="addWrap eIWrap">
-								<span class="material-symbols-outlined addIcon"> add_circle </span>
-								<span class="addLabel">Join waitlist</span>
-							</div> -->
-							<div class="attendeesWrap eIWrap">
-								<span class="singedUpNum">90</span>/<span class="eventSpots">18</span>
-								<!--<span class="material-symbols-outlined"> all_inclusive </span>-->
-								<ol class="attendeesList">
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-								</ol>
-							</div>
-						</div>
-					</div>
-					<div class="eventWrap">
-						<div class="eventHeadWrap eIWrap">
-							<span class="material-symbols-outlined collapse open"> expand_circle_right </span>
-							<h2 class="eventTitle">Wawa</h2>
-							<!-- <span class="material-symbols-outlined"> schedule  </span> -->
-							<span class="eventTime">7:00pm-8:00pm</span>
-						</div>
-
-						<div class="eventInfoWrap">
-							<div class="eventLocationWrap eIWrap">
-								<span class="material-symbols-outlined"> location_on </span
-								><span class="eventAddress">1050 West Chester Pike</span
-								><span class="material-symbols-outlined locationCopy"> content_copy </span>
-							</div>
-							<div class="travelWrap eIWrap">
-								<span class="material-symbols-outlined"> airport_shuttle </span>
-								<span class="travelTime">5 min</span>
-							</div>
-							<div class="eventLeadWrap eIWrap">
-								<span class="material-symbols-outlined"> person </span
-								><span class="eventLeader">T. Robert</span>
-							</div>
-							<div class="descWrap eIWrap">
-								<span class="material-symbols-outlined descIcon"> description </span>
-								<p class="eventDesc">
-									Vans to wawa to get food and other random things of dubious necesity.
-								</p>
-							</div>
-
-							<!-- <div class="addWrap eIWrap">
-								<span class="material-symbols-outlined addIcon"> add_circle </span>
-								<span class="addLabel">Join waitlist</span>
-							</div> -->
-							<div class="attendeesWrap eIWrap">
-								<span class="singedUpNum">90</span>/<span class="eventSpots">18</span>
-								<!--<span class="material-symbols-outlined"> all_inclusive </span>-->
-								<ol class="attendeesList">
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-								</ol>
-							</div>
-						</div>
-					</div>
-					<div class="eventWrap">
-						<div class="eventHeadWrap eIWrap">
-							<span class="material-symbols-outlined collapse open"> expand_circle_right </span>
-							<h2 class="eventTitle">Wawa</h2>
-							<!-- <span class="material-symbols-outlined"> schedule  </span> -->
-							<span class="eventTime">7:00pm-8:00pm</span>
-						</div>
-
-						<div class="eventInfoWrap">
-							<div class="eventLocationWrap eIWrap">
-								<span class="material-symbols-outlined"> location_on </span
-								><span class="eventAddress">1050 West Chester Pike</span
-								><span class="material-symbols-outlined locationCopy"> content_copy </span>
-							</div>
-							<div class="travelWrap eIWrap">
-								<span class="material-symbols-outlined"> airport_shuttle </span>
-								<span class="travelTime">5 min</span>
-							</div>
-							<div class="eventLeadWrap eIWrap">
-								<span class="material-symbols-outlined"> person </span
-								><span class="eventLeader">T. Robert</span>
-							</div>
-							<div class="descWrap eIWrap">
-								<span class="material-symbols-outlined descIcon"> description </span>
-								<p class="eventDesc">
-									Vans to wawa to get food and other random things of dubious necesity.
-								</p>
-							</div>
-
-							<!-- <div class="addWrap eIWrap">
-								<span class="material-symbols-outlined addIcon"> add_circle </span>
-								<span class="addLabel">Join waitlist</span>
-							</div> -->
-							<div class="attendeesWrap eIWrap">
-								<span class="singedUpNum">90</span>/<span class="eventSpots">18</span>
-								<!--<span class="material-symbols-outlined"> all_inclusive </span>-->
-								<ol class="attendeesList">
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-								</ol>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-			<section class="dayWrap open">
-				<div class="dayHeadWrap">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="collapse dayCollapse open"
-						viewBox="0 -960 960 960"
-						width="24px"
-						fill="white"
-					>
-						<path
-							d="m480-340 180-180-57-56-123 123-123-123-57 56 180 180Zm0 260q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"
-						/>
-					</svg>
-					<h2 class="dayHead">Day 1</h2>
-				</div>
-				<div class="eventsConatiner">
-					<div class="eventWrap">
-						<div class="eventHeadWrap eIWrap">
-							<span class="material-symbols-outlined collapse open"> expand_circle_right </span>
-							<h2 class="eventTitle">Wawa</h2>
-							<!-- <span class="material-symbols-outlined"> schedule  </span> -->
-							<span class="eventTime">7:00pm-8:00pm</span>
-						</div>
-
-						<div class="eventInfoWrap">
-							<div class="eventLocationWrap eIWrap">
-								<span class="material-symbols-outlined"> location_on </span
-								><span class="eventAddress">1050 West Chester Pike</span
-								><span class="material-symbols-outlined locationCopy"> content_copy </span>
-							</div>
-							<div class="travelWrap eIWrap">
-								<span class="material-symbols-outlined"> airport_shuttle </span>
-								<span class="travelTime">5 min</span>
-							</div>
-							<div class="eventLeadWrap eIWrap">
-								<span class="material-symbols-outlined"> person </span
-								><span class="eventLeader">T. Robert</span>
-							</div>
-							<div class="descWrap eIWrap">
-								<span class="material-symbols-outlined descIcon"> description </span>
-								<p class="eventDesc">
-									Vans to wawa to get food and other random things of dubious necesity.
-								</p>
-							</div>
-
-							<!-- <div class="addWrap eIWrap">
-								<span class="material-symbols-outlined addIcon"> add_circle </span>
-								<span class="addLabel">Join waitlist</span>
-							</div> -->
-							<div class="attendeesWrap eIWrap">
-								<span class="singedUpNum">90</span>/<span class="eventSpots">18</span>
-								<!--<span class="material-symbols-outlined"> all_inclusive </span>-->
-								<ol class="attendeesList">
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-									<li class="attendee">
-										<!-- <img src="https://lh3.googleusercontent.com/a/ACg8ocIyCFp9PVnWHiQ6NyPQW7GqPnhMJih5eimZxF6aok8YnvFAfFQ=s96-c" alt="Profile picture" class="pfp" /> -->
-										Bailey Tuckman
-									</li>
-								</ol>
-							</div>
-						</div>
-					</div>
-				</div>
-			</section>
-		</div>
-
-		<script type="module" src="../scripts/index.js"></script>
 		<script type="module" src="../scripts/dashboard.js"></script>
 	</body>
 </html>

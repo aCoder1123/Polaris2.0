@@ -52,7 +52,7 @@ body {
 	top: 0;
 }
 
-#infoContainer {
+#weekendInfoContainer {
 	width: 100%;
 	display: flex;
 	flex-direction: column;
@@ -60,6 +60,12 @@ body {
 	justify-content: flex-start;
 	margin: 0 auto;
 	overflow: scroll;
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
+#weekendInfoContainer::-webkit-scrollbar {
+	display: none;
 }
 
 #settingsHead,
@@ -73,6 +79,10 @@ body {
 
 #settingsWrap {
 	width: 80%;
+}
+
+#editWeekend {
+	margin: 0 auto 1vh auto;
 }
 
 .setting {
@@ -95,7 +105,7 @@ input[type="number"] {
 input[type="text"], textarea {
 	text-wrap: wrap;
 	outline: none;
-	width: 90%;
+	width: 80%;
 }
 
 button {
@@ -115,6 +125,12 @@ button {
 	flex-shrink: 0;
 }
 
+#mInfoWrap {
+	min-height: 29vh;
+	height: fit-content;
+	padding-bottom: .1vh;
+}
+
 #titleIn {
 	font-size: 2vh;
 }
@@ -125,14 +141,40 @@ button {
 
 #mAttendeesList {
 	width: 80%;
-	height: 2vh;
+	/* height: 2vh; */
 	margin: 0.3vh 0;
-	padding: 0;
+	padding: 1vh;
 	border: 1px solid black;
 	border-radius: 1vh;
 	margin-left: 10%;
 	background-color: hsl(230, 100%, 95%);
+	list-style-position: inside;
 }
+
+#attendeeAdd, .removeAttendee {
+	cursor: pointer;
+
+}
+
+#attendeeAdd:hover, .removeAttendee:hover {
+	color: rgb(89, 89, 89);
+}
+
+.mAttendeeWrap {
+	width: 95%;
+	padding-left: 5%;
+	height: 2vh;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	margin: 1vh 0;
+}
+
+.mAttendeeWrap input {
+	margin: 0 2%;
+}
+
 
 #eventSaveButton {
 	margin: 0.1vh auto;
@@ -152,7 +194,7 @@ button {
 	page-break-inside: avoid;
 	text-wrap: wrap;
 	max-height: 10vh;
-	margin: 0;
+	margin: 0 0 .2vh 0;
 
 	-ms-overflow-style: none; /* IE and Edge */
 	scrollbar-width: none; /* Firefox */

@@ -12,7 +12,11 @@ body {
 }
 
 
-/* start page content */
+h1 {
+	text-align: center;
+	height: 10%;
+	margin: 5% 0;
+}
 
 #helpContentWrap {
 	background-color: white;
@@ -24,7 +28,16 @@ body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: flex-start;
-	overflow: hidden;
+	/* box-shadow: 0vh 0vh 6vh black; */
+	
+}
+
+#helpContentWrap * {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+#helpContentWrap *::-webkit-scrollbar {
+	display: none;
 }
 
 h1 {
@@ -37,27 +50,36 @@ h1 {
 	align-items: center;
 	justify-content: flex-start;
 	width: 95%;
+	max-height: 70%;
 }
 
 #leftWrap {
-	width: 50%;
-	height: 100%;
+	width: 70%;
+	max-height: 100%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: start;
+	overflow-y: scroll;
 }
 
 form {
 	width: 90%;
-	border: 0.25vh solid black;
-	padding: 1vh;
-	background-color: hsl(228, 63%, 84%);
+	border: 1px solid black;
+	padding: 0;
+	background-color: hsl(227, 70%, 80%);
 	border-radius: 1.5vh;
+	padding: 1vh;
+	font-size: 1em;
+	max-height: 100%;
+	overflow-y: scroll;
 }
 
 fieldset {
 	border: none;
+	max-width: 100% !important;
+	margin: 0;
+	padding: 0;
 }
 
 legend h2 {
@@ -66,14 +88,22 @@ legend h2 {
 
 .inputWrap {
 	margin: 2% 5%;
+	max-width: 90%;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+	min-width: 60%;
+	max-height: min-content;
 }
 
 input,
 select,
 textarea {
-	margin-top: 0.75%;
+	margin-top: 0.25%;
 	margin-left: 2%;
 	font-family: inherit;
+	max-width: 90% !important;
 }
 
 input[type="text"] {
@@ -82,7 +112,7 @@ input[type="text"] {
 }
 
 #rightWrap {
-	width: 50%;
+	width: 30%;
 	height: 100%;
 	display: flex;
 	flex-direction: column;
@@ -92,7 +122,7 @@ input[type="text"] {
 
 #helpBlurb {
 	font-size: 2.25vh;
-	margin-bottom: 5%;
+	margin: auto 0;
 	text-align: center;
 	width: 95%;
 }
@@ -108,4 +138,20 @@ input[type="text"] {
 
 iframe {
 	max-width: 90%;
+}
+
+
+@media screen and (orientation: portrait) {
+	#helpContentWrap {
+		min-width: 200px;
+		overflow-y: scroll;
+		width: 90%;
+	}
+	#leftWrap, #rightWrap {
+		width: 95%;
+		overflow-y: visible;
+	}
+	#content {
+	flex-direction: column;
+}
 }

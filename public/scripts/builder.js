@@ -1,221 +1,130 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app-check.js";
+import {
+	initializeAppCheck,
+	ReCaptchaV3Provider,
+} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app-check.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 import {
 	getFirestore,
-	doc,
-	onSnapshot,
 	collection,
 	getDocs,
-	setDoc,
+	getDoc,
+	doc,
+	query,
+	where,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
-
-import { dataToFullHTML, daysOfTheWeek as weekDays } from "./htmlFromJSON.js";
-import { addListeners } from "./index.js";
+import {
+	dataToFullHTML,
+	daysOfTheWeek as weekDays,
+	addListeners,
+	Weekend,
+	WeekendEvent,
+	getUserFromEmail,
+} from "./util.js";
 import { firebaseConfig, siteKey } from "./config.js";
-import { handleAuth } from "./authHandling.js";
-
-class WeekendEvent {
-	constructor(id) {
-		(this.saveAsTemplate = document.getElementById("saveAsTemplate").checked),
-			(this.id = id),
-			(this.title = document.getElementById("titleIn").value);
-		this.timeStart = document.getElementById("eventStart").value;
-		this.timeEnd = document.getElementById("eventEnd").value;
-		this.location = document.getElementById("eventLocation").value;
-		this.travelTime = Number(document.getElementById("travelTime").value);
-		this.description = document.getElementById("desc").value;
-		this.faculty = document.getElementById("eventFaculty").value;
-		this.numSpots = Number(document.getElementById("slotsIn").value);
-		this.signups = [];
-		this.admissionCriteria = document.getElementById("criteriaSelector").value;
-	}
-
-	get asInformation() {
-		return {
-			saveAsTemplate: this.saveAsTemplate,
-			id: this.id,
-			title: this.title,
-			timeStart: this.timeStart,
-			timeEnd: this.timeEnd,
-			location: this.location,
-			travelTime: this.travelTime,
-			description: this.description,
-			faculty: this.faculty,
-			numSpots: this.numSpots,
-			signups: this.numSpots,
-			admissionCriteria: this.admissionCriteria,
-		};
-	}
-}
-
-class Weekend {
-	constructor() {
-		this.startDate = document.getElementById("startDate").value;
-		this.endDate = document.getElementById("endDate").value;
-		this.collectFeedback = document.getElementById("feedback").checked;
-		this.days = [];
-	}
-
-	updateSelf() {
-		let oldStart = this.startDate;
-		let oldEnd = this.endDate;
-		this.startDate = document.getElementById("startDate").value;
-		this.endDate = document.getElementById("endDate").value;
-		this.collectFeedback = document.getElementById("feedback").checked;
-
-		if (this.startDate && this.endDate) {
-			let startDate = new Date(this.startDate);
-			let endDate = new Date(this.endDate);
-			let numDays = 1 + (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
-			if (numDays > this.days.length) {
-				for (let i = 0; i < numDays - this.days.length; i++) {
-					if (this.startDate === oldStart) {
-						this.days.push([]);
-					} else {
-						this.days.unshift([]);
-					}
-				}
-			} else if (numDays < this.days.length) {
-				for (let i = 0; i < this.days.length - numDays; i++) {
-					if (this.startDate === oldStart) {
-						this.days.pop([]);
-					} else {
-						this.days.shift([]);
-					}
-				}
-			}
-		}
-		return this.startDate && this.endDate;
-	}
-
-	updateFromTemplate(template) {
-		for (let i = 0; i < template.length; i++) {
-			if (this.days.length - 1 < i) {
-				this.days.push([]);
-			} else {
-				this.days[i].filter((event) => {
-					return !event.template;
-				});
-			}
-			for (let event of template[i]) {
-				this.days[i].push(event);
-			}
-			this.sortDay(i);
-		}
-	}
-
-	addEvent(event, index = 0) {
-		this.days[index].push(event);
-		this.sortDay(index);
-	}
-
-	sortDay(day = 0) {
-		this.days[day].sort((a, b) => {
-			return (
-				Number(a.timeStart.slice(0, 2)) * 60 +
-				Number(a.timeStart.slice(3)) -
-				(Number(b.timeStart.slice(0, 2)) * 60 + Number(b.timeStart.slice(3)))
-			);
-		});
-	}
-
-	getInformation() {
-		if (!this.isValid) {
-			alert("Please enter valid information before saving.");
-			return;
-		}
-		return { information: JSON.stringify(this) };
-	}
-
-	saveSelf(name = null) {
-		for (let day of this.days) {
-			for (let event of day) {
-				if (event.saveAsTemplate) {
-					delete event.saveAsTemplate;
-					let eventData = Object.assign({}, event);
-					eventData.faculty = null;
-					setDoc(doc(db, "eventTemplates", eventData.title), eventData).catch((e) => {
-						alert("Error in saving weekend. Please try again.");
-						console.log(e);
-						return;
-					});
-				}
-			}
-		}
-		if (name) {
-			let temp = { information: JSON.stringify(this.days), title: name };
-			console.log(temp);
-			setDoc(doc(db, "weekendTemplates", this.id), temp)
-				.then(() => alert("Template Saved Succesfully"))
-				.catch((e) => {
-					alert("Error in saving. Please try again.");
-					console.log(e);
-				});
-		} else {
-			setDoc(doc(db, "weekends", this.id), this.getInformation())
-				.then(() => alert("Weekend Saved Succesfully"))
-				.catch((e) => {
-					alert("Error in saving weekend. Please try again.");
-					console.log(e);
-				});
-		}
-	}
-
-	get isValid() {
-		return this.startDate && this.endDate;
-	}
-	get id() {
-		return `${this.startDate}:${this.endDate}`;
-	}
-}
-
-
 
 const app = initializeApp(firebaseConfig);
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
-
-	// Optional argument. If true, the SDK automatically refreshes App Check
-	// tokens as needed.
+	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
 	isTokenAutoRefreshEnabled: true,
 });
+const auth = getAuth(app);
+
 const db = getFirestore(app, "maindb");
-// const [user, userinformation] = handleAuth(app);
 
 let eventTemplates = {};
 let weekendTemplates = {};
+let activeWeekend
+let editingActiveWeekend = false
+let students = [];
 let workingWeekend = new Weekend();
-
 let currentEventNum = 0;
 
-getDocs(collection(db, "eventTemplates")).then((eventTemplateSnapshot) => {
-	eventTemplateSnapshot.forEach((doc) => {
-		let docData = doc.data();
-		if (!docData) {
-			return;
+let firebaseUser;
+let userInformation;
+
+onAuthStateChanged(auth, (user) => {
+	if (user) {
+		firebaseUser = user;
+		getUserFromEmail(user.email, user.displayName, db).then((data) => {
+			if (!data.isAdmin) {
+				window.location.href = "../index.html";
+			}
+			userInformation = data;
+		});
+
+		let pfp = document.querySelector("#menuPF img");
+		if (pfp) {
+			pfp.loading = "lazy";
+			pfp.src = user.photoURL;
+			document.getElementById("userName").innerText = user.displayName;
 		}
-		eventTemplates[docData.title] = docData;
-		let option = document.createElement("option");
-		option.value = docData.title;
-		option.innerText = docData.title;
-		document.getElementById("eventTemplateSelector").appendChild(option);
-	});
+
+		getDocs(collection(db, "eventTemplates")).then((eventTemplateSnapshot) => {
+			eventTemplateSnapshot.forEach((doc) => {
+				let docData = doc.data();
+				if (!docData) {
+					return;
+				}
+				eventTemplates[docData.title] = docData;
+				let option = document.createElement("option");
+				option.value = docData.title;
+				option.innerText = docData.title;
+				document.getElementById("eventTemplateSelector").appendChild(option);
+			});
+		});
+
+		getDocs(collection(db, "weekendTemplates")).then((weekendTemplateSnapshot) => {
+			weekendTemplateSnapshot.forEach((doc) => {
+				let docData = doc.data();
+				if (!docData.title) {
+					return;
+				}
+				let title = docData.title;
+				docData = JSON.parse(docData.information);
+				weekendTemplates[title] = docData;
+				let option = document.createElement("option");
+				option.value = title;
+				option.innerText = title;
+				document.getElementById("weekendTemplateSelector").appendChild(option);
+			});
+		});
+
+		const q = query(collection(db, "users"), where("isAdmin", "==", false));
+
+		getDocs(q).then((docs) => {
+			docs.forEach((student) => {
+				students.push(student.data());
+			});
+			students.sort((a, b) => {
+				return [a.displayName, b.displayName].sort()[0] === a.displayName ? -1 : 1;
+			});
+			let htmlString = "";
+			for (let student of students) {
+				htmlString += `<option value="${student.email}">${student.displayName}</option>`;
+			}
+			document.getElementById("studentsList").insertAdjacentHTML("afterbegin", htmlString);
+		});
+
+		getDoc(doc(db, "activeWeekend", "default")).then((doc) => {
+			activeWeekend = doc.data().information
+		}).catch((error) => {
+			throw error
+		})
+	} else {
+		window.location.href = "../index.html";
+	}
 });
 
-getDocs(collection(db, "weekendTemplates")).then((weekendTemplateSnapshot) => {
-	weekendTemplateSnapshot.forEach((doc) => {
-		let docData = doc.data();
-		if (!docData.title) {
-			return;
-		}
-		let title = docData.title;
-		docData = JSON.parse(docData.information);
-		weekendTemplates[title] = docData;
-		let option = document.createElement("option");
-		option.value = title;
-		option.innerText = title;
-		document.getElementById("weekendTemplateSelector").appendChild(option);
-	});
+document.getElementById("signOutWrap").addEventListener("click", () => {
+	signOut(auth)
+		.then(() => {
+			window.location.href = `${isAdminPage ? "../" : ""}index.html`;
+		})
+		.catch((error) => {
+			alert(`There was a error signing out: ${error}`);
+		});
 });
 
 const updateWeekend = () => {
@@ -250,15 +159,17 @@ const updateWeekend = () => {
 	for (let deleteButton of document.querySelectorAll(".deleteButton")) {
 		deleteButton.onclick = (e) => {
 			let eventNode = e.target.parentElement.parentElement;
-			for (let day of workingWeekend) {
+			for (let day of workingWeekend.days) {
 				for (let i = 0; i < day.length; i++) {
-					if (day[i].id === eventNode.id) {
-						day.splice(i);
+					if (day[i].id === Number(eventNode.id)) {
+						day.splice(i, 1);
+						console.log("removing")
+						updateWeekend();
+						return
 					}
 				}
 			}
-			eventNode.remove();
-			updateWeekend();
+			
 		};
 	}
 };
@@ -291,7 +202,7 @@ document.getElementById("eventTemplateSelector").onchange = updateEventFromTempl
 const updateWeekendFromTemplate = (e) => {
 	let val = e.target.value;
 	let data = weekendTemplates[val];
-	workingWeekend.updateFromTemplate(data);
+	currentEventNum = workingWeekend.updateFromTemplate(data, currentEventNum);
 	updateWeekend();
 };
 
@@ -324,6 +235,22 @@ const saveEvent = () => {
 	let eventToAdd = new WeekendEvent(currentEventNum);
 	currentEventNum++;
 
+	for (let attendee of document.querySelectorAll(".attendeeInput")) {
+		let attendeeInfo;
+		for (let student of students) {
+			if (student.email === attendee.value) {
+				attendeeInfo = student;
+				break;
+			}
+		}
+		if (!attendeeInfo) {
+			alert("Attendee not found. Please revise attendee information.");
+			return;
+		}
+		
+		eventToAdd.signups.push({ displayName: attendeeInfo.displayName, email: attendeeInfo.email, status: "approved" });
+	}
+
 	workingWeekend.addEvent(eventToAdd, dayNum);
 	updateWeekend();
 };
@@ -342,13 +269,13 @@ const saveWeekend = () => {
 	}
 	if (
 		!confirm(
-			"Are you sure you want to save the current weekend? It will write over any weekend with identical dates."
+			"Are you sure you want to save the current weekend? It will write over the currently active weekend."
 		)
 	) {
 		return;
 	}
 
-	workingWeekend.saveSelf();
+	workingWeekend.saveSelf(db);
 };
 
 document.getElementById("saveWeekendButton").onclick = saveWeekend;
@@ -366,8 +293,62 @@ const saveWeekendAsTemplate = () => {
 		return;
 	}
 	let name = prompt("Please enter a name for this template: ");
+	if (!name) return
 
-	workingWeekend.saveSelf(name);
+	workingWeekend.saveSelf(db, name);
 };
 
 document.getElementById("saveWeekendAsTemplateButton").onclick = saveWeekendAsTemplate;
+
+const verifyAttendee = (e) => {
+	if (e.target.checkValidity()) {
+		let input = e.target.value;
+		for (let student of students) {
+			if (student.email === input) {
+				return
+			}
+		}
+	}
+	alert("Please enter a valid email address.");
+};
+
+const addAttendee = () => {
+	document.getElementById("mAttendeesList").insertAdjacentHTML(
+		"afterbegin",
+		`<div class="mAttendeeWrap">
+			<input required type="email" list="studentsList" class="attendeeInput" onchange="verifyAttendee(this)"/>
+			<span class="material-symbols-outlined removeAttendee" onclick="this.parentElement.remove()">cancel</span>
+		</div>`
+	);
+	for (let el of document.querySelectorAll(".attendeeInput")) {
+		el.onchange = verifyAttendee;
+	}
+};
+
+document.getElementById("attendeeAdd").onclick = addAttendee;
+
+const editCurrentWeekend = (e) => {
+	if (!editingActiveWeekend) {
+		e.target.innerText = "Edit New Weekend"
+		editingActiveWeekend = true
+		workingWeekend.updateFromString(activeWeekend)
+		let startIn = document.getElementById("startDate")
+		let endIn = document.getElementById("endDate")
+		startIn.value = workingWeekend.startDate
+		endIn.value = workingWeekend.endDate
+		startIn.disabled = true
+		endIn.disabled = true
+	} else {
+		e.target.innerText = "Edit Active Weekend";
+		editingActiveWeekend = false;
+		let startIn = document.getElementById("startDate");
+		let endIn = document.getElementById("endDate");
+		startIn.disabled = false;
+		endIn.disabled = false;
+	}
+	updateWeekend();
+}
+
+document.getElementById("editWeekend").onclick = editCurrentWeekend;
+
+addListeners();

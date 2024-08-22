@@ -42,25 +42,36 @@ body {
 	color: white;
 }
 
-#infoConatiner {
+#infoContainer {
 	width: 90%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: flex-start;
 	margin: 0 auto;
+	height: 93.85vh;
 }
 
 #selectorWrap {
-	margin: 2vh 0;
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	align-items: center;
 	justify-content: center;
+	height: 10%;
 }
 
-#selectorHead {
-	font-size: 2.5vh;
+.arrow {
+	margin: 0 .1vw;
+	cursor: pointer;
+	transition: color .1s ease;
+}
+
+.arrow:hover {
+	color: hsl(0, 0%, 50%);
+}
+
+.arrow:active {
+	color: hsl(0, 0%, 65%);
 }
 
 #infoWrap {
@@ -70,7 +81,20 @@ body {
 	justify-content: flex-start;
 	width: 100%;
 	font-size: 2vh;
+	height: 90%;
 }
+
+
+#currentTrips, #remainingTrips, #completedTrips {
+		display: none;
+	}
+ 
+
+#infoWrap.active {
+	#currentTrips, #remainingTrips, #completedTrips {
+		display: block;
+	}
+} 
 
 .info {
 	color: blue;
@@ -85,10 +109,4 @@ body {
 	width: max-content;
 	padding: 0 2%;
 	cursor: pointer;
-}
-
-#editorLink {
-	width: 100%;
-	text-align: center;
-	margin-top: 3vh;
 }

@@ -6,7 +6,7 @@
 		<link rel="shortcut icon" href="../images/favicon.ico" type="image/x-icon" />
 
 		<link rel="stylesheet" href="../css/index.css" />
-		<link rel="stylesheet" href="../css/eventsStyling.css">
+		<link rel="stylesheet" href="../css/eventsStyling.css" />
 		<link rel="stylesheet" href="../css/builder.css" />
 		<link
 			rel="stylesheet"
@@ -63,8 +63,16 @@
 				</a>
 			</div>
 			<a id="menuPF" class="menuWrap" href="../profile.html">
-				<img src="" alt="PFP" />
-				<h2 id="userName">Bailey Tuckman</h2>
+				<img src="../images/blankUser.svg" alt="PFP" />
+				<h2 id="userName"></h2>
+			</a>
+			<a id="dashWrap" class="menuWrap" href="./index.html">
+				<span class="material-symbols-outlined"> monitoring </span>
+				<span class="menuText">Admin Dashboard</span>
+			</a>
+			<a id="builderWrap" class="menuWrap" href="./builder.html">
+				<span class="material-symbols-outlined"> edit_calendar </span>
+				<span class="menuText">Weekend Builder</span>
 			</a>
 			<a id="callDAWrap" class="menuWrap" href="tel:+16103997971">
 				<span class="material-symbols-outlined"> phone_in_talk </span>
@@ -76,25 +84,22 @@
 			</a>
 			<a id="helpWrap" class="menuWrap" href="../help.html"
 				><span class="material-symbols-outlined"> help_center </span>
-				<span class="menuText">Polaris Help</span></a
-			>
-
+				<span class="menuText">Polaris Help</span>
+			</a>
 			<div id="signOutWrap" class="menuWrap">
 				<span class="material-symbols-outlined"> logout </span><span class="menuText">Sign Out</span>
 			</div>
-
 			<div id="menuFooter">
 				<a href="https://westtown.edu">Westtown School</a>
 				<span>975 Westtown Rd. West Chester, PA</span>
 			</div>
-
-			<address></address>
 		</div>
 		<section id="weekendInfo">
 			<h2 id="infoHead">Editor</h2>
-			<div id="infoContainer">
+			<div id="weekendInfoContainer">
 				<div id="settingsWrap">
 					<h3 id="settingsHead">Weekend Settings</h3>
+					<button id="editWeekend" class="setting">Edit Active Weekend</button>
 					<div id="settingsInfoWrap">
 						<div class="setting">
 							<label for="startDate">Start Date: </label>
@@ -109,7 +114,7 @@
 							<input type="checkbox" name="feedback" id="feedback" checked />
 						</div>
 						<div class="setting">
-							<label for="template">Select a template: </label>
+							<label for="weekendTemplateSelector">Select a template: </label>
 							<select name="template" id="weekendTemplateSelector">
 								<option value="">No Template</option>
 							</select>
@@ -141,7 +146,7 @@
 						<input type="time" name="eventEnd" id="eventEnd" value="12:00" />
 					</div>
 					<div class="setting">
-						<label for="admissionCriteria">Admission Criteria: </label>
+						<label for="criteriaSelector">Admission Criteria: </label>
 						<select id="criteriaSelector">
 							<option value="Normal Signup">Normal Signup</option>
 							<option value="Advanced Lottery">Advanced Lottery</option>
@@ -151,37 +156,37 @@
 						</select>
 					</div>
 
-					<div class="eventMakerWrap">
+					<div class="eventMakerWrap open">
 						<div id="mEventHeadWrap" class="eventHeadWrap eIWrap">
 							<span class="material-symbols-outlined collapse"> expand_circle_right </span>
 							<input required type="text" placeholder="Event Title" id="titleIn" />
 						</div>
 
-						<div class="eventInfoWrap">
+						<div id="mInfoWrap" class="eventInfoWrap">
 							<div class="eventLocationWrap eIWrap">
-								<span class="material-symbols-outlined"> location_on </span
-								><span class="eventAddress"
-									><input id="eventLocation" required type="text" placeholder="Event Location"
-								/></span>
+								<span class="material-symbols-outlined"> location_on </span>
+								<span class="eventAddress">
+									<input id="eventLocation" required type="text" placeholder="Event Location" />
+								</span>
 							</div>
 							<div class="travelWrap eIWrap">
 								<span class="material-symbols-outlined"> airport_shuttle </span>
-								<span class="travelTime"
-									><input id="travelTime" required type="number" step="1" min="0" /> min</span
-								>
+								<span class="travelTime">
+									<input id="travelTime" required type="number" step="1" min="0" /> min
+								</span>
 							</div>
 							<div class="eventLeadWrap eIWrap">
-								<span class="material-symbols-outlined"> person </span
-								><span class="eventLeader"
-									>T. <input id="eventFaculty" required type="text" placeholder="trip leader"
-								/></span>
+								<span class="material-symbols-outlined"> person </span>
+								<span id="eventLeader">
+									T. <input id="eventFaculty" required type="text" placeholder="trip leader" />
+								</span>
 							</div>
 							<div class="descWrap eIWrap">
 								<span class="material-symbols-outlined descIcon"> description </span>
 								<p class="eventDesc"><textarea name="desc" id="desc" cols="20" rows="4"></textarea></p>
 							</div>
 							<div class="attendeesWrap eIWrap">
-								<span class="material-symbols-outlined">block</span>
+								<span class="material-symbols-outlined" id="attendeeAdd">add_circle</span>
 								<span class="singedUpNum">0</span>/<input
 									required
 									type="number"
@@ -190,7 +195,19 @@
 									id="slotsIn"
 									value="9"
 								/>
-								<ol id="mAttendeesList"></ol>
+								<div id="mAttendeesList"></div>
+
+								<datalist id="studentsList"> </datalist>
+								<!-- <label for="ice-cream-choice">Choose a flavor:</label> -->
+								<!-- <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" />
+
+								<datalist id="ice-cream-flavors">
+									<option value="Chocolate"></option>
+									<option value="Coconut"></option>
+									<option value="Mint"></option>
+									<option value="Strawberry"></option>
+									<option value="Vanilla"></option>
+								</datalist> -->
 								<button type="button" id="eventSaveButton">Save Event</button>
 							</div>
 						</div>
@@ -204,10 +221,7 @@
 				<pre id="debugCode"></pre>
 			</div>
 		</section>
-
 		<div id="daysContainer"></div>
-
-		<script type="module" src="../scripts/index.js"></script>
 		<script type="module" src="../scripts/builder.js"></script>
 	</body>
 </html>

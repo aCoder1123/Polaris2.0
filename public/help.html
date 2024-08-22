@@ -63,10 +63,11 @@
 			</div>
 			<a id="menuPF" class="menuWrap" href="profile.html">
 				<img
-					src="https://lh3.googleusercontent.com/ogw/AF2bZyhqJFxJqBdz4ZSl5Be7XFkvSHzJy3gfnihADQf00Wl6pDE=s64-c-mo"
+					src="images/blankUser.svg"
 					alt="PFP"
+					loading="lazy"
 				/>
-				<h2 id="userName">Bailey Tuckman</h2>
+				<h2 id="userName"></h2>
 			</a>
 			<a id="callDAWrap" class="menuWrap" href="tel:+16103997971">
 				<span class="material-symbols-outlined"> phone_in_talk </span>
@@ -76,10 +77,10 @@
 				<span class="material-symbols-outlined"> security </span>
 				<span class="menuText">Call Campus Security</span>
 			</a>
-			<a id="helpWrap" class="menuWrap" href="help.html"
-				><span class="material-symbols-outlined"> help_center </span>
-				<span class="menuText">Polaris Help</span></a
-			>
+			<a id="helpWrap" class="menuWrap" href="help.html">
+				<span class="material-symbols-outlined"> help_center </span>
+				<span class="menuText">Polaris Help</span>
+			</a>
 
 			<div id="signOutWrap" class="menuWrap">
 				<span class="material-symbols-outlined"> logout </span><span class="menuText">Sign Out</span>
@@ -96,7 +97,6 @@
 			<div id="content">
 				<div id="leftWrap">
 					<form action="" method="post" id="reportForm">
-						<fieldset>
 							<legend><h2>Bug Report Form</h2></legend>
 							<div class="inputWrap">
 								<label for="pageSelect">Page on which the error occurred:</label>
@@ -122,7 +122,6 @@
 							</div>
 							<div class="inputWrap">
 								<label for="emailIn">Email for followup (leave blank to report anonymously):</label>
-								<br />
 								<input
 									type="email"
 									name="email"
@@ -132,17 +131,15 @@
 								/>
 							</div>
 							<input type="submit" value="Submit" name="submit" id="submitBtn" />
-						</fieldset>
 					</form>
 				</div>
 				<div id="rightWrap">
 					<span id="helpBlurb"
 						>For weekend program help <a href="mailto:robert.frazier@westtown.edu">email T. Robert</a> or
-						<a href="tel:+16103997971">call the DA</a>. For Polaris help watch the explanation video below
-						(coming, soon?) or
-						<a href="mailto:bailey.tuckman@westtown.edu">email (designaed help person)</a>.</span
-					>
-					<iframe
+						<a href="tel:+16103997971">call the DA</a>. For Polaris tech help 
+						<a href="mailto:bailey.tuckman@westtown.edu">email (someone)</a>.
+					</span>
+					<!-- <iframe
 						width="560"
 						height="315"
 						src="https://www.youtube.com/embed/b_t1l9eNvjM?si=7fKmer5YIc0bjgNR"
@@ -151,11 +148,10 @@
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 						referrerpolicy="strict-origin-when-cross-origin"
 						allowfullscreen
-					></iframe>
+					></iframe> -->
 				</div>
 			</div>
 		</section>
-		<script type="module" src="scripts/index.js"></script>
 		<script type="module" src="scripts/help.js"></script>
 	</body>
 </html>

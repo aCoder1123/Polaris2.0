@@ -4,21 +4,14 @@ import {
 	ReCaptchaV3Provider,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app-check.js";
 
-import {
-	GoogleAuthProvider,
-	getAuth,
-	signInWithPopup,
-	signOut,
-	onAuthStateChanged,
-} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 import {
 	getFunctions,
-	httpsCallable,
 	connectFunctionsEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import { firebaseConfig, siteKey } from "./config.js";
-import { handleAuth } from "./authHandling.js";
-
+import { getUserFromEmail, addListeners, getAdminLinks } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
 const appCheck = initializeAppCheck(app, {
@@ -28,25 +21,49 @@ const appCheck = initializeAppCheck(app, {
 });
 const auth = getAuth(app);
 const functions = getFunctions(app);
-
-
-let user;
+const db = getFirestore(app, "maindb");
 let userInformation;
+let firebaseUser;
+onAuthStateChanged(auth, (user) => {
+	if (user) {
+		firebaseUser = user;
+		getUserFromEmail(user.email, user.displayName, db).then((data) => {
+			userInformation = data;
+			document.getElementById("credit").innerText = userInformation.credit;
+			if (userInformation.isAdmin) {
+				document.getElementById("callDAWrap").insertAdjacentHTML("beforebegin", getAdminLinks(false));
+			}
+		});
 
-handleAuth(app).then((res) => {
-	user = res[0]
-	userInformation = res[1]
-	console.log(res)
-	document.getElementById("#pfp").src = user.photoURL;
-	document.getElementById("#userName").innerText = user.displayName;
-	console.log(auth.currentUser);
-})
+		let pfp = document.querySelector("#menuPF img");
+		if (pfp) {
+			pfp.loading = "lazy";
+			pfp.src = user.photoURL;
+			document.getElementById("pfp").src = user.photoURL;
+			for (let el of document.querySelectorAll(".userName")) {
+				el.innerText = user.displayName;
+			}
+		}
+	} else {
+		window.location.href = `index.html`;
+	}
+});
 
+document.getElementById("signOutWrap").addEventListener("click", () => {
+	signOut(auth)
+		.then(() => {
+			window.location.href = `${isAdminPage ? "../" : ""}index.html`;
+		})
+		.catch((error) => {
+			alert(`There was a error signing out: ${error}`);
+		});
+});
 
 if (window.location.hostname === "127.0.0.1") {
 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 }
 
+addListeners();
 
 // const sendEmail = httpsCallable(functions, "sendEmail");
 
@@ -67,5 +84,3 @@ if (window.location.hostname === "127.0.0.1") {
 // 		console.log("user signed out");
 // 	}
 // });
-
-
