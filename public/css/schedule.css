@@ -43,3 +43,71 @@ body {
 	background-color: var(--header-blue);
 	color: white;
 }
+
+.scheduleConatiner {
+	width: 95%;
+	margin: 0 auto;
+}
+
+.scheduleDayHead {
+	width: 100%;
+	text-align: center;
+}
+
+.sEventWrap {
+	display: block;
+}
+
+@media all and (orientation: portrait) {
+	html {
+		overflow-x: none;
+		max-width: 100vw;
+	}
+	body {
+		flex-direction: column;
+		align-items: center;
+		justify-content: flex-start;
+		overflow-y: scroll;
+		overflow-x: none;
+		height: 100%;
+		width: 100%;
+
+		
+	}
+
+	#daysContainer {
+		width: 100vw;
+
+		max-width: 100vw;
+		overflow-x: none;
+		height: fit-content;
+		flex-direction: column;
+	}
+	.dayWrap {
+		width: 100vw;
+		height: 6vh;
+	}
+	.dayHead {
+		display: block;
+		border: none;
+	}
+	.dayWrap.open,
+	#mySchedule {
+		width: 100vw;
+		height: 100vh;
+		overflow-y: scroll;
+		border: none;
+	}
+	.dayCollapse {
+		margin-left: 2%;
+	}
+	.eventWrap {
+		margin: none;
+		margin: 1%;
+	}
+	.eventsContainer {
+		padding: 0;
+		padding-bottom: 2vh;
+		max-width: 100vw;
+	}
+}

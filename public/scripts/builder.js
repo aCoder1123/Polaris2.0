@@ -12,6 +12,7 @@ import {
 	doc,
 	query,
 	where,
+	connectFirestoreEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import {
 	dataToFullHTML,
@@ -20,6 +21,7 @@ import {
 	Weekend,
 	WeekendEvent,
 	getUserFromEmail,
+	handleDBError,
 } from "./util.js";
 import { firebaseConfig, siteKey } from "./config.js";
 
@@ -33,10 +35,15 @@ const auth = getAuth(app);
 
 const db = getFirestore(app, "maindb");
 
+// if (window.location.hostname === "127.0.0.1") {
+// 	connectFirestoreEmulator(db, "127.0.0.1", 8080);
+// 	console.log("Connecting Firebase Emulator")
+// }
+
 let eventTemplates = {};
 let weekendTemplates = {};
-let activeWeekend
-let editingActiveWeekend = false
+let activeWeekend;
+let editingActiveWeekend = false;
 let students = [];
 let workingWeekend = new Weekend();
 let currentEventNum = 0;
@@ -49,7 +56,7 @@ onAuthStateChanged(auth, (user) => {
 		firebaseUser = user;
 		getUserFromEmail(user.email, user.displayName, db).then((data) => {
 			if (!data.isAdmin) {
-				window.location.href = "../index.html";
+				// window.location.href = "../index.html";
 			}
 			userInformation = data;
 		});
@@ -61,57 +68,63 @@ onAuthStateChanged(auth, (user) => {
 			document.getElementById("userName").innerText = user.displayName;
 		}
 
-		getDocs(collection(db, "eventTemplates")).then((eventTemplateSnapshot) => {
-			eventTemplateSnapshot.forEach((doc) => {
-				let docData = doc.data();
-				if (!docData) {
-					return;
-				}
-				eventTemplates[docData.title] = docData;
-				let option = document.createElement("option");
-				option.value = docData.title;
-				option.innerText = docData.title;
-				document.getElementById("eventTemplateSelector").appendChild(option);
-			});
-		});
+		getDocs(collection(db, "eventTemplates"))
+			.then((eventTemplateSnapshot) => {
+				eventTemplateSnapshot.forEach((doc) => {
+					let docData = doc.data();
+					if (!docData) {
+						return;
+					}
+					eventTemplates[docData.title] = docData;
+					let option = document.createElement("option");
+					option.value = docData.title;
+					option.innerText = docData.title;
+					document.getElementById("eventTemplateSelector").appendChild(option);
+				});
+			})
+			.catch(handleDBError);
 
-		getDocs(collection(db, "weekendTemplates")).then((weekendTemplateSnapshot) => {
-			weekendTemplateSnapshot.forEach((doc) => {
-				let docData = doc.data();
-				if (!docData.title) {
-					return;
-				}
-				let title = docData.title;
-				docData = JSON.parse(docData.information);
-				weekendTemplates[title] = docData;
-				let option = document.createElement("option");
-				option.value = title;
-				option.innerText = title;
-				document.getElementById("weekendTemplateSelector").appendChild(option);
-			});
-		});
+		getDocs(collection(db, "weekendTemplates"))
+			.then((weekendTemplateSnapshot) => {
+				weekendTemplateSnapshot.forEach((doc) => {
+					let docData = doc.data();
+					if (!docData.title) {
+						return;
+					}
+					let title = docData.title;
+					docData = JSON.parse(docData.information);
+					weekendTemplates[title] = docData;
+					let option = document.createElement("option");
+					option.value = title;
+					option.innerText = title;
+					document.getElementById("weekendTemplateSelector").appendChild(option);
+				});
+			})
+			.catch(handleDBError);
 
 		const q = query(collection(db, "users"), where("isAdmin", "==", false));
 
-		getDocs(q).then((docs) => {
-			docs.forEach((student) => {
-				students.push(student.data());
-			});
-			students.sort((a, b) => {
-				return [a.displayName, b.displayName].sort()[0] === a.displayName ? -1 : 1;
-			});
-			let htmlString = "";
-			for (let student of students) {
-				htmlString += `<option value="${student.email}">${student.displayName}</option>`;
-			}
-			document.getElementById("studentsList").insertAdjacentHTML("afterbegin", htmlString);
-		});
+		getDocs(q)
+			.then((docs) => {
+				docs.forEach((student) => {
+					students.push(student.data());
+				});
+				students.sort((a, b) => {
+					return [a.displayName, b.displayName].sort()[0] === a.displayName ? -1 : 1;
+				});
+				let htmlString = "";
+				for (let student of students) {
+					htmlString += `<option value="${student.email}">${student.displayName}</option>`;
+				}
+				document.getElementById("studentsList").insertAdjacentHTML("afterbegin", htmlString);
+			})
+			.catch(handleDBError);
 
-		getDoc(doc(db, "activeWeekend", "default")).then((doc) => {
-			activeWeekend = doc.data().information
-		}).catch((error) => {
-			throw error
-		})
+		getDoc(doc(db, "activeWeekend", "default"))
+			.then((doc) => {
+				activeWeekend = doc.data().information;
+			})
+			.catch(handleDBError);
 	} else {
 		window.location.href = "../index.html";
 	}
@@ -133,7 +146,7 @@ const updateWeekend = () => {
 	if (valid) {
 		let wrap = document.getElementById("daysContainer");
 		wrap.replaceChildren();
-		let elements = dataToFullHTML(workingWeekend, true).querySelectorAll(".dayWrap");
+		let elements = dataToFullHTML(workingWeekend, "editor").querySelectorAll(".dayWrap");
 		for (let i = 0; i < elements.length; i++) {
 			wrap.append(elements[i]);
 		}
@@ -163,13 +176,12 @@ const updateWeekend = () => {
 				for (let i = 0; i < day.length; i++) {
 					if (day[i].id === Number(eventNode.id)) {
 						day.splice(i, 1);
-						console.log("removing")
+						console.log("removing");
 						updateWeekend();
-						return
+						return;
 					}
 				}
 			}
-			
 		};
 	}
 };
@@ -247,8 +259,12 @@ const saveEvent = () => {
 			alert("Attendee not found. Please revise attendee information.");
 			return;
 		}
-		
-		eventToAdd.signups.push({ displayName: attendeeInfo.displayName, email: attendeeInfo.email, status: "approved" });
+
+		eventToAdd.signups.push({
+			displayName: attendeeInfo.displayName,
+			email: attendeeInfo.email,
+			status: "approved",
+		});
 	}
 
 	workingWeekend.addEvent(eventToAdd, dayNum);
@@ -268,9 +284,7 @@ const saveWeekend = () => {
 		return;
 	}
 	if (
-		!confirm(
-			"Are you sure you want to save the current weekend? It will write over the currently active weekend."
-		)
+		!confirm("Are you sure you want to save the current weekend? It will write over the currently active weekend.")
 	) {
 		return;
 	}
@@ -293,7 +307,7 @@ const saveWeekendAsTemplate = () => {
 		return;
 	}
 	let name = prompt("Please enter a name for this template: ");
-	if (!name) return
+	if (!name) return;
 
 	workingWeekend.saveSelf(db, name);
 };
@@ -305,7 +319,7 @@ const verifyAttendee = (e) => {
 		let input = e.target.value;
 		for (let student of students) {
 			if (student.email === input) {
-				return
+				return;
 			}
 		}
 	}
@@ -329,15 +343,15 @@ document.getElementById("attendeeAdd").onclick = addAttendee;
 
 const editCurrentWeekend = (e) => {
 	if (!editingActiveWeekend) {
-		e.target.innerText = "Edit New Weekend"
-		editingActiveWeekend = true
-		workingWeekend.updateFromString(activeWeekend)
-		let startIn = document.getElementById("startDate")
-		let endIn = document.getElementById("endDate")
-		startIn.value = workingWeekend.startDate
-		endIn.value = workingWeekend.endDate
-		startIn.disabled = true
-		endIn.disabled = true
+		e.target.innerText = "Edit New Weekend";
+		editingActiveWeekend = true;
+		workingWeekend.updateFromString(activeWeekend);
+		let startIn = document.getElementById("startDate");
+		let endIn = document.getElementById("endDate");
+		startIn.value = workingWeekend.startDate;
+		endIn.value = workingWeekend.endDate;
+		startIn.disabled = true;
+		endIn.disabled = true;
 	} else {
 		e.target.innerText = "Edit Active Weekend";
 		editingActiveWeekend = false;
@@ -347,7 +361,7 @@ const editCurrentWeekend = (e) => {
 		endIn.disabled = false;
 	}
 	updateWeekend();
-}
+};
 
 document.getElementById("editWeekend").onclick = editCurrentWeekend;
 

@@ -185,7 +185,7 @@
 }
 
 .locationCopy:hover,
-.addIcon:hover {
+.addIcon:hover, .addIcon:disabled {
 	color: grey !important;
 }
 

@@ -73,6 +73,10 @@ node_modules/
 #other 
 .DS_Store
 
-testing.html
+testing*.html
 
 firestore.rules
+
+emulatorsSave/*
+
+temp.md

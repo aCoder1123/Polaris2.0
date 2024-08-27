@@ -98,7 +98,7 @@ const updateWeekend = () => {
 	viewingWeekend = weekends[weekends.length - 1 - weekendSelect.selectedIndex];
 	let wrap = document.getElementById("daysContainer");
 	wrap.replaceChildren();
-	let elements = dataToFullHTML(viewingWeekend, false).querySelectorAll(".dayWrap");
+	let elements = dataToFullHTML(viewingWeekend, "schedule").querySelectorAll(".dayWrap");
 	for (let i = 0; i < elements.length; i++) {
 		wrap.append(elements[i]);
 	}

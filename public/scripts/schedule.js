@@ -10,22 +10,56 @@ import {
 	onSnapshot,
 	collection,
 	getDocs,
+	connectFirestoreEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import {
+	getFunctions,
+	httpsCallable,
+	connectFunctionsEmulator,
+} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 import { firebaseConfig, siteKey } from "./config.js";
 import { dataToFullHTML, addListeners, getUserFromEmail, getAdminLinks } from "./util.js";
+// import { api } from "https://apis.google.com/js/api.js";
 
 const app = initializeApp(firebaseConfig);
-
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
 	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
 	isTokenAutoRefreshEnabled: true,
 });
 const auth = getAuth(app);
-
 const db = getFirestore(app, "maindb");
+const functions = getFunctions(app);
+
+const handleSignupFunc = httpsCallable(functions, 'handleSignup')
+
 let userInformation;
 let firebaseUser;
+let weekendInformation;
+
+// if (window.location.hostname === "127.0.0.1") {
+// 	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
+// 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+// 	console.log("Connecting Firebase Emulator")
+// }
+
+// function startApp(user) {
+// 	auth.currentUser
+// 		.getToken()
+// 		.then(function (token) {
+// 			return gapi.client.calendar.events.list({
+// 				calendarId: "primary",
+// 				timeMin: new Date().toISOString(),
+// 				showDeleted: false,
+// 				singleEvents: true,
+// 				maxResults: 10,
+// 				orderBy: "startTime",
+// 			});
+// 		})
+// 		.then(function (response) {
+// 			console.log(response);
+// 		});
+// }
 
 onAuthStateChanged(auth, (user) => {
 	if (user) {
@@ -43,6 +77,36 @@ onAuthStateChanged(auth, (user) => {
 			pfp.src = user.photoURL;
 			document.getElementById("userName").innerText = user.displayName;
 		}
+
+		// var script = document.createElement("script");
+		// script.type = "text/javascript";
+		// script.src = "https://apis.google.com/js/api.js";
+		// // Once the Google API Client is loaded, you can run your code
+		// script.onload = function (e) {
+		// 	// Initialize the Google API Client with the config object
+		// 	gapi.load('client', () => {
+		// 		gapi.client
+		// 			.init({
+		// 				apiKey: firebaseConfig.apiKey,
+		// 				clientId: firebaseConfig.clientId,
+		// 				discoveryDocs: firebaseConfig.discoveryDocs,
+		// 				scope: firebaseConfig.scopes.join(" "),
+		// 			})
+		// 			// Loading is finished, so start the app
+		// 			.then(function () {
+		// 				// Make sure the Google API Client is properly signed in
+		// 				console.log("Inited")
+		// 				if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+		// 					startApp(user);
+		// 				} else {
+		// 					firebase.auth().signOut(); // Something went wrong, sign out
+		// 				}
+		// 			});
+		// 	})
+			
+		// };
+		// Add to the document
+		// document.getElementsByTagName("head")[0].appendChild(script);
 	} else {
 		window.location.href = `index.html`;
 	}
@@ -58,25 +122,42 @@ document.getElementById("signOutWrap").addEventListener("click", () => {
 		});
 });
 
-const handleScheduleUpdate = (doc) => {
-	console.log(`Doc is: ${doc}`);
-	let weekendInformation = JSON.parse(doc.data().information);
+const unsub = onSnapshot(doc(db, "activeWeekend", "default"), (doc) => {
+	console.log(doc.data());
+	weekendInformation = JSON.parse(doc.data().information);
 
 	let wrap = document.getElementById("daysContainer");
 	wrap.replaceChildren();
-	let elements = dataToFullHTML(weekendInformation, false).querySelectorAll(".dayWrap");
+	let nodes = dataToFullHTML(weekendInformation, "schedule", firebaseUser.displayName)
+	let elements = nodes.querySelectorAll(
+		".dayWrap"
+	);
 	for (let i = 0; i < elements.length; i++) {
 		wrap.append(elements[i]);
 	}
 	addListeners();
-};
+	document.querySelectorAll(".addIcon").forEach((el) => {
+		el.addEventListener("click", handleSignup);
+	});
 
-let querySnap = await getDocs(collection(db, "weekends"));
-let docs = [];
-querySnap.forEach((doc) => {
-	docs.push(doc.data().information);
+	let scheduleContainer = document.getElementById("scheduleContainer")
+	scheduleContainer.replaceChildren();
+	for (let node of nodes.querySelectorAll(".scheduleDay")) {
+		scheduleContainer.appendChild(node)
+	}
 });
 
-let id = JSON.parse(docs[0]).startDate + ":" + JSON.parse(docs[0]).endDate;
 
-const unsub = onSnapshot(doc(db, "weekends", id), handleScheduleUpdate);
+const handleSignup = (e) => {
+	let button = e.target
+	if (button.innerText === "circle") return
+	console.log(button)
+	let eID = button.parentElement.parentElement.parentElement.id
+	console.log(eID)
+	button.innerText = "circle"
+	button.disabled = true
+	handleSignupFunc({id: eID}).then((res) => {
+		console.log(res)
+	})
+}
+

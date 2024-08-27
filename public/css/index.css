@@ -78,7 +78,7 @@ h6 {
 
 #sideMenuWrap.open {
 	width: 20vw;
-	min-width: 200px;
+	min-width: 250px;
 	border-width: 0.1vw;
 	box-shadow: 0vh 0vh 3vh rgb(0, 0, 0);
 }
