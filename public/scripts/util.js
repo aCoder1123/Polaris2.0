@@ -252,7 +252,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 				attendeesString += `<li class="attendee ${element.status}">${element.displayName}</li>`;
 			}
 			eventsHTMLString += `<div class="eventWrap" id="${
-				type === "editor" ? event.id : type === "schedule" ? i + "-" + eventNum : ""
+				type === "editor" ? event.id :  i + "-" + eventNum 
 			}"><div class="eventHeadWrap eIWrap"><span class="material-symbols-outlined collapse"> expand_circle_right </span><h2 class="eventTitle">${
 				event.title
 			}</h2><span class="eventTime">${formatTime(event.timeStart)}-${formatTime(event.timeEnd)}</span>${
@@ -268,7 +268,11 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 			}</p></div><div class="attendeesWrap eIWrap">${
 				type === "editor"
 					? '<span class="material-symbols-outlined">block</span>'
-					: `<span class="material-symbols-outlined addIcon"> ${!inEvent ? "add_circle" : "cancel"} </span>`
+					: `<span class="material-symbols-outlined ${
+						type === "schedule" || type === "editor" ? "addIcon" : "checkInLaunch"
+					}"> ${
+							type === "schedule" ? (!inEvent ? "add_circle" : "cancel") : "task_alt"
+					  } </span>`
 			}<span class="singedUpNum">${event.signups.length}</span>/<span class="eventSpots">${
 				event.numSpots ? event.numSpots : '<span class="material-symbols-outlined">all_inclusive</span>'
 			} ${
@@ -281,6 +285,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 					event.title
 				}</h2><span class="eventTime">${formatTime(event.timeStart)}-${formatTime(event.timeEnd)}</span></div></div>`;
 			}
+			eventNum++
 
 		}
 
@@ -297,7 +302,6 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 					${dayHTMLString || "No events this day."}
 				</div>`;
 		dayHTMLString = ""
-		eventNum++;
 	}
 
 	return parser.parseFromString(fullHTMLString + scheduleHtmlString, "text/html");

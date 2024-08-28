@@ -115,7 +115,8 @@
 	height: 7vh;
 	flex-shrink: 0;
 	transform: rotate(90deg);
-	transition: var(--dayCollapseTime) ease transform;
+	transition: var(--dayCollapseTime) ease all;
+	cursor: pointer;
 }
 
 .dayCollapse.open {
@@ -126,6 +127,11 @@
 .dayCollapse:hover {
 	color: hsl(0, 0%, 40%);
 	fill: hsl(0, 0%, 80%) !important;
+}
+
+.collapse:active, .dayCollapse:active {
+	color: hsl(0, 0%, 60%);
+	fill: hsl(0, 0%, 60%) !important;
 }
 
 .collapse {
@@ -257,8 +263,20 @@
 	font-size: 1.75vh;
 }
 
-.approved {
+.checkedIn {
 	color: green;
+}
+.pending {
+	color: black;
+}
+.noShow {
+	color: darkred;
+}
+.removed {
+	text-decoration: line-through;
+}
+.approved {
+	color: black;
 }
 /* 
 @media all and (orientation: portrait) {

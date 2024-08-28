@@ -11,6 +11,7 @@ import {
 	collection,
 	getDocs,
 	connectFirestoreEmulator,
+	setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import {
 	getFunctions,
@@ -19,7 +20,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 import { firebaseConfig, siteKey } from "./config.js";
 import { dataToFullHTML, addListeners, getUserFromEmail, getAdminLinks } from "./util.js";
-// import { api } from "https://apis.google.com/js/api.js";
 
 const app = initializeApp(firebaseConfig);
 const appCheck = initializeAppCheck(app, {
@@ -31,34 +31,20 @@ const auth = getAuth(app);
 const db = getFirestore(app, "maindb");
 const functions = getFunctions(app);
 
-const handleSignupFunc = httpsCallable(functions, 'handleSignup')
+const handleSignupFunc = httpsCallable(functions, "handleSignup");
 
+let scheduleType = "admin";
 let userInformation;
 let firebaseUser;
 let weekendInformation;
+
+let currentEventID;
+let idAsArray
 
 // if (window.location.hostname === "127.0.0.1") {
 // 	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
 // 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 // 	console.log("Connecting Firebase Emulator")
-// }
-
-// function startApp(user) {
-// 	auth.currentUser
-// 		.getToken()
-// 		.then(function (token) {
-// 			return gapi.client.calendar.events.list({
-// 				calendarId: "primary",
-// 				timeMin: new Date().toISOString(),
-// 				showDeleted: false,
-// 				singleEvents: true,
-// 				maxResults: 10,
-// 				orderBy: "startTime",
-// 			});
-// 		})
-// 		.then(function (response) {
-// 			console.log(response);
-// 		});
 // }
 
 onAuthStateChanged(auth, (user) => {
@@ -68,45 +54,15 @@ onAuthStateChanged(auth, (user) => {
 			userInformation = data;
 			if (userInformation.isAdmin) {
 				document.getElementById("callDAWrap").insertAdjacentHTML("beforebegin", getAdminLinks(false));
+				scheduleType = "admin";
 			}
 		});
-
 		let pfp = document.querySelector("#menuPF img");
 		if (pfp) {
 			pfp.loading = "lazy";
 			pfp.src = user.photoURL;
 			document.getElementById("userName").innerText = user.displayName;
 		}
-
-		// var script = document.createElement("script");
-		// script.type = "text/javascript";
-		// script.src = "https://apis.google.com/js/api.js";
-		// // Once the Google API Client is loaded, you can run your code
-		// script.onload = function (e) {
-		// 	// Initialize the Google API Client with the config object
-		// 	gapi.load('client', () => {
-		// 		gapi.client
-		// 			.init({
-		// 				apiKey: firebaseConfig.apiKey,
-		// 				clientId: firebaseConfig.clientId,
-		// 				discoveryDocs: firebaseConfig.discoveryDocs,
-		// 				scope: firebaseConfig.scopes.join(" "),
-		// 			})
-		// 			// Loading is finished, so start the app
-		// 			.then(function () {
-		// 				// Make sure the Google API Client is properly signed in
-		// 				console.log("Inited")
-		// 				if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-		// 					startApp(user);
-		// 				} else {
-		// 					firebase.auth().signOut(); // Something went wrong, sign out
-		// 				}
-		// 			});
-		// 	})
-			
-		// };
-		// Add to the document
-		// document.getElementsByTagName("head")[0].appendChild(script);
 	} else {
 		window.location.href = `index.html`;
 	}
@@ -123,15 +79,12 @@ document.getElementById("signOutWrap").addEventListener("click", () => {
 });
 
 const unsub = onSnapshot(doc(db, "activeWeekend", "default"), (doc) => {
-	console.log(doc.data());
 	weekendInformation = JSON.parse(doc.data().information);
-
 	let wrap = document.getElementById("daysContainer");
 	wrap.replaceChildren();
-	let nodes = dataToFullHTML(weekendInformation, "schedule", firebaseUser.displayName)
-	let elements = nodes.querySelectorAll(
-		".dayWrap"
-	);
+	let nodes = dataToFullHTML(weekendInformation, scheduleType, firebaseUser.displayName);
+
+	let elements = nodes.querySelectorAll(".dayWrap");
 	for (let i = 0; i < elements.length; i++) {
 		wrap.append(elements[i]);
 	}
@@ -139,25 +92,98 @@ const unsub = onSnapshot(doc(db, "activeWeekend", "default"), (doc) => {
 	document.querySelectorAll(".addIcon").forEach((el) => {
 		el.addEventListener("click", handleSignup);
 	});
+	document.querySelectorAll(".checkInLaunch").forEach((el) => {
+		el.addEventListener("click", handleCheckIn);
+	});
 
-	let scheduleContainer = document.getElementById("scheduleContainer")
+	let scheduleContainer = document.getElementById("scheduleContainer");
 	scheduleContainer.replaceChildren();
 	for (let node of nodes.querySelectorAll(".scheduleDay")) {
-		scheduleContainer.appendChild(node)
+		scheduleContainer.appendChild(node);
 	}
 });
 
-
 const handleSignup = (e) => {
-	let button = e.target
-	if (button.innerText === "circle") return
-	console.log(button)
-	let eID = button.parentElement.parentElement.parentElement.id
-	console.log(eID)
-	button.innerText = "circle"
-	button.disabled = true
-	handleSignupFunc({id: eID}).then((res) => {
-		console.log(res)
-	})
-}
+	let button = e.target;
+	if (button.innerText === "circle") return;
+	let eID = button.parentElement.parentElement.parentElement.id;
+	button.innerText = "circle";
+	button.disabled = true;
+	handleSignupFunc({ id: eID }).then((res) => {
+		console.log(res);
+	});
+};
 
+const formatCheckIn = () => {
+	let wrap = document.getElementById("attendeesWrap");
+	let signups = weekendInformation.days[idAsArray[0]][idAsArray[1]].signups;
+	wrap.replaceChildren();
+
+	if (!signups.length) {
+		wrap.innerText = "No Sign-Ups Currently";
+		return;
+	}
+	for (let i = 0; i < signups.length; i++) {
+		let attendeeHTMLString = `<div class="attendeeWrap">
+					<span class="attendeeNum">${i + 1}.</span>
+					<span class="attendeeName">${signups[i].displayName}</span>
+					<select class="statusSelect" id="${signups[i].email}" list="checkInOptions" placeholder="Status: ">
+						<option ${signups[i].status === "checkedIn" ? "selected" : ""} value="checkedIn">Checked In</option>
+						<option ${signups[i].status === "approved" ? "selected" : ""} value="approved">Approved</option>
+						<option ${signups[i].status === "pending" ? "selected" : ""} value="pending">Pending</option>
+						<option ${signups[i].status === "noShow" ? "selected" : ""} value="noShow">No-Show</option>
+						<option ${signups[i].status === "removed" ? "selected" : ""} value="removed">Removed</option>
+					</select>
+				</div>`;
+		wrap.insertAdjacentHTML("beforeend", attendeeHTMLString);
+	}
+	if (document.getElementById("sortType").innerHTML === "sort_by_alpha") {
+		let array = Array.from(wrap.children);
+		array.sort((a, b) => {
+			return [a.childNodes[3].innerText, a.childNodes[3].innerText].sort()[0] === a.childNodes[3].innerText
+				? -1
+				: 1;
+		});
+		wrap.replaceChildren();
+		for (let node of array) {
+			wrap.appendChild(node);
+		}
+	}
+};
+
+const handleCheckIn = (e) => {
+	document.getElementById("checkInWindow").classList.toggle("active");
+	let event = e.target.parentElement.parentElement.parentElement;
+	document.getElementById("windowHead").innerText = event.childNodes[0].childNodes[1].innerText;
+	currentEventID = event.id;
+	idAsArray = [Number(currentEventID[0]), Number(currentEventID.slice(2))];
+	formatCheckIn();
+};
+
+document.getElementById("exitSignup").addEventListener("click", (e) => {
+	e.target.parentElement.classList.toggle("active");
+	formatCheckIn();
+});
+
+document.getElementById("sortType").addEventListener("click", (e) => {
+	let button = e.target;
+	button.innerText = button.innerText === "format_list_numbered" ? "sort_by_alpha" : "format_list_numbered";
+	formatCheckIn();
+});
+
+document.getElementById("checkInSaveButton").onclick = () => {
+	let statuses = document.querySelectorAll("#attendeesWrap .statusSelect")
+	for (let status of statuses) {
+		let attendeeStatus = status.value
+		for (let signupNum in weekendInformation.days[idAsArray[0]][idAsArray[1]].signups) {
+			if (weekendInformation.days[idAsArray[0]][idAsArray[1]].signups[signupNum].email === status.id) {
+				weekendInformation.days[idAsArray[0]][idAsArray[1]].signups[signupNum].status = attendeeStatus
+			}
+		}
+	}
+	setDoc(doc(db, "activeWeekend", "default"), {information: JSON.stringify(weekendInformation)}).then((val) => {
+		document.getElementById("checkInWindow").classList.toggle("active")
+	}).catch((error) => {
+		alert(`Error saving statuses: ${error}`)
+	})
+};
