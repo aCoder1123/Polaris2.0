@@ -79,7 +79,7 @@ onAuthStateChanged(auth, (user) => {
 					let option = document.createElement("option");
 					option.value = docData.title;
 					option.innerText = docData.title;
-					document.getElementById("eventTemplateSelector").appendChild(option);
+					document.getElementById("eventTemplateList").appendChild(option);
 				});
 			})
 			.catch(handleDBError);
@@ -144,8 +144,10 @@ const updateWeekend = () => {
 	let valid = workingWeekend.updateSelf();
 
 	if (valid) {
-		let wrap = document.getElementById("daysContainer");
-		wrap.replaceChildren();
+		let wrap = document.getElementsByTagName("body")[0];
+		for (let node of document.querySelectorAll("body .dayWrap")) {
+			node.remove();
+		}
 		let elements = dataToFullHTML(workingWeekend, "editor").querySelectorAll(".dayWrap");
 		for (let i = 0; i < elements.length; i++) {
 			wrap.append(elements[i]);
@@ -200,6 +202,7 @@ document.getElementById("debugCodeButton").onclick = toggleDebug;
 const updateEventFromTemplate = (e) => {
 	let val = e.target.value;
 	let data = eventTemplates[val];
+	if (!data) return
 	document.getElementById("eventStart").value = data.timeStart;
 	document.getElementById("eventEnd").value = data.timeEnd;
 	document.getElementById("titleIn").value = data.title;

@@ -12,14 +12,10 @@ body {
 	position: static;
 }
 
-/* start of side menu */
-
 /* Start of Schedule */
-
 #mySchedule {
-	width: 24.8vw;
+	width: 25vw;
 	height: 100vh;
-	/* overflow-y: scroll; */
 	background-color: rgb(255, 255, 255);
 	border-right: 0.15vw solid black;
 	flex-shrink: 0;
@@ -37,7 +33,6 @@ body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	/* padding: 0.4vh 0; */
 	margin: 0;
 	font-size: 4vh;
 	background-color: var(--header-blue);
@@ -49,9 +44,15 @@ body {
 	margin: 0 auto;
 }
 
+.scheduleDay {
+	font-size: 1.5vh;
+	text-align: center;
+}
+
 .scheduleDayHead {
 	width: 100%;
 	text-align: center;
+	font-size: 3vh;
 }
 
 .sEventWrap {
@@ -59,17 +60,30 @@ body {
 }
 
 .checkInLaunch,
-#exitSignup, #sortType {
+#exitSignup,
+#sortType,
+#attendeesMail {
 	cursor: pointer;
+	-webkit-touch-callout: none; /* iOS Safari */
+	-webkit-user-select: none; /* Safari */
+	-khtml-user-select: none; /* Konqueror HTML */
+	-moz-user-select: none; /* Old versions of Firefox */
+	-ms-user-select: none; /* Internet Explorer/Edge */
+	user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+	color: black;
 }
 
 .checkInLaunch:hover,
-#exitSignup:hover, #sortType:hover {
+#exitSignup:hover,
+#sortType:hover,
+#attendeesMail:hover {
 	color: grey !important;
 }
 
 .checkInLaunch:active,
-#exitSignup:active, #sortType:active {
+#exitSignup:active,
+#sortType:active,
+#attendeesMail:active {
 	color: darkgray !important;
 }
 
@@ -91,7 +105,7 @@ body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: flex-start;
-	box-shadow: 0 0 .5vh black;
+	box-shadow: 0 0 0.5vh black;
 }
 
 #checkInWindow.active ~ * {
@@ -110,7 +124,7 @@ body {
 	align-items: center;
 	justify-content: center;
 	font-size: 4vh;
-	border-bottom: .1vh solid black;
+	border-bottom: 0.1vh solid black;
 }
 
 #exitSignup {
@@ -119,34 +133,29 @@ body {
 	right: 3%;
 	color: white;
 	font-size: 3vh;
-	transition: color .2s ease;
+	transition: color 0.2s ease;
 }
 
 #sortWrap {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	justify-content: space-between;
-	width: 18%;
+	justify-content: center;
 	margin: 2% 0;
+	width: 25%;
 }
 
 #sortType {
+	margin-left: 3%;
 	font-size: 3.5vh;
-	-webkit-touch-callout: none; /* iOS Safari */
-	-webkit-user-select: none; /* Safari */
-	-khtml-user-select: none; /* Konqueror HTML */
-	-moz-user-select: none; /* Old versions of Firefox */
-	-ms-user-select: none; /* Internet Explorer/Edge */
-	user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
 }
 
 #attendeesWrap {
 	background-color: white;
 	width: 65%;
-	border: .1vh solid black;
-	height: 65%;
-	border-radius: 5%;
+	border: 0.1vh solid black;
+	height: 60%;
+	border-radius: 3vh;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -162,6 +171,10 @@ body {
 	cursor: pointer;
 }
 
+#attendeesMail {
+	margin: 2% 0;
+}
+
 #checkInSaveButton {
 	margin: auto 0;
 	font-size: 2vh;
@@ -170,52 +183,39 @@ body {
 
 @media all and (orientation: portrait) {
 	html {
-		overflow-x: none;
-		max-width: 100vw;
+		width: 100vw;
+		height: 100vh;
+		overflow-y: hidden;
+		overflow-x: scroll;
 	}
+
 	body {
-		flex-direction: column;
-		align-items: center;
-		justify-content: flex-start;
-		overflow-y: scroll;
-		overflow-x: none;
-		height: 100%;
-		width: 100%;
+		scroll-snap-type: x mandatory;
+		overflow-y: hidden;
+		overflow-x: scroll;
 	}
 
-	#daysContainer {
-		width: 100vw;
+	body > * {
+		scroll-snap-align: start;
+	}
 
-		max-width: 100vw;
-		overflow-x: none;
-		height: fit-content;
-		flex-direction: column;
-	}
-	.dayWrap {
-		width: 100vw;
-		height: 6vh;
-	}
-	.dayHead {
-		display: block;
-		border: none;
-	}
 	.dayWrap.open,
 	#mySchedule {
 		width: 100vw;
 		height: 100vh;
-		overflow-y: scroll;
-		border: none;
+		flex-shrink: 0;
 	}
+
+	#daysContainer {
+		min-width: max-content;
+	}
+
 	.dayCollapse {
-		margin-left: 2%;
+		margin-left: 2.5%;
 	}
-	.eventWrap {
-		margin: none;
-		margin: 1%;
-	}
-	.eventsContainer {
-		padding: 0;
-		padding-bottom: 2vh;
-		max-width: 100vw;
+
+	.dayWrap {
+		min-width: 30px;
+		border-width: 2px;
 	}
 }

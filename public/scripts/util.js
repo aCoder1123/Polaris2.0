@@ -231,7 +231,6 @@ const formatTime = (timeString) => {
 
 const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", name = null) => {
 	let fullHTMLString = "";
-	console.log(name)
 	const startDate = new Date(information.startDate + "T00:00:00");
 	const startDay = startDate.getDay();
 	const endDate = new Date(information.endDate + "T00:00:00");
@@ -239,25 +238,29 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 	while (information.days.length < numDays) {
 		information.days.push([]);
 	}
-	let scheduleHtmlString = ""
+	let scheduleHtmlString = "";
 	for (let i = 0; i < numDays; i++) {
-		let dayHTMLString = ""
+		let dayHTMLString = "";
 		let eventsHTMLString = "";
 		let eventNum = 0;
 		for (let event of information.days[i]) {
 			let attendeesString = "";
 			let inEvent = false;
 			for (let element of event.signups) {
-				if (element.displayName === name) {inEvent = true}
+				if (element.displayName === name) {
+					inEvent = true;
+				}
 				attendeesString += `<li class="attendee ${element.status}">${element.displayName}</li>`;
 			}
 			eventsHTMLString += `<div class="eventWrap" id="${
-				type === "editor" ? event.id :  i + "-" + eventNum 
+				type === "editor" ? event.id : i + "-" + eventNum
 			}"><div class="eventHeadWrap eIWrap"><span class="material-symbols-outlined collapse"> expand_circle_right </span><h2 class="eventTitle">${
 				event.title
 			}</h2><span class="eventTime">${formatTime(event.timeStart)}-${formatTime(event.timeEnd)}</span>${
 				type === "editor" ? '<span class="material-symbols-outlined addIcon deleteButton">delete</span>' : ""
-			}</div><div class="eventInfoWrap"><div class="eventLocationWrap eIWrap"><span class="material-symbols-outlined"> location_on </span><span class="eventAddress">${
+			}</div><div class="eventInfoWrap${
+				event.admissionCriteria === "none" ? " noAdmit" : ""
+			}"><div class="eventLocationWrap eIWrap"><span class="material-symbols-outlined"> location_on </span><span class="eventAddress">${
 				event.location
 			}</span></div><div class="travelWrap eIWrap"><span class="material-symbols-outlined"> airport_shuttle </span><span class="travelTime">${
 				event.travelTime
@@ -265,28 +268,40 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 				event.faculty /*[0].first*/
 			}</span></div><div class="descWrap eIWrap"><span class="material-symbols-outlined descIcon"> description </span><p class="eventDesc">${
 				event.description
-			}</p></div><div class="attendeesWrap eIWrap">${
-				type === "editor"
-					? '<span class="material-symbols-outlined">block</span>'
-					: `<span class="material-symbols-outlined ${
-						type === "schedule" || type === "editor" ? "addIcon" : "checkInLaunch"
-					}"> ${
-							type === "schedule" ? (!inEvent ? "add_circle" : "cancel") : "task_alt"
-					  } </span>`
-			}<span class="singedUpNum">${event.signups.length}</span>/<span class="eventSpots">${
-				event.numSpots ? event.numSpots : '<span class="material-symbols-outlined">all_inclusive</span>'
-			} ${
-				event.admissionCriteria && event.admissionCriteria != "Normal Signup"
-					? `(${event.admissionCriteria})`
+			}</p></div>
+			
+			${
+				event.admissionCriteria != "none"
+					? `<div class="attendeesWrap eIWrap">${
+							type === "editor"
+								? '<span class="material-symbols-outlined">block</span>'
+								: `<span class="material-symbols-outlined ${
+										type === "schedule" || type === "editor" ? "addIcon" : "checkInLaunch"
+								  }"> ${
+										type === "schedule" ? (!inEvent ? "add_circle" : "cancel") : "task_alt"
+								  } </span>`
+					  }<span class="singedUpNum">${event.signups.length}</span>/<span class="eventSpots">${
+							event.numSpots
+								? event.numSpots
+								: '<span class="material-symbols-outlined">all_inclusive</span>'
+					  } ${
+							event.admissionCriteria && event.admissionCriteria != "Normal Signup"
+								? `(${event.admissionCriteria})`
+								: ""
+					  } </span><ol class="attendeesList">${attendeesString}</ol></div>`
 					: ""
-			} </span><ol class="attendeesList">${attendeesString}</ol></div></div></div>`;
+			}
+			
+			</div></div>`;
+
 			if (inEvent) {
 				dayHTMLString += `<div class="eventWrap sEventWrap"><div class="eventHeadWrap eIWrap"><h2 class="eventTitle">${
 					event.title
-				}</h2><span class="eventTime">${formatTime(event.timeStart)}-${formatTime(event.timeEnd)}</span></div></div>`;
+				}</h2><span class="eventTime">${formatTime(event.timeStart)}-${formatTime(
+					event.timeEnd
+				)}</span></div></div>`;
 			}
-			eventNum++
-
+			eventNum++;
 		}
 
 		fullHTMLString += `<section class="dayWrap open">
@@ -296,12 +311,12 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 				</div>
                 <div class="eventsContainer">${eventsHTMLString}</div>
                 </section>`;
-		
+
 		scheduleHtmlString += `<div class="scheduleDay">
 					<h3 class="scheduleDayHead">${daysOfTheWeek[(startDay + i) % 7]}</h3>
 					${dayHTMLString || "No events this day."}
 				</div>`;
-		dayHTMLString = ""
+		dayHTMLString = "";
 	}
 
 	return parser.parseFromString(fullHTMLString + scheduleHtmlString, "text/html");
@@ -382,12 +397,12 @@ const getAdminLinks = (adminPage) => {
 
 const handleDBError = (error) => {
 	if (error.message.includes("permissions")) {
-		alert("You do not have sufficient permissions for this action.")
-		console.log(error)
+		alert("You do not have sufficient permissions for this action.");
+		console.log(error);
 	} else {
 		throw error;
 	}
-}
+};
 
 export {
 	dataToFullHTML,

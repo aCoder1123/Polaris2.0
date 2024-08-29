@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Dosis:wght@200..800&family=Wittgenstein:ital,wght@0,400..900;1,400..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Dosis:wght@200..800&family=Wittgenstein:ital,wght@0,400..900;1,400..900&display=swap");
 
 html {
 	font-family: "Wittgenstein", serif;
@@ -30,11 +30,16 @@ h6 {
 	font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
-
 #polarisLogoLink {
 	width: 70%;
 	margin-left: auto;
 	margin-right: 1%;
+	max-height: 6vh;
+}
+
+#polarisLogo {
+	max-height: 5.5vh;
+	margin: auto 0;
 }
 
 #polarisLogo * {
@@ -49,10 +54,7 @@ h6 {
 	fill: white;
 }
 
-
-
 /* start of side menu */
-
 #sideMenuWrap {
 	position: absolute;
 	top: 0;
@@ -64,7 +66,6 @@ h6 {
 	background-color: whitesmoke;
 	z-index: 100;
 	transition: width 0.3s ease-out, min-width 0.3s ease-out;
-
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
@@ -97,7 +98,6 @@ h6 {
 	top: 0.5vh;
 	left: 0.5vw;
 	height: 5vh;
-	/* max-width: 50%; */
 	fill: white;
 	transition: fill 0.3 ease-out;
 }
@@ -115,7 +115,6 @@ h6 {
 
 .menuWrap {
 	width: 90%;
-	/* height: 5%; */
 	margin-left: 10%;
 	display: flex;
 	flex-direction: row;

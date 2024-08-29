@@ -125,9 +125,8 @@
 					<h3 id="eventCreatorHead">Event Creator</h3>
 					<div class="setting">
 						<label for="eventTemplateSelector">Select a template: </label>
-						<select name="eventTemplateSelector" id="eventTemplateSelector">
-							<option value="">No Template</option>
-						</select>
+						<input type="search" id="eventTemplateSelector" list="eventTemplateList" placeholder="No Template">
+						<datalist id="eventTemplateList"></datalist>
 					</div>
 					<div class="setting">
 						<label for="saveAsTemplate">Save as template: </label>
@@ -153,6 +152,7 @@
 							<option value="Credit Lottery">Credit Lottery</option>
 							<option value="Pure Credit">Pure Credit</option>
 							<option value="Random Lottery">Random Lottery</option>
+							<option value="none">No Signup</option>
 						</select>
 					</div>
 
@@ -221,7 +221,7 @@
 				<pre id="debugCode"></pre>
 			</div>
 		</section>
-		<div id="daysContainer"></div>
+		<!-- <div id="daysContainer"></div> -->
 		<script type="module" src="../scripts/builder.js"></script>
 	</body>
 </html>

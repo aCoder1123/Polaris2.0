@@ -96,8 +96,10 @@ document.getElementById("signOutWrap").addEventListener("click", () => {
 
 const updateWeekend = () => {
 	viewingWeekend = weekends[weekends.length - 1 - weekendSelect.selectedIndex];
-	let wrap = document.getElementById("daysContainer");
-	wrap.replaceChildren();
+	let wrap = document.getElementsByTagName("body")[0];
+	for (let node of document.querySelectorAll("body .dayWrap")) {
+		node.remove();
+	}
 	let elements = dataToFullHTML(viewingWeekend, "schedule").querySelectorAll(".dayWrap");
 	for (let i = 0; i < elements.length; i++) {
 		wrap.append(elements[i]);

@@ -11,7 +11,7 @@ import {
 	collection,
 	getDocs,
 	connectFirestoreEmulator,
-	setDoc
+	setDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import {
 	getFunctions,
@@ -33,13 +33,13 @@ const functions = getFunctions(app);
 
 const handleSignupFunc = httpsCallable(functions, "handleSignup");
 
-let scheduleType = "admin";
+let scheduleType = "schedule";
 let userInformation;
 let firebaseUser;
 let weekendInformation;
 
 let currentEventID;
-let idAsArray
+let idAsArray;
 
 // if (window.location.hostname === "127.0.0.1") {
 // 	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
@@ -56,6 +56,33 @@ onAuthStateChanged(auth, (user) => {
 				document.getElementById("callDAWrap").insertAdjacentHTML("beforebegin", getAdminLinks(false));
 				scheduleType = "admin";
 			}
+
+			const unsub = onSnapshot(doc(db, "activeWeekend", "default"), (doc) => {
+				weekendInformation = JSON.parse(doc.data().information);
+				let wrap = document.getElementsByTagName("body")[0]
+				for (let node of document.querySelectorAll("body .dayWrap")) {
+					node.remove();
+				}
+				let nodes = dataToFullHTML(weekendInformation, scheduleType, firebaseUser.displayName);
+
+				let elements = nodes.querySelectorAll(".dayWrap");
+				for (let i = 0; i < elements.length; i++) {
+					wrap.append(elements[i]);
+				}
+				addListeners();
+				document.querySelectorAll(".addIcon").forEach((el) => {
+					el.addEventListener("click", handleSignup);
+				});
+				document.querySelectorAll(".checkInLaunch").forEach((el) => {
+					el.addEventListener("click", handleCheckIn);
+				});
+
+				let scheduleContainer = document.getElementById("scheduleContainer");
+				scheduleContainer.replaceChildren();
+				for (let node of nodes.querySelectorAll(".scheduleDay")) {
+					scheduleContainer.appendChild(node);
+				}
+			});
 		});
 		let pfp = document.querySelector("#menuPF img");
 		if (pfp) {
@@ -71,36 +98,11 @@ onAuthStateChanged(auth, (user) => {
 document.getElementById("signOutWrap").addEventListener("click", () => {
 	signOut(auth)
 		.then(() => {
-			window.location.href = `${isAdminPage ? "../" : ""}index.html`;
+			window.location.href = `index.html`;
 		})
 		.catch((error) => {
 			alert(`There was a error signing out: ${error}`);
 		});
-});
-
-const unsub = onSnapshot(doc(db, "activeWeekend", "default"), (doc) => {
-	weekendInformation = JSON.parse(doc.data().information);
-	let wrap = document.getElementById("daysContainer");
-	wrap.replaceChildren();
-	let nodes = dataToFullHTML(weekendInformation, scheduleType, firebaseUser.displayName);
-
-	let elements = nodes.querySelectorAll(".dayWrap");
-	for (let i = 0; i < elements.length; i++) {
-		wrap.append(elements[i]);
-	}
-	addListeners();
-	document.querySelectorAll(".addIcon").forEach((el) => {
-		el.addEventListener("click", handleSignup);
-	});
-	document.querySelectorAll(".checkInLaunch").forEach((el) => {
-		el.addEventListener("click", handleCheckIn);
-	});
-
-	let scheduleContainer = document.getElementById("scheduleContainer");
-	scheduleContainer.replaceChildren();
-	for (let node of nodes.querySelectorAll(".scheduleDay")) {
-		scheduleContainer.appendChild(node);
-	}
 });
 
 const handleSignup = (e) => {
@@ -109,14 +111,13 @@ const handleSignup = (e) => {
 	let eID = button.parentElement.parentElement.parentElement.id;
 	button.innerText = "circle";
 	button.disabled = true;
-	handleSignupFunc({ id: eID }).then((res) => {
-		console.log(res);
-	});
+	handleSignupFunc({ id: eID }).then((res) => {});
 };
 
 const formatCheckIn = () => {
 	let wrap = document.getElementById("attendeesWrap");
 	let signups = weekendInformation.days[idAsArray[0]][idAsArray[1]].signups;
+	let attendeesEmails = []
 	wrap.replaceChildren();
 
 	if (!signups.length) {
@@ -124,6 +125,7 @@ const formatCheckIn = () => {
 		return;
 	}
 	for (let i = 0; i < signups.length; i++) {
+		if (signups[i].status === "checkedIn") {attendeesEmails.push(signups[i].email)}
 		let attendeeHTMLString = `<div class="attendeeWrap">
 					<span class="attendeeNum">${i + 1}.</span>
 					<span class="attendeeName">${signups[i].displayName}</span>
@@ -149,6 +151,7 @@ const formatCheckIn = () => {
 			wrap.appendChild(node);
 		}
 	}
+	document.getElementById("mailLink").href = `mailto:${attendeesEmails.join(",")}?subject=${document.getElementById("windowHead").innerText}`;
 };
 
 const handleCheckIn = (e) => {
@@ -172,18 +175,20 @@ document.getElementById("sortType").addEventListener("click", (e) => {
 });
 
 document.getElementById("checkInSaveButton").onclick = () => {
-	let statuses = document.querySelectorAll("#attendeesWrap .statusSelect")
+	let statuses = document.querySelectorAll("#attendeesWrap .statusSelect");
 	for (let status of statuses) {
-		let attendeeStatus = status.value
+		let attendeeStatus = status.value;
 		for (let signupNum in weekendInformation.days[idAsArray[0]][idAsArray[1]].signups) {
 			if (weekendInformation.days[idAsArray[0]][idAsArray[1]].signups[signupNum].email === status.id) {
-				weekendInformation.days[idAsArray[0]][idAsArray[1]].signups[signupNum].status = attendeeStatus
+				weekendInformation.days[idAsArray[0]][idAsArray[1]].signups[signupNum].status = attendeeStatus;
 			}
 		}
 	}
-	setDoc(doc(db, "activeWeekend", "default"), {information: JSON.stringify(weekendInformation)}).then((val) => {
-		document.getElementById("checkInWindow").classList.toggle("active")
-	}).catch((error) => {
-		alert(`Error saving statuses: ${error}`)
-	})
+	setDoc(doc(db, "activeWeekend", "default"), { information: JSON.stringify(weekendInformation) })
+		.then((val) => {
+			document.getElementById("checkInWindow").classList.toggle("active");
+		})
+		.catch((error) => {
+			alert(`Error saving statuses: ${error}`);
+		});
 };

@@ -32,7 +32,6 @@
 	height: 100%;
 	width: 3vw;
 	background-color: white;
-
 	border-right: 0.15vw solid black;
 	flex-shrink: 0;
 	flex-grow: 0;
@@ -52,7 +51,7 @@
 }
 
 .dayWrap.open {
-	width: 24.8vw;
+	width: 24.85vw;
 }
 
 .dayHeadWrap {
@@ -78,6 +77,7 @@
 .eventsContainer {
 	min-width: 100%;
 	min-height: 93.5vh;
+	max-width: 100%;
 }
 
 .eventWrap {
@@ -109,6 +109,10 @@
 	height: 32vh;
 }
 
+.eventWrap.open .eventInfoWrap.noAdmit {
+	height: 17vh;
+}
+
 .dayCollapse {
 	position: absolute;
 	left: 0.5vw;
@@ -129,7 +133,8 @@
 	fill: hsl(0, 0%, 80%) !important;
 }
 
-.collapse:active, .dayCollapse:active {
+.collapse:active,
+.dayCollapse:active {
 	color: hsl(0, 0%, 60%);
 	fill: hsl(0, 0%, 60%) !important;
 }
@@ -175,10 +180,17 @@
 	margin-right: auto;
 	flex-shrink: 1;
 	max-height: 100%;
-	text-wrap: wrap;
-	font-size: 1.4em;
+	text-wrap: balance;
+	font-size: 1.75vw;
 	width: auto;
+	max-width: 60%;
 	font-weight: 400;
+}
+
+.eventTime {
+	text-align: end;
+	font-size: 1.25vw;
+	margin-left: 2%;
 }
 
 .locationCopy {
@@ -191,7 +203,8 @@
 }
 
 .locationCopy:hover,
-.addIcon:hover, .addIcon:disabled {
+.addIcon:hover,
+.addIcon:disabled {
 	color: grey !important;
 }
 
@@ -267,7 +280,7 @@
 	color: green;
 }
 .pending {
-	color: black;
+	color: orange;
 }
 .noShow {
 	color: darkred;
@@ -276,23 +289,15 @@
 	text-decoration: line-through;
 }
 .approved {
-	color: black;
+	color: blue;
 }
-/* 
-@media all and (orientation: portrait) {
-	body {
-		flex-direction: column !important; 
-		overflow-y: scroll;
-		display: none;
-	}
-	#daysContainer {
-		overflow: scroll;
-		width: 100vw;
-		height: 100vh;
+
+@media screen and (orientation: portrait) {
+	.eventTitle {
+		font-size: 6vw;
 	}
 
-	body section {
-		width: 100vw;
-		
+	.eventTime {
+		font-size: 3.5vw;
 	}
-} */
+}
