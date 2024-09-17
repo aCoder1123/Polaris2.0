@@ -11,10 +11,18 @@ import {
 	collection,
 	getDocs,
 	query,
+	onSnapshot,
+	deleteDoc,
+	setDoc,
+	updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import {
+	getFunctions,
+	httpsCallable,
+	connectFunctionsEmulator,
+} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 
 import { dataToFullHTML, daysOfTheWeek as weekDays, addListeners, getUserFromEmail } from "./util.js";
-
 import { firebaseConfig, siteKey } from "./config.js";
 
 const app = initializeApp(firebaseConfig);
@@ -25,6 +33,7 @@ const appCheck = initializeAppCheck(app, {
 });
 const auth = getAuth(app);
 const db = getFirestore(app, "maindb");
+const functions = getFunctions(app);
 addListeners();
 
 const weekendSelect = document.getElementById("dateSelect");
@@ -33,11 +42,12 @@ let firebaseUser;
 let userInformation;
 let weekends = [];
 let viewingWeekend;
+let adminList = [];
 
 onAuthStateChanged(auth, (user) => {
 	if (user) {
 		firebaseUser = user;
-		getUserFromEmail(user.email, user.displayName, db).then((data) => {
+		getUserFromEmail(user.email, user.displayName, db, functions).then((data) => {
 			if (!data.isAdmin) {
 				window.location.href = "../index.html";
 			}
@@ -79,6 +89,41 @@ onAuthStateChanged(auth, (user) => {
 				alert(`ERROR LOADING WEEKENDS: ${error}`);
 				throw error;
 			});
+		const unsub = onSnapshot(collection(db, "admin"), (collection) => {
+			document.getElementById("adminListWrap").replaceChildren()
+			adminList = []
+			collection.forEach((doc) => {
+				adminList.push(doc.id);
+				document.getElementById("adminListWrap").insertAdjacentHTML(
+					"afterbegin",
+					`
+					<div class="admin" id="${doc.id}">
+						<span class="adminEmail">${doc.id}</span>
+						<span class="material-symbols-outlined removeAdmin">close</span>
+					</div>
+					`
+				);
+			});
+			console.log(adminList)
+			document.querySelectorAll(".removeAdmin").forEach((el) => {
+				el.onclick = async (e) => {
+					let id = e.target.parentElement.id;
+					if (id === firebaseUser.email) {
+						alert("Cannot removed admin privileges from self")
+						return
+					}
+					let userDoc = await getDoc(doc(db, "users", id));
+					if (userDoc.exists()) {
+						userDoc = userDoc.data();
+						if (userDoc.isAdmin) {
+							userDoc.isAdmin = false;
+							await setDoc(doc(db, "users", id), userDoc);
+						}
+					}
+					await deleteDoc(doc(db, "admin", id));
+				};
+			});
+		});
 	} else {
 		window.location.href = "../index.html";
 	}
@@ -107,16 +152,16 @@ const updateWeekend = () => {
 	addListeners();
 
 	let signUpsNum = 0;
-	let tripNum = 0
+	let tripNum = 0;
 
 	for (let day of viewingWeekend.days) {
-		tripNum+= day.length
+		tripNum += day.length;
 		for (let event of day) {
 			signUpsNum += event.signups.length;
 		}
 	}
-	document.getElementById("tripNum").innerText = tripNum
-	document.getElementById("signupNum").innerText = signUpsNum
+	document.getElementById("tripNum").innerText = tripNum;
+	document.getElementById("signupNum").innerText = signUpsNum;
 
 	if (weekendSelect.selectedIndex === 0) {
 		document.getElementById("infoWrap").classList.add("active");
@@ -140,3 +185,19 @@ document.getElementById("weekendForward").addEventListener("click", () => {
 });
 
 weekendSelect.addEventListener("change", updateWeekend);
+
+document.getElementById("addAdminButton").onclick = async () => {
+	let email = document.getElementById("adminIn");
+	if (email.checkValidity()) {
+		await setDoc(doc(db, "admin", email.value), {})
+		let userDoc = await getDoc(doc(db, "users", email.value))
+		if (userDoc.exists()) {
+			userDoc = userDoc.data()
+			userDoc.isAdmin = true
+			await setDoc(doc(db, "users", email), userDoc)
+		}
+		email.value = ""
+	} else {
+		alert("Please enter a valid email.")
+	}
+};

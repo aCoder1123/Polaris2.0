@@ -6,9 +6,6 @@ body {
 	width: 100vw;
 	height: 100vh;
 	margin: 0;
-	background-image: url("../images/starrySky.jpeg");
-	background-position: bottom;
-	background-size: cover;
 	position: static;
 }
 
@@ -99,15 +96,58 @@ body {
 	color: blue;
 }
 
-.trip {
-	background-color: aquamarine;
-	border: 0.2vh solid black;
-	border-radius: 0.5vh;
-	text-align: center;
-	margin: 0.1vh 10%;
-	width: max-content;
-	padding: 0 2%;
-	cursor: pointer;
+#adminWrap {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	width: 100%;
+}
+
+
+
+#adminListWrap {
+	border: 1px solid black;
+	border-radius: 2vh;
+	width: 98%;
+	padding: .5vw;
+	background-color: whitesmoke;
+}
+
+.admin {
+	font-size: 1.5vh;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	width: 100%;
+}
+
+.removeAdmin {
+	margin-left: 2%;
+	font-size: 1vh;
+		cursor: pointer;
+	transition: .1s ease color;
+}
+
+.removeAdmin:hover {
+	color: rgb(95, 95, 95);
+}
+
+.removeAdmin:active {
+	color: rgb(180, 180, 180);
+}
+
+#addWrap {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+}
+
+#addWrap * {
+	margin: .5vh;
 }
 
 @media all and (orientation: portrait) {

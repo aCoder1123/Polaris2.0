@@ -1,8 +1,0 @@
-"firestore": {
-      "port": 8080
-    },
-
-,
-	"firestore": {
-		"rules": "firestore.rules"
-	}

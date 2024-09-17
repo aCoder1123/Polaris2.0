@@ -41,16 +41,16 @@ let weekendInformation;
 let currentEventID;
 let idAsArray;
 
-// if (window.location.hostname === "127.0.0.1") {
-// 	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
-// 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
-// 	console.log("Connecting Firebase Emulator")
-// }
+if (window.location.hostname === "127.0.0.1") {
+	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
+	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+	console.log("Connecting Firebase Emulator")
+}
 
 onAuthStateChanged(auth, (user) => {
 	if (user) {
 		firebaseUser = user;
-		getUserFromEmail(user.email, user.displayName, db).then((data) => {
+		getUserFromEmail(user.email, user.displayName, db, functions).then((data) => {
 			userInformation = data;
 			if (userInformation.isAdmin) {
 				document.getElementById("callDAWrap").insertAdjacentHTML("beforebegin", getAdminLinks(false));
@@ -180,6 +180,10 @@ document.getElementById("checkInSaveButton").onclick = () => {
 		let attendeeStatus = status.value;
 		for (let signupNum in weekendInformation.days[idAsArray[0]][idAsArray[1]].signups) {
 			if (weekendInformation.days[idAsArray[0]][idAsArray[1]].signups[signupNum].email === status.id) {
+				if (attendeeStatus === "removed") {
+					weekendInformation.days[idAsArray[0]][idAsArray[1]].signups.splice(signupNum, 1);
+					continue
+				}
 				weekendInformation.days[idAsArray[0]][idAsArray[1]].signups[signupNum].status = attendeeStatus;
 			}
 		}

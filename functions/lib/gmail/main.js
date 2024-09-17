@@ -1,9 +1,9 @@
 "use strict";
 // Code adapted from https://www.labnol.org/google-api-service-account-220405
-const { google } = require("googleapis");
+// const { google } = require("googleapis");
 const MailComposer = require("nodemailer/lib/mail-composer");
-const credentials = require("./credentials.json");
-const tokens = require("./token.json");
+const credentials = require("../../OAuthClient.json");
+const tokens = require("../../token.json");
 const getGmailService = () => {
     const { client_secret, client_id, redirect_uris } = credentials.installed;
     const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);

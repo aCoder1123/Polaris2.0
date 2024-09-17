@@ -6,9 +6,6 @@ body {
 	width: 100vw;
 	height: 100vh;
 	margin: 0;
-	background-image: url("../images/starrySky.jpeg");
-	background-position: bottom;
-	background-size: cover;
 	position: static;
 }
 
@@ -217,5 +214,10 @@ body {
 	.dayWrap {
 		min-width: 30px;
 		border-width: 2px;
+	}
+
+	#checkInWindow {
+		width: 90vw;
+		left: 5vw;
 	}
 }

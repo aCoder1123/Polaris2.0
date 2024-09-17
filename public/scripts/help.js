@@ -21,7 +21,6 @@ const appCheck = initializeAppCheck(app, {
 });
 const auth = getAuth(app);
 const db = getFirestore(app, "maindb");
-
 const functions = getFunctions(app);
 addListeners();
 
@@ -31,7 +30,7 @@ let userInformation;
 onAuthStateChanged(auth, (user) => {
 	if (user) {
 		firebaseUser = user;
-		getUserFromEmail(user.email, user.displayName, db).then((data) => {
+		getUserFromEmail(user.email, user.displayName, db, functions).then((data) => {
 			userInformation = data;
 			console.log(userInformation);
 			if (userInformation.isAdmin) {

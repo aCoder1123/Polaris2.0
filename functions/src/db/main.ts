@@ -3,11 +3,5 @@ exports.userDoc = {
 	email: "",
 	events: [],
 	credit: 0,
-	emailPreferences: {
-		advLottery: true,
-		eventConf: true,
-		eventFeedback: true,
-		newEvent: true,
-	},
 	displayName: ""
 };

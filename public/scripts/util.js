@@ -1,4 +1,9 @@
 import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import {
+	getFunctions,
+	httpsCallable,
+	connectFunctionsEmulator,
+} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 
 const daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -17,7 +22,13 @@ class WeekendEvent {
 		this.faculty = document.getElementById("eventFaculty").value;
 		this.numSpots = Number(document.getElementById("slotsIn").value);
 		this.signups = [];
-		this.admissionCriteria = document.getElementById("criteriaSelector").value;
+		let select = document.getElementById("criteriaSelector");
+		this.admission = {
+			val: select.value,
+			name: select.options[select.selectedIndex].innerText,
+			filtered: false,
+			credited: false,
+		};
 	}
 
 	get asInformation() {
@@ -33,7 +44,7 @@ class WeekendEvent {
 			faculty: this.faculty,
 			numSpots: this.numSpots,
 			signups: [],
-			admissionCriteria: this.admissionCriteria,
+			admission: this.admission,
 		};
 	}
 }
@@ -42,7 +53,8 @@ class Weekend {
 	constructor() {
 		this.startDate = document.getElementById("startDate").value;
 		this.endDate = document.getElementById("endDate").value;
-		this.collectFeedback = document.getElementById("feedback").checked;
+		this.release = { dateTime: "", released: false };
+		this.admission = {dateTime: "", filtered: false};
 		this.days = [];
 	}
 
@@ -51,7 +63,7 @@ class Weekend {
 		let oldEnd = this.endDate;
 		this.startDate = document.getElementById("startDate").value;
 		this.endDate = document.getElementById("endDate").value;
-		this.collectFeedback = document.getElementById("feedback").checked;
+		// this.collectFeedback = document.getElementById("feedback").checked;
 
 		if (this.startDate && this.endDate) {
 			let startDate = new Date(this.startDate);
@@ -103,11 +115,13 @@ class Weekend {
 		let info = JSON.parse(string);
 		document.getElementById("startDate").value = info.startDate;
 		document.getElementById("endDate").value = info.endDate;
-		document.getElementById("feedback").checked = info.collectFeedback;
+		document.getElementById("releaseDate").value = info.release.dateTime;
+		// document.getElementById("feedback").checked = info.collectFeedback;
 		this.startDate = info.startDate;
 		this.endDate = info.endDate;
+		this.release = info.release;
 
-		this.collectFeedback = info.collectFeedback;
+		// this.collectFeedback = info.collectFeedback;
 		this.days = info.days;
 	}
 
@@ -134,14 +148,15 @@ class Weekend {
 		return { information: JSON.stringify(this) };
 	}
 
-	saveSelf(db, name = null) {
+	async saveSelf(db, name = null) {
+		this.release.released = this.release.released || !this.release.dateTime;
 		for (let day of this.days) {
 			for (let event of day) {
 				if (event.saveAsTemplate) {
 					delete event.saveAsTemplate;
 					let eventData = Object.assign({}, event);
 					eventData.faculty = null;
-					setDoc(doc(db, "eventTemplates", eventData.title), eventData).catch((e) => {
+					await setDoc(doc(db, "eventTemplates", eventData.title), eventData).catch((e) => {
 						alert("Error in saving weekend. Please try again.");
 						console.log(e);
 						return;
@@ -151,41 +166,26 @@ class Weekend {
 		}
 		if (name) {
 			let temp = { information: JSON.stringify(this.days), title: name };
-			console.log(temp);
-			setDoc(doc(db, "weekendTemplates", name), temp)
+			await setDoc(doc(db, "weekendTemplates", name), temp)
 				.then(() => alert("Template Saved Successfully"))
 				.catch((e) => {
 					alert("Error in saving. Please try again.");
 					console.log(e);
 				});
+		} else if (this.release.released) {
+			let data = await getDoc(doc(db, "activeWeekend", "default"));
+			data = JSON.parse(data.data().information);
+			if (data.startDate != this.startDate) {
+				await setDoc(doc(db, "weekends", `${data.startDate}-${data.endDate}`), {
+					information: JSON.stringify(data),
+				});
+				await setDoc(doc(db, "activeWeekend", "default"), this.getInformation());
+			} else {
+				await setDoc(doc(db, "activeWeekend", "default"), this.getInformation())
+			}
 		} else {
-			getDoc(doc(db, "activeWeekend", "default")).then((activeWeekend) => {
-				let data = JSON.parse(activeWeekend.data().information);
-				if (data.startDate != this.startDate) {
-					setDoc(doc(db, "weekends", `${data.startDate}-${data.endDate}`), {
-						information: JSON.stringify(data),
-					})
-						.then(() => {
-							setDoc(doc(db, "activeWeekend", "default"), this.getInformation())
-								.then(() => alert("Weekend Saved Successfully"))
-								.catch((e) => {
-									alert("Error in saving weekend. Please try again.");
-									console.log(e);
-								});
-						})
-						.catch((e) => {
-							alert("Error in saving weekend. Please try again.");
-							console.log(e);
-						});
-				} else {
-					setDoc(doc(db, "activeWeekend", "default"), this.getInformation())
-						.then(() => alert("Weekend Saved Successfully"))
-						.catch((e) => {
-							alert("Error in saving weekend. Please try again.");
-							console.log(e);
-						});
-				}
-			});
+			console.log("setting queue");
+			await setDoc(doc(db, "activeWeekend", "queued"), this.getInformation())
 		}
 	}
 
@@ -193,7 +193,7 @@ class Weekend {
 		return this.startDate && this.endDate;
 	}
 	get id() {
-		return `${this.startDate}:${this.endDate}`;
+		return `${this.startDate}-${this.endDate}`;
 	}
 }
 
@@ -214,7 +214,8 @@ const userDoc = {
 const formatTime = (timeString) => {
 	let hours = Number(timeString.slice(0, 2));
 	if (hours > 12) return (hours - 12).toString() + timeString.slice(2) + "pm";
-	else return timeString.slice(1) + "am";
+	else if (hours > 9) return timeString + "am";
+	return timeString.slice(1) + "am";
 };
 
 // const daysFromDates = (start, end) => {
@@ -258,8 +259,8 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 				event.title
 			}</h2><span class="eventTime">${formatTime(event.timeStart)}-${formatTime(event.timeEnd)}</span>${
 				type === "editor" ? '<span class="material-symbols-outlined addIcon deleteButton">delete</span>' : ""
-			}</div><div class="eventInfoWrap${
-				event.admissionCriteria === "none" ? " noAdmit" : ""
+			}</div><div class="eventInfoWrap ${
+				event.admission.val === "none" ? " noAdmit" : event.admission.name
 			}"><div class="eventLocationWrap eIWrap"><span class="material-symbols-outlined"> location_on </span><span class="eventAddress">${
 				event.location
 			}</span></div><div class="travelWrap eIWrap"><span class="material-symbols-outlined"> airport_shuttle </span><span class="travelTime">${
@@ -271,7 +272,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 			}</p></div>
 			
 			${
-				event.admissionCriteria != "none"
+				event.admission.val != "none"
 					? `<div class="attendeesWrap eIWrap">${
 							type === "editor"
 								? '<span class="material-symbols-outlined">block</span>'
@@ -285,9 +286,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 								? event.numSpots
 								: '<span class="material-symbols-outlined">all_inclusive</span>'
 					  } ${
-							event.admissionCriteria && event.admissionCriteria != "Normal Signup"
-								? `(${event.admissionCriteria})`
-								: ""
+							event.admission.val && event.admission.val != "signup" ? `(${event.admission.name})` : ""
 					  } </span><ol class="attendeesList">${attendeesString}</ol></div>`
 					: ""
 			}
@@ -361,23 +360,22 @@ const addListeners = () => {
 	}
 };
 
-const getUserFromEmail = async (email, name, db) => {
+const getUserFromEmail = async (email, name, db, functions) => {
 	let information;
 	await getDoc(doc(db, "users", email))
 		.then((docSnap) => {
 			if (docSnap.exists()) {
 				information = docSnap.data();
-			} else {
-				let newUser = userDoc;
-				newUser.email = email;
-				newUser.displayName = name;
-				setDoc(doc(db, "users", newUser.email), newUser);
-				information = newUser;
 			}
 		})
 		.catch((error) => {
 			throw error;
 		});
+	if (!information) {
+		const userCreate = httpsCallable(functions, "createNewUser");
+		let userRes = await userCreate({ displayName: name });
+		information = userRes.data;
+	}
 
 	return information;
 };

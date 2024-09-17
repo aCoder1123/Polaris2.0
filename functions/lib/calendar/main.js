@@ -5,14 +5,14 @@ const fs = require("fs").promises;
 const path = require("path");
 // const process = require("process");
 const { authenticate } = require("@google-cloud/local-auth");
-// const { google } = require("googleapis");
+const { google } = require("googleapis");
 // If modifying these scopes, delete token.json.
 const SCOPES = ["https://www.googleapis.com/auth/calendar.events"];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
-const TOKEN_PATH = path.join(process.cwd(), "token.json");
-const CREDENTIALS_PATH = path.join(process.cwd(), "credentials.json");
+const TOKEN_PATH = path.join(process.cwd(), "./token.json");
+const CREDENTIALS_PATH = path.join(process.cwd(), "./OAuthClient.json");
 /**
  * Reads previously authorized credentials from the save file.
  *
@@ -69,11 +69,11 @@ exports.eventTemplate = {
     description: "",
     start: {
         dateTime: "2024-07-28T09:00:00", //formatted according to RFC3339 (yyyy-mm-ddThh:mm:ss)
-        timeZone: "America/New_York", //IANA Time Zone Database name
+        // timeZone: "America/New_York", //IANA Time Zone Database name
     },
     end: {
         dateTime: "2024-07-28T17:00:00",
-        timeZone: "America/New_York",
+        // timeZone: "America/New_York",
     },
     // recurrence: ["RRULE:FREQ=DAILY;COUNT=2"],
     attendees: [
@@ -112,69 +112,56 @@ async function listEvents(auth) {
         console.log(`${start} - ${event.summary}`);
     });
 }
-//authorize().then(listEvents).catch(console.error);
 exports.createEventFromJSON = async (eventDetails) => {
-    let eventData;
-    let eventError;
     let auth = await authorize();
     const calendar = google.calendar({ version: "v3", auth });
-    calendar.events.insert({
+    let result = await calendar.events.insert({
         auth: auth,
         calendarId: "primary",
         resource: eventDetails,
         sendUpdates: "all",
-    }, function (err, event) {
-        if (err) {
-            eventError = err;
-            return;
-        }
-        eventData = event.data;
-        // console.log("Event created: %s", event.data.id);
     });
-    if (eventData) {
-        return { status: "success", data: eventData };
-    }
-    else {
-        return { status: "error", data: eventError };
-    }
+    return result;
 };
-exports.addAttendees = async (data) => {
-    let eventData;
-    let eventError;
+exports.manageAttendees = async (event, calendarID = "primary") => {
+    if (!event.calID)
+        return;
     let auth = await authorize();
     const calendar = google.calendar({ version: "v3", auth });
-    calendar.events
-        .get({
-        calendarId: data.calID,
-        eventId: data.eID,
+    try {
+        let getRes = await calendar.events.get({
+            calendarId: calendarID,
+            eventId: event.calID,
+        });
+        getRes.data.attendees = [];
+        for (let attendee of event.signups) {
+            if (attendee.status === "approved" || attendee.status === "checkedIn") {
+                getRes.data.attendees.push({ email: attendee.email });
+            }
+        }
+        let setRes = await calendar.events.update({
+            calendarId: calendarID,
+            eventId: getRes.data.id,
+            requestBody: getRes.data,
+        });
+        return { status: "success", data: setRes };
+    }
+    catch (error) {
+        return { status: "error", data: error };
+    }
+};
+exports.deleteCalendarEvent = async (eventID, calendarID = "primary") => {
+    let auth = await authorize();
+    const calendar = google.calendar({ version: "v3", auth });
+    await calendar.events
+        .delete({
+        calendarId: calendarID,
+        eventId: eventID,
     })
         .then((res) => {
-        // console.log(res);
-        data.attendees.array.forEach((element) => {
-            res.data.attendees.push(element);
-        });
-        calendar.events
-            .update({
-            calendarId: data.calID,
-            eventId: res.data.id,
-            requestBody: res.data,
-        })
-            .then((resp) => {
-            eventData = resp;
-            // console.log("Event updated: %s", resp);
-        })
-            .catch((error) => {
-            eventError = error;
-        });
-    })
-        .catch((err) => {
-        eventError = err;
+        return res;
+    }).catch((error) => {
+        return error.message;
     });
-    if (eventData) {
-        return { status: "success", data: eventData };
-    }
-    else {
-        return { status: "error", data: eventError };
-    }
 };
 //# sourceMappingURL=main.js.map

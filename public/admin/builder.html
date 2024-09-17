@@ -99,7 +99,10 @@
 			<div id="weekendInfoContainer">
 				<div id="settingsWrap">
 					<h3 id="settingsHead">Weekend Settings</h3>
-					<button id="editWeekend" class="setting">Edit Active Weekend</button>
+					<div id="topButtons">
+						<button id="editWeekend" class="setting">Edit Active Weekend</button>
+						<button id="clearBtn" class="setting">Clear</button>
+					</div>
 					<div id="settingsInfoWrap">
 						<div class="setting">
 							<label for="startDate">Start Date: </label>
@@ -110,8 +113,12 @@
 							<input type="date" name="endDate" id="endDate" min="2024-1-1" />
 						</div>
 						<div class="setting">
-							<label for="feedback">Collect Feedback: </label>
-							<input type="checkbox" name="feedback" id="feedback" checked />
+							<label for="releaseDate">Release: </label>
+							<input type="datetime-local" name="releaseDate" id="releaseDate" min="2024-1-1" />
+						</div>
+						<div class="setting">
+							<label for="lotteryDate">Lottery: </label>
+							<input type="datetime-local" name="lotteryDate" id="lotteryDate" min="2024-1-1" />
 						</div>
 						<div class="setting">
 							<label for="weekendTemplateSelector">Select a template: </label>
@@ -124,8 +131,13 @@
 				<div id="eventCreatorWrap">
 					<h3 id="eventCreatorHead">Event Creator</h3>
 					<div class="setting">
-						<label for="eventTemplateSelector">Select a template: </label>
-						<input type="search" id="eventTemplateSelector" list="eventTemplateList" placeholder="No Template">
+						<label for="eventTemplateSelector">Template: </label>
+						<input
+							type="search"
+							id="eventTemplateSelector"
+							list="eventTemplateList"
+							placeholder="No Template"
+						/>
 						<datalist id="eventTemplateList"></datalist>
 					</div>
 					<div class="setting">
@@ -145,13 +157,13 @@
 						<input type="time" name="eventEnd" id="eventEnd" value="12:00" />
 					</div>
 					<div class="setting">
-						<label for="criteriaSelector">Admission Criteria: </label>
+						<label for="criteriaSelector">Admission: </label>
 						<select id="criteriaSelector">
-							<option value="Normal Signup">Normal Signup</option>
-							<option value="Advanced Lottery">Advanced Lottery</option>
-							<option value="Credit Lottery">Credit Lottery</option>
-							<option value="Pure Credit">Pure Credit</option>
-							<option value="Random Lottery">Random Lottery</option>
+							<option value="signup">Signup</option>
+							<option value="advLottery">Advanced Lottery</option>
+							<option value="creditLottery">Credit Lottery</option>
+							<option value="credit">Pure Credit</option>
+							<option value="randLottery">Random Lottery</option>
 							<option value="none">No Signup</option>
 						</select>
 					</div>
@@ -198,16 +210,7 @@
 								<div id="mAttendeesList"></div>
 
 								<datalist id="studentsList"> </datalist>
-								<!-- <label for="ice-cream-choice">Choose a flavor:</label> -->
-								<!-- <input list="ice-cream-flavors" id="ice-cream-choice" name="ice-cream-choice" />
 
-								<datalist id="ice-cream-flavors">
-									<option value="Chocolate"></option>
-									<option value="Coconut"></option>
-									<option value="Mint"></option>
-									<option value="Strawberry"></option>
-									<option value="Vanilla"></option>
-								</datalist> -->
 								<button type="button" id="eventSaveButton">Save Event</button>
 							</div>
 						</div>
@@ -221,7 +224,6 @@
 				<pre id="debugCode"></pre>
 			</div>
 		</section>
-		<!-- <div id="daysContainer"></div> -->
 		<script type="module" src="../scripts/builder.js"></script>
 	</body>
 </html>

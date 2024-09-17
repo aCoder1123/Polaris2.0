@@ -1,16 +1,11 @@
 const { onCall, HttpsError, onRequest } = require("firebase-functions/v2/https");
-const { logger } = require("firebase-functions/v2");
 const { sendMail, emailOptions } = require("./gmail/main");
-const { createEventFromJSON, addAttendees } = require("./calendar/main");
-const { userDoc } = require("./db/main");
-const { firebaseConfig } = require("../config");
-const { initializeApp, applicationDefault, cert } = require("firebase-admin/app");
-const { getFirestore, Timestamp, FieldValue, Filter } = require("firebase-admin/firestore");
+const { createEventFromJSON, manageAttendees, eventTemplate, deleteCalendarEvent } = require("./calendar/main");
+const admin = require("firebase-admin");
+const { getFirestore } = require("firebase-admin/firestore");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 
-initializeApp({
-	credential: applicationDefault(),
-});
-
+admin.initializeApp()
 const db = getFirestore("maindb");
 
 
@@ -28,21 +23,26 @@ exports.sendEmail = onCall((request: any) => {
 	return send(messageOptions);
 });
 
-exports.bugReport = onCall((request: any) => {
-	let messageOptions = emailOptions;
-	messageOptions.to = "bailey.tuckman@westtown.edu";
-	messageOptions.subject = `Polaris bug report: ${request.data.page}`;
-	messageOptions.text = `On ${new Date().toLocaleString("en-US", {
-		weekday: "long",
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	})} there was a bug reported on  ${request.data.page} by ${
-		request.data.email ? request.data.email : "anonymous"
-	}.\n\nDescription:\n${request.data.description}\n\nSteps to Reproduce: ${request.data.repro}`;
+exports.bugReport = onCall(
+	{
+		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+	},
+	(request: any) => {
+		let messageOptions = emailOptions;
+		messageOptions.to = "bailey.tuckman@westtown.edu";
+		messageOptions.subject = `Polaris bug report: ${request.data.page}`;
+		messageOptions.text = `On ${new Date().toLocaleString("en-US", {
+			weekday: "long",
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+		})} there was a bug reported on  ${request.data.page} by ${
+			request.data.email ? request.data.email : "anonymous"
+		}.\n\nDescription:\n${request.data.description}\n\nSteps to Reproduce: ${request.data.repro}`;
 
-	return send(messageOptions);
-});
+		return send(messageOptions);
+	}
+);
 
 exports.handleSignup = onCall(
 	{
@@ -51,42 +51,314 @@ exports.handleSignup = onCall(
 	async (request: any) => {
 		if (request.auth === null) return { status: "failed", information: "User not signed in." };
 		let currentWeekendDoc = await db.collection("activeWeekend").doc("default").get();
-		let currentWeekend = JSON.parse(currentWeekendDoc.data().information)
-		const endAsDate = new Date(currentWeekend.endDate + "T23:59:59");
-		if (endAsDate < new Date()) {
-			return { status: "failed", information: "Cannot Sign Up for Past Weekend." };
-		}
+		let currentWeekend = JSON.parse(currentWeekendDoc.data().information);
+		let attendeeRemoved = false;
 
 		const id = request.data.id;
 		const displayName = request.auth.token.name;
 		const email = request.auth.token.email;
-
 		let event = currentWeekend.days[Number(id[0])][Number(id.slice(2))];
+
+		let eventDate = new Date(currentWeekend.startDate + "T00:00:00");
+		eventDate.setTime(eventDate.getTime() + 1000 * 60 * 60 * 24 * Number(id[0]));
+		eventDate.setTime(
+			eventDate.getTime() +
+				(1000 * 60 * 60 * Number(event.timeStart.slice(0, 2)) + 1000 * 60 * Number(event.timeStart.slice(3)))
+		);
+
+		if (event.admission.val === "none") return { status: "fail", information: "Event has no signup" };
+		if (eventDate < new Date()) {
+			return { status: "failed", information: "Cannot sign up for past event." };
+		}
+
 		for (let signupNum in event.signups) {
 			if (event.signups[signupNum].email === email) {
 				currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.splice(signupNum, 1);
-				let docRef = db.collection("activeWeekend").doc("default");
-				let setRes = await docRef.set({
-					information: JSON.stringify(currentWeekend),
-				});
-				return { status: "success", information: setRes };
+				attendeeRemoved = true;
 			}
 		}
-		currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.push({
-			displayName: displayName,
-			email: email,
-			status: "pending",
-		});
-		let docRef = db.collection("activeWeekend").doc("default");
-		let setRes = await docRef.set({
-			information: JSON.stringify(currentWeekend),
-		});
-		return { status: "success", information: setRes };
+
+		if (!attendeeRemoved) {
+			let admitStatus = "pending";
+			let studentDoc;
+			let student;
+			let credit;
+			switch (event.admission.val) {
+				case "randLottery":
+					if (event.admission.filtered && event.signups.length < event.numSpots) {
+						admitStatus = "approved";
+					}
+					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.push({
+						displayName: displayName,
+						email: email,
+						status: admitStatus,
+					});
+					break;
+				case "creditLottery":
+					if (event.admission.filtered && event.signups.length < event.numSpots) {
+						admitStatus = "approved";
+					}
+					studentDoc = await db.collection("users").doc(request.auth.token.email).get();
+					student = JSON.parse(studentDoc.data().information);
+					credit = student.credit;
+					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.push({
+						displayName: displayName,
+						email: email,
+						status: admitStatus,
+						credit: credit,
+					});
+					break;
+				case "credit":
+					studentDoc = await db.collection("users").doc(request.auth.token.email).get();
+					student = JSON.parse(studentDoc.data().information);
+					credit = student.credit;
+					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.push({
+						displayName: displayName,
+						email: email,
+						status: admitStatus,
+						credit: credit,
+					});
+					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.sort((a: any, b: any) => {
+						return b.credit - a.credit;
+					});
+
+					break;
+				default:
+					if (event.signups.length < event.numSpots) {
+						admitStatus = "approved";
+					}
+					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.push({
+						displayName: displayName,
+						email: email,
+						status: admitStatus,
+					});
+					break;
+			}
+		}
+
+		if (
+			event.admission.filtered ||
+			event.admission.val === "signup" ||
+			event.admission.val === "advLottery" ||
+			event.admission.val === "credit"
+		) {
+			for (let i = 0; i < event.signups.length; i++) {
+				currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups[i] =
+					i < event.numSpots ? "approved" : "pending";
+			}
+		}
+
+		try {
+			let docRef = db.collection("activeWeekend").doc("default");
+			let setRes = await docRef.set({
+				information: JSON.stringify(currentWeekend),
+			});
+			let attendeesRes = await manageAttendees(currentWeekend.days[Number(id[0])][Number(id.slice(2))]);
+			return { status: "success", information: JSON.stringify({ db: setRes, GCal: attendeesRes }) };
+		} catch (error) {
+			return { status: "error", information: error };
+		}
 	}
 );
 
-// exports.test = onCall(async (request: any) => {
-// 	let ref = db.collection("activeWeekend").doc("default");
-// 	let res = await ref.get();
-// 	return JSON.stringify(res.data());
-// });
+const saveEvents = async (request: any) => {
+	let activeWeekend = await db.collection("activeWeekend").doc("default").get();
+	activeWeekend = JSON.parse(activeWeekend.data().information);
+	let updateEvents = [];
+	for (let i = 0; i < activeWeekend.days.length; i++) {
+		for (let eventNum = 0; eventNum < activeWeekend.days[i].length; eventNum++) {
+			let event = activeWeekend.days[i][eventNum];
+			if (event.calID) continue;
+			let template = eventTemplate;
+			template.summary = event.title;
+			template.description = event.description;
+			template.location = event.location;
+			template.signups = [];
+			for (let signup of event.signups) {
+				if (signup.status === "approved" || signup.status === "checkedIn") {
+					template.attendees.push({ email: signup.email });
+				}
+			}
+			let startDate = new Date(activeWeekend.startDate + "T00:00:00");
+			startDate.setTime(startDate.getTime() + 1000 * 60 * 60 * 24 * i + 1000 * 60 * startDate.getTimezoneOffset()); 
+			startDate.setTime(
+				startDate.getTime() +
+					(1000 * 60 * 60 * Number(event.timeStart.slice(0, 2)) +
+						1000 * 60 * Number(event.timeStart.slice(3)))
+			);
+			template.start.dateTime = startDate.toISOString();
+
+			let endDate = new Date(activeWeekend.startDate + "T00:00:00");
+			endDate.setTime(endDate.getTime() + 1000 * 60 * 60 * 24 * i + 1000 * 60 * endDate.getTimezoneOffset());
+			endDate.setTime(
+				endDate.getTime() +
+					(1000 * 60 * 60 * Number(event.timeEnd.slice(0, 2)) + 1000 * 60 * Number(event.timeEnd.slice(3)))
+			);
+			template.end.dateTime = endDate.toISOString();
+			let result = await createEventFromJSON(template);
+			activeWeekend.days[i][eventNum].calID = result.data.id;
+			if (event.admission.val === "randLottery" || event.admission.val === "creditLottery") {
+				updateEvents.push({ day: i, time: event.timeStart });
+			}
+		}
+	}
+	let setRes = await db.collection("activeWeekend").doc("default").set({
+		information: JSON.stringify(activeWeekend),
+	});
+
+	return JSON.stringify(setRes);
+};
+
+exports.saveWeekendEvents = onCall(
+	{
+		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+	},
+	(request: any) => {
+		saveEvents(request)
+	}
+	
+);
+
+exports.deleteEvent = onCall(
+	{
+		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+	},
+	async (request: any) => {
+		if (request.data.eventID) return await deleteCalendarEvent(request.data.eventID);
+		try {
+			for (let id of request.data.eventIDs) {
+				await deleteCalendarEvent(id)
+			}
+		} catch (error: any) {
+			return {status: "error", information: error.message}
+		}
+	}
+);
+
+exports.createNewUser = onCall(
+	{
+		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+	},
+	async (request: any) => {
+		const userDoc = {
+			isAdmin: false,
+			email: "",
+			events: [],
+			credit: 0,
+			displayName: "",
+		};
+		let userInfo = userDoc;
+		userInfo.email = request.auth.token.email;
+		userInfo.displayName = request.data.displayName;
+		let adminRef = await db.collection("admin").doc(request.auth.token.email).get();
+		userInfo.isAdmin = adminRef.exists;
+		await db.collection("users").doc(request.auth.token.email).set(userInfo);
+		return userInfo;
+	}
+);
+
+exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request: any) => {
+	let queuedRef = await db.collection("activeWeekend").doc("queued").get();
+	if (queuedRef.exists) {
+		let data = queuedRef.data().information
+		data = JSON.parse(data)
+		let releaseDate = new Date(data.release.dateTime)
+		let current = new Date()
+		if (releaseDate.getTime() - current.getTime() < 1000 * 60 * 10) {
+			data.release.released = true
+			await db.collection("activeWeekend").doc("default").set({information: JSON.stringify(data)});
+			await db.collection("activeWeekend").doc("queued").delete()
+			await saveEvents({});
+		}
+	}
+
+	let weekendRef = await db.collection("activeWeekend").doc("default").get();
+	let changed = false;
+	if (!weekendRef.exists) return {status: "sucess", information: "No weekend currently exists"};
+	let activeWeekend = JSON.parse(weekendRef.data().information);
+	let weekendEndDate = new Date(activeWeekend.endDate + "T23:59:59");
+	let currentDate = new Date();
+	if (weekendEndDate.getTime() - currentDate.getTime() < 0) return { status: "sucess", information: "No future weekend" };
+	for (let dayNum = 0; dayNum < activeWeekend.days.length; dayNum++) {
+		for (let eventNum = 0; eventNum < activeWeekend.days[dayNum].length; eventNum++) {
+			let event = activeWeekend.days[dayNum][eventNum];
+			if (
+				(event.admission.val === "creditLottery" || event.admission.val === "randLottery") &&
+				!event.admission.filtered && !activeWeekend.admission.filtered
+			) {
+				let startDate
+				if (activeWeekend.admission && activeWeekend.admission.lotteryTime) {
+					startDate = new Date(activeWeekend.admission.lotteryTime);
+				} else {
+					startDate = new Date(activeWeekend.startDate + "T00:00:00");
+					startDate.setTime(startDate.getTime() + 1000 * 60 * 60 * 12); /* 12pm on the first day*/
+				}
+				let diff = startDate.getTime() - currentDate.getTime();
+				if (diff > 0 && diff < 1000 * 60 * 60 * 2.1) {
+					//less than 2.1 hours
+					changed = true;
+					let array = activeWeekend.days[dayNum][eventNum].signups;
+					activeWeekend.days[dayNum][eventNum].admission.filtered = true;
+					if (event.admission.val == "creditLottery") {
+						for (let attendee of array) {
+							attendee.creditVal = (1 + Math.floor(attendee.credit / 10)) * Math.random();
+						}
+						array.sort((a: any, b: any) => b.creditVal - a.creditVal);
+					} else {
+						// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+						for (let i = array.length - 1; i >= 0; i--) {
+							const j = Math.floor(Math.random() * (i + 1));
+							[array[i], array[j]] = [array[j], array[i]];
+						}
+					}
+					await manageAttendees(activeWeekend.days[dayNum][eventNum]);
+					activeWeekend.admission.filtered = true
+				}
+			}
+			if (!event.admission.credited) {
+				console.log("crediting")
+				let endDate = new Date(activeWeekend.startDate + "T00:00:00");
+				endDate.setTime(endDate.getTime() + 1000 * 60 * 60 * 24 * dayNum); /* add day offset*/
+				endDate.setTime(
+					endDate.getTime() +
+						(1000 * 60 * 60 * Number(event.timeEnd.slice(0, 2)) +
+							1000 * 60 * Number(event.timeEnd.slice(3)))
+				);
+				let diff = endDate.getTime() - currentDate.getTime();
+				if (diff < 1000 * 60 * 10) {
+					console.log("gonna credit")
+					activeWeekend.days[dayNum][eventNum].admission.credited = true
+					changed = true
+					for (let i = 0; i < event.signups.length; i++) {
+						let student = event.signups[i]
+						if (student.status === "checkedIn") {
+							let docRef = db.collection("users").doc(student.email)
+							let data = await docRef.get()
+							data = data.data()
+							if (!data.exists) continue
+							data.credit += 10
+							await docRef.set(data)
+						} else if (student.status === "noShow" && i <= event.signupNum) {
+							let docRef = db.collection("users").doc(student.email);
+							let data = await docRef.get()
+							if (!data.exists) continue;
+							data = data.data();
+							data.credit -= 5;
+							await docRef.set(data);
+						}
+					}
+				}
+			}
+
+		}
+	}
+
+	if (changed) {
+		let setRef = await db
+			.collection("activeWeekend")
+			.doc("default")
+			.set({ information: JSON.stringify(activeWeekend) });
+		return { status: "success", information: setRef };
+	}
+	return { status: "success", information: "no changes made" };
+});

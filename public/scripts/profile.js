@@ -27,7 +27,7 @@ let firebaseUser;
 onAuthStateChanged(auth, (user) => {
 	if (user) {
 		firebaseUser = user;
-		getUserFromEmail(user.email, user.displayName, db).then((data) => {
+		getUserFromEmail(user.email, user.displayName, db, functions).then((data) => {
 			userInformation = data;
 			document.getElementById("credit").innerText = userInformation.credit;
 			if (userInformation.isAdmin) {

@@ -15,6 +15,11 @@ import {
 	connectFirestoreEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import {
+	getFunctions,
+	httpsCallable,
+	connectFunctionsEmulator,
+} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
+import {
 	dataToFullHTML,
 	daysOfTheWeek as weekDays,
 	addListeners,
@@ -32,21 +37,29 @@ const appCheck = initializeAppCheck(app, {
 	isTokenAutoRefreshEnabled: true,
 });
 const auth = getAuth(app);
-
 const db = getFirestore(app, "maindb");
+const functions = getFunctions(app);
 
-// if (window.location.hostname === "127.0.0.1") {
-// 	connectFirestoreEmulator(db, "127.0.0.1", 8080);
-// 	console.log("Connecting Firebase Emulator")
-// }
+const createWeekendEvents = httpsCallable(functions, "saveWeekendEvents");
+const deleteEvent = httpsCallable(functions, "deleteEvent");
+
+if (window.location.hostname === "127.0.0.1") {
+	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
+	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+	console.log("Connecting Firebase Emulator");
+}
 
 let eventTemplates = {};
 let weekendTemplates = {};
 let activeWeekend;
+let queuedWeekend;
+let editingWeekend;
 let editingActiveWeekend = false;
+let editingQueuedWeekend = false;
 let students = [];
 let workingWeekend = new Weekend();
 let currentEventNum = 0;
+let idsToDelete = [];
 
 let firebaseUser;
 let userInformation;
@@ -54,10 +67,8 @@ let userInformation;
 onAuthStateChanged(auth, (user) => {
 	if (user) {
 		firebaseUser = user;
-		getUserFromEmail(user.email, user.displayName, db).then((data) => {
-			if (!data.isAdmin) {
-				// window.location.href = "../index.html";
-			}
+		getUserFromEmail(user.email, user.displayName, db, functions).then((data) => {
+			if (!data.isAdmin) window.location.href = "../index.html";
 			userInformation = data;
 		});
 
@@ -72,9 +83,7 @@ onAuthStateChanged(auth, (user) => {
 			.then((eventTemplateSnapshot) => {
 				eventTemplateSnapshot.forEach((doc) => {
 					let docData = doc.data();
-					if (!docData) {
-						return;
-					}
+					if (!docData) return;
 					eventTemplates[docData.title] = docData;
 					let option = document.createElement("option");
 					option.value = docData.title;
@@ -88,9 +97,7 @@ onAuthStateChanged(auth, (user) => {
 			.then((weekendTemplateSnapshot) => {
 				weekendTemplateSnapshot.forEach((doc) => {
 					let docData = doc.data();
-					if (!docData.title) {
-						return;
-					}
+					if (!docData.title) return;
 					let title = docData.title;
 					docData = JSON.parse(docData.information);
 					weekendTemplates[title] = docData;
@@ -109,60 +116,50 @@ onAuthStateChanged(auth, (user) => {
 				docs.forEach((student) => {
 					students.push(student.data());
 				});
-				students.sort((a, b) => {
-					return [a.displayName, b.displayName].sort()[0] === a.displayName ? -1 : 1;
-				});
+				students.sort((a, b) => ([a.displayName, b.displayName].sort()[0] === a.displayName ? -1 : 1));
 				let htmlString = "";
-				for (let student of students) {
+				for (let student of students)
 					htmlString += `<option value="${student.email}">${student.displayName}</option>`;
-				}
 				document.getElementById("studentsList").insertAdjacentHTML("afterbegin", htmlString);
 			})
 			.catch(handleDBError);
 
+		getDoc(doc(db, "activeWeekend", "queued"))
+			.then((doc) => {
+				if (doc.exists()) queuedWeekend = doc.data().information;
+			})
+			.catch(handleDBError);
 		getDoc(doc(db, "activeWeekend", "default"))
 			.then((doc) => {
 				activeWeekend = doc.data().information;
 			})
 			.catch(handleDBError);
-	} else {
-		window.location.href = "../index.html";
-	}
+	} else window.location.href = "../index.html";
 });
 
 document.getElementById("signOutWrap").addEventListener("click", () => {
 	signOut(auth)
-		.then(() => {
-			window.location.href = `${isAdminPage ? "../" : ""}index.html`;
-		})
-		.catch((error) => {
-			alert(`There was a error signing out: ${error}`);
-		});
+		.then(() => (window.location.href = `${isAdminPage ? "../" : ""}index.html`))
+		.catch((error) => alert(`There was a error signing out: ${error}`));
 });
 
 const updateWeekend = () => {
 	let valid = workingWeekend.updateSelf();
-
 	if (valid) {
 		let wrap = document.getElementsByTagName("body")[0];
-		for (let node of document.querySelectorAll("body .dayWrap")) {
-			node.remove();
-		}
+		for (let node of document.querySelectorAll("body .dayWrap")) node.remove();
+
 		let elements = dataToFullHTML(workingWeekend, "editor").querySelectorAll(".dayWrap");
-		for (let i = 0; i < elements.length; i++) {
-			wrap.append(elements[i]);
-		}
+		for (let i = 0; i < elements.length; i++) wrap.append(elements[i]);
 
 		const startDate = new Date(workingWeekend.startDate + "T00:00:00");
 		const startDay = startDate.getDay();
-
 		let select = document.getElementById("daySelect");
 		select.replaceChildren();
 		let option = document.createElement("option");
 
 		for (let i = 0; i < workingWeekend.days.length; i++) {
 			option = document.createElement("option");
-
 			option.value = i;
 			option.innerText = weekDays[(startDay + i) % 7];
 			select.appendChild(option);
@@ -177,8 +174,8 @@ const updateWeekend = () => {
 			for (let day of workingWeekend.days) {
 				for (let i = 0; i < day.length; i++) {
 					if (day[i].id === Number(eventNode.id)) {
+						if (day[i].calID) idsToDelete.push(day[i].calID);
 						day.splice(i, 1);
-						console.log("removing");
 						updateWeekend();
 						return;
 					}
@@ -188,9 +185,7 @@ const updateWeekend = () => {
 	}
 };
 
-for (let el of document.querySelectorAll("#settingsWrap input")) {
-	el.onchange = updateWeekend;
-}
+for (let el of document.querySelectorAll("#settingsWrap input")) el.onchange = updateWeekend;
 
 const toggleDebug = (e) => {
 	document.getElementById("debugCode").classList.toggle("visible");
@@ -202,7 +197,7 @@ document.getElementById("debugCodeButton").onclick = toggleDebug;
 const updateEventFromTemplate = (e) => {
 	let val = e.target.value;
 	let data = eventTemplates[val];
-	if (!data) return
+	if (!data) return;
 	document.getElementById("eventStart").value = data.timeStart;
 	document.getElementById("eventEnd").value = data.timeEnd;
 	document.getElementById("titleIn").value = data.title;
@@ -276,23 +271,35 @@ const saveEvent = () => {
 
 document.getElementById("eventSaveButton").onclick = saveEvent;
 document.addEventListener("keypress", (e) => {
-	if (e.key === "Enter") {
-		saveEvent();
-	}
+	if (e.key === "Enter") saveEvent();
 });
 
-const saveWeekend = () => {
+const saveWeekend = async () => {
 	if (!workingWeekend.isValid) {
 		alert("Please enter valid weekend information.");
 		return;
 	}
 	if (
-		!confirm("Are you sure you want to save the current weekend? It will write over the currently active weekend.")
-	) {
+		!confirm(
+			"Are you sure you want to save the current weekend? It will write over the currently active or queued weekend."
+		)
+	)
 		return;
-	}
 
-	workingWeekend.saveSelf(db);
+	document.getElementById("saveWeekendButton").disabled = true;
+	
+	try {
+		if (idsToDelete.length === 1) await deleteEvent({ eventID: idsToDelete[0] });
+		else if (idsToDelete.length) await deleteEvent({ eventIDs: idsToDelete });
+		idsToDelete = [];
+
+		await workingWeekend.saveSelf(db);
+		await createWeekendEvents();
+		alert("Weekend Saved Successfully");
+		window.location.reload();
+	} catch (error) {
+		alert(`Error saving weekend: ${error.message}`);
+	}
 };
 
 document.getElementById("saveWeekendButton").onclick = saveWeekend;
@@ -309,6 +316,7 @@ const saveWeekendAsTemplate = () => {
 	) {
 		return;
 	}
+
 	let name = prompt("Please enter a name for this template: ");
 	if (!name) return;
 
@@ -321,9 +329,7 @@ const verifyAttendee = (e) => {
 	if (e.target.checkValidity()) {
 		let input = e.target.value;
 		for (let student of students) {
-			if (student.email === input) {
-				return;
-			}
+			if (student.email === input) return;
 		}
 	}
 	alert("Please enter a valid email address.");
@@ -334,38 +340,109 @@ const addAttendee = () => {
 		"afterbegin",
 		`<div class="mAttendeeWrap">
 			<input required type="email" list="studentsList" class="attendeeInput" onchange="verifyAttendee(this)"/>
-			<span class="material-symbols-outlined removeAttendee" onclick="this.parentElement.remove()">cancel</span>
+			<span class="material-symbols-outlined removeAttendee" onclick="this.parentElement.remove()">close</span>
 		</div>`
 	);
-	for (let el of document.querySelectorAll(".attendeeInput")) {
-		el.onchange = verifyAttendee;
-	}
+	for (let el of document.querySelectorAll(".attendeeInput")) el.onchange = verifyAttendee;
 };
 
 document.getElementById("attendeeAdd").onclick = addAttendee;
 
 const editCurrentWeekend = (e) => {
-	if (!editingActiveWeekend) {
+	if (!editingActiveWeekend && !editingQueuedWeekend) {
 		e.target.innerText = "Edit New Weekend";
-		editingActiveWeekend = true;
-		workingWeekend.updateFromString(activeWeekend);
+		if (queuedWeekend) {
+			let choice = confirm(
+				"There appears to be a weekend currently scheduled for release. Would you like to edit that weekend instead?"
+			);
+			editingActiveWeekend = !choice;
+			editingQueuedWeekend = choice;
+			if (choice) workingWeekend.updateFromString(queuedWeekend);
+			else workingWeekend.updateFromString(activeWeekend);
+		} else {
+			editingActiveWeekend = true;
+			workingWeekend.updateFromString(activeWeekend);
+		}
+		currentEventNum = 0;
+		for (let dayNum in workingWeekend.days) {
+			for (let eventNum in workingWeekend.days[dayNum]) {
+				workingWeekend.days[dayNum][eventNum].id = currentEventNum;
+				currentEventNum++;
+			}
+		}
 		let startIn = document.getElementById("startDate");
 		let endIn = document.getElementById("endDate");
 		startIn.value = workingWeekend.startDate;
 		endIn.value = workingWeekend.endDate;
 		startIn.disabled = true;
 		endIn.disabled = true;
+		let release = document.getElementById("releaseDate");
+		if (workingWeekend.release.released) release.disabled = true;
+		else {
+			release.disabled = false;
+			release.value = workingWeekend.release.dateTime;
+		}
+		let lottery = document.getElementById("lotteryDate");
+		if (workingWeekend.admission.filtered) lottery.disabled = true;
+		else {
+			lottery.disabled = false;
+			lottery.value = workingWeekend.admission.dateTime;
+		}
 	} else {
 		e.target.innerText = "Edit Active Weekend";
 		editingActiveWeekend = false;
-		let startIn = document.getElementById("startDate");
-		let endIn = document.getElementById("endDate");
-		startIn.disabled = false;
-		endIn.disabled = false;
+		editingQueuedWeekend = false;
+		document.getElementById("startDate").disabled = false;
+		document.getElementById("endDate").disabled = false;
+		document.getElementById("releaseDate").disabled = false;
 	}
 	updateWeekend();
 };
 
 document.getElementById("editWeekend").onclick = editCurrentWeekend;
+
+const editReleaseTime = () => {
+	if (workingWeekend.release.released) return;
+	let dateTimeString = document.getElementById("releaseDate").value;
+	let newDate = new Date(dateTimeString);
+	let current = new Date();
+	if (newDate < current) {
+		alert("Cannot set release to past time. To release immediately clear the release date.");
+		return;
+	}
+	workingWeekend.release.dateTime = dateTimeString;
+	updateWeekend();
+};
+
+document.getElementById("releaseDate").onchange = editReleaseTime;
+
+const editLotteryTime = () => {
+	if (workingWeekend.admission.filtered) return;
+	let dateTimeString = document.getElementById("lotteryDate").value;
+	let newDate = new Date(dateTimeString);
+	let current = new Date();
+	if (newDate < current) {
+		alert("Cannot set lottery to past time.");
+		return;
+	}
+	workingWeekend.admission.dateTime = dateTimeString;
+	console.log(workingWeekend)
+	updateWeekend();
+};
+
+document.getElementById("lotteryDate").onchange = editLotteryTime;
+
+const clearDays = () => {
+	for (let dayNum in workingWeekend.days) {
+		for (let eventNum in workingWeekend.days[dayNum]) {
+			if (workingWeekend.days[dayNum][eventNum].calID)
+				idsToDelete.push(workingWeekend.days[dayNum][eventNum].calID);
+		}
+		workingWeekend.days[dayNum] = [];
+	}
+	updateWeekend();
+};
+
+document.getElementById("clearBtn").onclick = clearDays;
 
 addListeners();

@@ -80,3 +80,9 @@ firestore.rules
 emulatorsSave/*
 
 temp.md
+
+token.json
+
+OAuthClient.json
+
+adminSDKSecretKey.json
