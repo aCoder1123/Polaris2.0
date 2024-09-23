@@ -9,9 +9,9 @@ import {
 	getFunctions,
 	connectFunctionsEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import { getFirestore, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import { firebaseConfig, siteKey } from "./config.js";
-import { getUserFromEmail, addListeners, getAdminLinks } from "./util.js";
+import { getUserFromEmail, addListeners, getMenuHTMLString } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
 const appCheck = initializeAppCheck(app, {
@@ -30,33 +30,30 @@ onAuthStateChanged(auth, (user) => {
 		getUserFromEmail(user.email, user.displayName, db, functions).then((data) => {
 			userInformation = data;
 			document.getElementById("credit").innerText = userInformation.credit;
-			if (userInformation.isAdmin) {
-				document.getElementById("callDAWrap").insertAdjacentHTML("beforebegin", getAdminLinks(false));
-			}
 		});
 
-		let pfp = document.querySelector("#menuPF img");
-		if (pfp) {
-			pfp.loading = "lazy";
-			pfp.src = user.photoURL;
-			document.getElementById("pfp").src = user.photoURL;
-			for (let el of document.querySelectorAll(".userName")) {
-				el.innerText = user.displayName;
-			}
+		let adminDoc = getDoc(doc(db, "admin", user.email)).then((doc) => {
+			document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, false, doc.exists()));
+
+			document.getElementById("signOutWrap").addEventListener("click", () => {
+				signOut(auth)
+					.then(() => {
+						window.location.href = `../index.html`;
+					})
+					.catch((error) => {
+						alert(`There was a error signing out: ${error}`);
+					});
+			});
+			addListeners();
+		});
+		for (let el of document.querySelectorAll(".userName")) {
+			el.innerText = user.displayName;
 		}
+		document.getElementById("userPFP").src = user.photoURL;
+		
 	} else {
 		window.location.href = `index.html`;
 	}
-});
-
-document.getElementById("signOutWrap").addEventListener("click", () => {
-	signOut(auth)
-		.then(() => {
-			window.location.href = `${isAdminPage ? "../" : ""}index.html`;
-		})
-		.catch((error) => {
-			alert(`There was a error signing out: ${error}`);
-		});
 });
 
 if (window.location.hostname === "127.0.0.1") {
@@ -64,23 +61,3 @@ if (window.location.hostname === "127.0.0.1") {
 }
 
 addListeners();
-
-// const sendEmail = httpsCallable(functions, "sendEmail");
-
-// onAuthStateChanged(auth, (user) => {
-// 	if (user) {
-// 		document.getElementById("emailButton").onclick = () => {
-// 			let emailConf = { email: user.email, subject: "Your Email Has Arrived.", text: "Testing 1, 2, 3!" };
-// 			sendEmail(emailConf)
-// 				.then((result) => {
-// 					console.log(result);
-// 				})
-// 				.catch((error) => {
-// 					console.log(error);
-// 				});
-// 		};
-// 	} else {
-// 		window.location.href = "index.html";
-// 		console.log("user signed out");
-// 	}
-// });

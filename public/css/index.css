@@ -69,7 +69,7 @@ h6 {
 
 /* start of side menu */
 #sideMenuWrap {
-	position: fixed;
+	position: absolute;
 	top: 0;
 	left: 0;
 	height: 100%;
@@ -107,7 +107,7 @@ h6 {
 }
 
 #menuToggle {
-	position: fixed;
+	position: absolute;
 	top: 0.5vh;
 	left: 0.5vw;
 	height: 5vh;

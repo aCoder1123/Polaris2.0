@@ -27,6 +27,7 @@ import {
 	WeekendEvent,
 	getUserFromEmail,
 	handleDBError,
+	getMenuHTMLString,
 } from "./util.js";
 import { firebaseConfig, siteKey } from "./config.js";
 
@@ -72,12 +73,17 @@ onAuthStateChanged(auth, (user) => {
 			userInformation = data;
 		});
 
-		let pfp = document.querySelector("#menuPF img");
-		if (pfp) {
-			pfp.loading = "lazy";
-			pfp.src = user.photoURL;
-			document.getElementById("userName").innerText = user.displayName;
-		}
+		document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, true, true));
+		
+		document.getElementById("signOutWrap").addEventListener("click", () => {
+			signOut(auth)
+				.then(() => {
+					window.location.href = `../index.html`;
+				})
+				.catch((error) => {
+					alert(`There was a error signing out: ${error}`);
+				});
+		});
 
 		getDocs(collection(db, "eventTemplates"))
 			.then((eventTemplateSnapshot) => {
@@ -134,13 +140,8 @@ onAuthStateChanged(auth, (user) => {
 				activeWeekend = doc.data().information;
 			})
 			.catch(handleDBError);
+		addListeners();
 	} else window.location.href = "../index.html";
-});
-
-document.getElementById("signOutWrap").addEventListener("click", () => {
-	signOut(auth)
-		.then(() => (window.location.href = `${isAdminPage ? "../" : ""}index.html`))
-		.catch((error) => alert(`There was a error signing out: ${error}`));
 });
 
 const updateWeekend = () => {
@@ -287,7 +288,7 @@ const saveWeekend = async () => {
 		return;
 
 	document.getElementById("saveWeekendButton").disabled = true;
-	
+
 	try {
 		if (idsToDelete.length === 1) await deleteEvent({ eventID: idsToDelete[0] });
 		else if (idsToDelete.length) await deleteEvent({ eventIDs: idsToDelete });
@@ -426,13 +427,14 @@ const editLotteryTime = () => {
 		return;
 	}
 	workingWeekend.admission.dateTime = dateTimeString;
-	console.log(workingWeekend)
+	console.log(workingWeekend);
 	updateWeekend();
 };
 
 document.getElementById("lotteryDate").onchange = editLotteryTime;
 
 const clearDays = () => {
+	if (!confirm("Are you sure you want to delete all events? This cannot be reverted.")) return;
 	for (let dayNum in workingWeekend.days) {
 		for (let eventNum in workingWeekend.days[dayNum]) {
 			if (workingWeekend.days[dayNum][eventNum].calID)

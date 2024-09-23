@@ -59,7 +59,7 @@ body {
 .checkInLaunch,
 #exitSignup,
 #sortType,
-#attendeesMail {
+.attendeeLink {
 	cursor: pointer;
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none; /* Safari */
@@ -73,14 +73,14 @@ body {
 .checkInLaunch:hover,
 #exitSignup:hover,
 #sortType:hover,
-#attendeesMail:hover {
+.attendeeLink:hover {
 	color: grey !important;
 }
 
 .checkInLaunch:active,
 #exitSignup:active,
 #sortType:active,
-#attendeesMail:active {
+.attendeeLink:active {
 	color: darkgray !important;
 }
 

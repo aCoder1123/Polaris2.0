@@ -27,7 +27,7 @@ provider.setCustomParameters({
 	login_hint: "first.last@westtown.edu",
 });
 
-provider.addScope("https://www.googleapis.com/auth/calendar.readonly");
+// provider.addScope("");
 
 auth.languageCode = "en";
 setPersistence(auth, browserSessionPersistence)

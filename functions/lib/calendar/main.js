@@ -1,6 +1,7 @@
 "use strict";
 //https://developers.google.com/calendar/api/v3/reference/events/insert#node.js
 //https://developers.google.com/calendar/api/v3/reference/events
+// https://developers.google.com/calendar/api/quickstart/js
 const fs = require("fs").promises;
 const path = require("path");
 // const process = require("process");
@@ -69,11 +70,11 @@ exports.eventTemplate = {
     description: "",
     start: {
         dateTime: "2024-07-28T09:00:00", //formatted according to RFC3339 (yyyy-mm-ddThh:mm:ss)
-        // timeZone: "America/New_York", //IANA Time Zone Database name
+        timeZone: "America/New_York", //IANA Time Zone Database name
     },
     end: {
         dateTime: "2024-07-28T17:00:00",
-        // timeZone: "America/New_York",
+        timeZone: "America/New_York",
     },
     // recurrence: ["RRULE:FREQ=DAILY;COUNT=2"],
     attendees: [
@@ -88,30 +89,6 @@ exports.eventTemplate = {
         ],
     },
 };
-/**
- * Lists the next 10 events on the user's primary calendar.
- * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
- */
-async function listEvents(auth) {
-    const calendar = google.calendar({ version: "v3", auth });
-    const res = await calendar.events.list({
-        calendarId: "primary",
-        timeMin: new Date().toISOString(),
-        maxResults: 10,
-        singleEvents: true,
-        orderBy: "startTime",
-    });
-    const events = res.data.items;
-    if (!events || events.length === 0) {
-        console.log("No upcoming events found.");
-        return;
-    }
-    console.log("Upcoming 10 events:");
-    events.map((event, i) => {
-        const start = event.start.dateTime || event.start.date;
-        console.log(`${start} - ${event.summary}`);
-    });
-}
 exports.createEventFromJSON = async (eventDetails) => {
     let auth = await authorize();
     const calendar = google.calendar({ version: "v3", auth });

@@ -9,9 +9,9 @@ import {
 	httpsCallable,
 	connectFunctionsEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import { getFirestore, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import { firebaseConfig, siteKey } from "./config.js";
-import { addListeners, getUserFromEmail, getAdminLinks } from "./util.js";
+import { addListeners, getUserFromEmail, getAdminLinks, getMenuHTMLString } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
 const appCheck = initializeAppCheck(app, {
@@ -32,31 +32,26 @@ onAuthStateChanged(auth, (user) => {
 		firebaseUser = user;
 		getUserFromEmail(user.email, user.displayName, db, functions).then((data) => {
 			userInformation = data;
-			console.log(userInformation);
-			if (userInformation.isAdmin) {
-				document.getElementById("callDAWrap").insertAdjacentHTML("beforebegin", getAdminLinks(false));
-			}
 		});
 
-		let pfp = document.querySelector("#menuPF img");
-		if (pfp) {
-			pfp.loading = "lazy";
-			pfp.src = user.photoURL;
-			document.getElementById("userName").innerText = user.displayName;
-		}
+		let adminDoc = getDoc(doc(db, "admin", user.email)).then((doc) => {
+			document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, false, doc.exists()));
+
+			document.getElementById("signOutWrap").addEventListener("click", () => {
+				signOut(auth)
+					.then(() => {
+						window.location.href = `../index.html`;
+					})
+					.catch((error) => {
+						alert(`There was a error signing out: ${error}`);
+					});
+			});
+			addListeners();
+		});
+
 	} else {
 		window.location.href = `index.html`;
 	}
-});
-
-document.getElementById("signOutWrap").addEventListener("click", () => {
-	signOut(auth)
-		.then(() => {
-			window.location.href = `${isAdminPage ? "../" : ""}index.html`;
-		})
-		.catch((error) => {
-			alert(`There was a error signing out: ${error}`);
-		});
 });
 
 if (window.location.hostname === "127.0.0.1") {

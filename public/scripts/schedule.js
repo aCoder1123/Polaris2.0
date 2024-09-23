@@ -8,10 +8,8 @@ import {
 	getFirestore,
 	doc,
 	onSnapshot,
-	collection,
-	getDocs,
-	connectFirestoreEmulator,
 	setDoc,
+	getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import {
 	getFunctions,
@@ -19,7 +17,7 @@ import {
 	connectFunctionsEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 import { firebaseConfig, siteKey } from "./config.js";
-import { dataToFullHTML, addListeners, getUserFromEmail, getAdminLinks } from "./util.js";
+import { dataToFullHTML, addListeners, getUserFromEmail, getMenuHTMLString } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
 const appCheck = initializeAppCheck(app, {
@@ -44,7 +42,7 @@ let idAsArray;
 if (window.location.hostname === "127.0.0.1") {
 	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
-	console.log("Connecting Firebase Emulator")
+	console.log("Connecting Firebase Emulator");
 }
 
 onAuthStateChanged(auth, (user) => {
@@ -53,13 +51,12 @@ onAuthStateChanged(auth, (user) => {
 		getUserFromEmail(user.email, user.displayName, db, functions).then((data) => {
 			userInformation = data;
 			if (userInformation.isAdmin) {
-				document.getElementById("callDAWrap").insertAdjacentHTML("beforebegin", getAdminLinks(false));
 				scheduleType = "admin";
 			}
 
 			const unsub = onSnapshot(doc(db, "activeWeekend", "default"), (doc) => {
 				weekendInformation = JSON.parse(doc.data().information);
-				let wrap = document.getElementsByTagName("body")[0]
+				let wrap = document.getElementsByTagName("body")[0];
 				for (let node of document.querySelectorAll("body .dayWrap")) {
 					node.remove();
 				}
@@ -84,25 +81,24 @@ onAuthStateChanged(auth, (user) => {
 				}
 			});
 		});
-		let pfp = document.querySelector("#menuPF img");
-		if (pfp) {
-			pfp.loading = "lazy";
-			pfp.src = user.photoURL;
-			document.getElementById("userName").innerText = user.displayName;
-		}
+		
+		let adminDoc = getDoc(doc(db, "admin", user.email)).then((doc) => {
+			document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, false, doc.exists()));
+
+			document.getElementById("signOutWrap").addEventListener("click", () => {
+				signOut(auth)
+					.then(() => {
+						window.location.href = `../index.html`;
+					})
+					.catch((error) => {
+						alert(`There was a error signing out: ${error}`);
+					});
+			});
+			addListeners();
+		});
 	} else {
 		window.location.href = `index.html`;
 	}
-});
-
-document.getElementById("signOutWrap").addEventListener("click", () => {
-	signOut(auth)
-		.then(() => {
-			window.location.href = `index.html`;
-		})
-		.catch((error) => {
-			alert(`There was a error signing out: ${error}`);
-		});
 });
 
 const handleSignup = (e) => {
@@ -117,15 +113,18 @@ const handleSignup = (e) => {
 const formatCheckIn = () => {
 	let wrap = document.getElementById("attendeesWrap");
 	let signups = weekendInformation.days[idAsArray[0]][idAsArray[1]].signups;
-	let attendeesEmails = []
+	let attendeesEmails = [];
 	wrap.replaceChildren();
 
 	if (!signups.length) {
 		wrap.innerText = "No Sign-Ups Currently";
+		document.getElementById("mailLink").href = `mailto:${firebaseUser.email}`;
 		return;
 	}
 	for (let i = 0; i < signups.length; i++) {
-		if (signups[i].status === "checkedIn") {attendeesEmails.push(signups[i].email)}
+		if (signups[i].status === "checkedIn") {
+			attendeesEmails.push(signups[i].email);
+		}
 		let attendeeHTMLString = `<div class="attendeeWrap">
 					<span class="attendeeNum">${i + 1}.</span>
 					<span class="attendeeName">${signups[i].displayName}</span>
@@ -151,7 +150,10 @@ const formatCheckIn = () => {
 			wrap.appendChild(node);
 		}
 	}
-	document.getElementById("mailLink").href = `mailto:${attendeesEmails.join(",")}?subject=${document.getElementById("windowHead").innerText}`;
+	console.log("setting link")
+	document.getElementById("mailLink").href = `mailto:${attendeesEmails.join(",")}?subject=${
+		document.getElementById("windowHead").innerText
+	}`;
 };
 
 const handleCheckIn = (e) => {
@@ -161,6 +163,7 @@ const handleCheckIn = (e) => {
 	currentEventID = event.id;
 	idAsArray = [Number(currentEventID[0]), Number(currentEventID.slice(2))];
 	formatCheckIn();
+	console.log("doing check in")
 };
 
 document.getElementById("exitSignup").addEventListener("click", (e) => {
@@ -182,7 +185,7 @@ document.getElementById("checkInSaveButton").onclick = () => {
 			if (weekendInformation.days[idAsArray[0]][idAsArray[1]].signups[signupNum].email === status.id) {
 				if (attendeeStatus === "removed") {
 					weekendInformation.days[idAsArray[0]][idAsArray[1]].signups.splice(signupNum, 1);
-					continue
+					continue;
 				}
 				weekendInformation.days[idAsArray[0]][idAsArray[1]].signups[signupNum].status = attendeeStatus;
 			}
@@ -195,4 +198,28 @@ document.getElementById("checkInSaveButton").onclick = () => {
 		.catch((error) => {
 			alert(`Error saving statuses: ${error}`);
 		});
+};
+
+function setPrint() {
+	const closePrint = () => {
+		document.body.removeChild(this);
+	};
+	this.contentWindow.onbeforeunload = closePrint;
+	this.contentWindow.onafterprint = closePrint;
+	this.contentWindow.print();
+}
+
+document.getElementById("attendeesPrint").onclick = (e) => {
+	let printFrame = document.createElement("iframe")
+	let currentEvent = weekendInformation.days[idAsArray[0]][idAsArray[1]]
+	let srcString = `<h1>${currentEvent.title}</h1>`
+	for (let attendee of currentEvent.signups) {
+		if (attendee.status === "checkedIn") {
+			srcString += `<br><h3>${attendee.displayName}</h3>`;
+		}
+	}
+	printFrame.srcdoc = srcString
+	printFrame.onload = setPrint
+	printFrame.style.display = "none"
+	document.body.appendChild(printFrame);
 };

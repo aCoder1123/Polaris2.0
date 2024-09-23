@@ -23,17 +23,19 @@
 * [Firebase Setup](https://firebase.google.com/docs/web/setup#add-sdks-initialize)
 * [Firebase Docs](https://firebase.google.com/docs/reference/js)
 
-###Firestore
+####Firestore
 
 * [Setup](https://firebase.google.com/docs/firestore/quickstart?authuser=0#web_4)
 
-###Auth
+####Auth
 
 * [Quickstart Examples Repo](https://github.com/firebase/quickstart-js/blob/master/auth/google-popup.ts)
 
-###Functions
+####Functions
 
 * [Calling Functions](https://firebase.google.com/docs/functions/callable?hl=en&authuser=0&gen=2nd)
 
+##Google Cloud
 
-
+* [Pricing Calculator](https://cloud.google.com/products/calculator?hl=en&dl=CiRiNmNiNjUwMS1mNzBiLTQ5MmUtOGEyMC04NWRkZjU2MzgxYjAQExokNTJBQ0VFNzYtM0VDMC00NDBGLThBMDYtQkI5OUE3ODUwRDY2)
+* [Setting Organization](https://cloud.google.com/resource-manager/docs/handle-special-cases#migrating_projects_no_org)

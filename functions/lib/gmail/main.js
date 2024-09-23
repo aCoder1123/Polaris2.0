@@ -1,6 +1,8 @@
 "use strict";
 // Code adapted from https://www.labnol.org/google-api-service-account-220405
-// const { google } = require("googleapis");
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.emailOptions = exports.sendMail = void 0;
+const { google } = require("googleapis");
 const MailComposer = require("nodemailer/lib/mail-composer");
 const credentials = require("../../OAuthClient.json");
 const tokens = require("../../token.json");
@@ -16,7 +18,7 @@ const createMail = async (options) => {
     const message = await mailComposer.compile().build();
     return Buffer.from(message).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 };
-exports.sendMail = async (options) => {
+const sendMail = async (options) => {
     const gmail = getGmailService();
     const rawMessage = await createMail(options);
     const data = await gmail.users.messages.send({
@@ -27,7 +29,8 @@ exports.sendMail = async (options) => {
     });
     return data;
 };
-exports.emailOptions = {
+exports.sendMail = sendMail;
+const emailOptions = {
     to: "",
     cc: "bailey.tuckman@gmail.com",
     replyTo: "bailey.tuckman@gmail.com",
@@ -40,4 +43,5 @@ exports.emailOptions = {
         { key: "X-Application-Version", value: "v1.0.0" },
     ],
 };
+exports.emailOptions = emailOptions;
 //# sourceMappingURL=main.js.map

@@ -166,6 +166,8 @@
 	padding: 1% 2%;
 	background-color: hsl(220, 93%, 80%);
 	overflow: hidden;
+	border-bottom: 0vh solid black;
+	transition: border-bottom ease var(--collapseTime);
 }
 .eventHeadWrap * {
 	margin-top: 0;
@@ -173,7 +175,7 @@
 }
 
 .eventWrap.open .eventHeadWrap {
-	border-bottom: 0.1vh solid black;
+	border-bottom: .1vh solid black;
 }
 
 .eventTitle {
@@ -200,6 +202,10 @@
 
 .eventLocationWrap:hover .locationCopy {
 	display: block !important;
+}
+
+.addDisabled {
+	cursor: not-allowed;
 }
 
 .locationCopy:hover,
@@ -261,6 +267,13 @@
 	background-color: hsl(230, 100%, 95%);
 }
 
+.attendeesList.empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
 .attendeesList::-webkit-scrollbar {
 	display: none;
 }
@@ -299,5 +312,9 @@
 
 	.eventTime {
 		font-size: 3.5vw;
+	}
+
+	.dayCollapse {
+		display: none;
 	}
 }

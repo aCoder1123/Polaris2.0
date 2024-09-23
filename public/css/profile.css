@@ -60,7 +60,7 @@ h2 {
 	width: 70%;
 }
 
-#pfp {
+#userPFP {
 	border-radius: 50%;
 	/* height: 100%; */
 	margin-right: 3%;
@@ -71,40 +71,6 @@ h2 {
 #userWrap .userName {
 	width: min-content;
 }
-
-/* form {
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	align-items: flex-start;
-	justify-content: flex-start;
-	width: 80%;
-	grid-area: 2 / 1 / 2 / 1;
-}
-
-fieldset {
-	border: none;
-}
-
-h2 {
-	margin: 1% 0;
-}
-
-.formSection {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-start;
-	margin: 3% 5%;
-}
-
-.formSection input {
-	margin-right: 3%;
-}
-
-#formSubmit {
-	margin: 3% 0%;
-} */
 
 #creditWrap {
 	grid-area: 1 / 2 / 1 / 2;

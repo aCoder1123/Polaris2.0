@@ -18,11 +18,9 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import {
 	getFunctions,
-	httpsCallable,
-	connectFunctionsEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 
-import { dataToFullHTML, daysOfTheWeek as weekDays, addListeners, getUserFromEmail } from "./util.js";
+import { dataToFullHTML, addListeners, getUserFromEmail, getMenuHTMLString } from "./util.js";
 import { firebaseConfig, siteKey } from "./config.js";
 
 const app = initializeApp(firebaseConfig);
@@ -54,12 +52,24 @@ onAuthStateChanged(auth, (user) => {
 			userInformation = data;
 		});
 
-		let pfp = document.querySelector("#menuPF img");
-		if (pfp) {
-			pfp.loading = "lazy";
-			pfp.src = user.photoURL;
-			document.getElementById("userName").innerText = user.displayName;
-		}
+		// let pfp = document.querySelector("#menuPF img");
+		// if (pfp) {
+		// 	pfp.loading = "lazy";
+		// 	pfp.src = user.photoURL;
+		// 	document.getElementById("userName").innerText = user.displayName;
+		// }
+
+		document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, true, true));
+
+		document.getElementById("signOutWrap").addEventListener("click", () => {
+			signOut(auth)
+				.then(() => {
+					window.location.href = `../index.html`;
+				})
+				.catch((error) => {
+					alert(`There was a error signing out: ${error}`);
+				});
+		});
 
 		getDocs(query(collection(db, "weekends")))
 			.then((docs) => {
@@ -104,12 +114,11 @@ onAuthStateChanged(auth, (user) => {
 					`
 				);
 			});
-			console.log(adminList)
 			document.querySelectorAll(".removeAdmin").forEach((el) => {
 				el.onclick = async (e) => {
 					let id = e.target.parentElement.id;
 					if (id === firebaseUser.email) {
-						alert("Cannot removed admin privileges from self")
+						alert("Cannot remove admin privileges from self")
 						return
 					}
 					let userDoc = await getDoc(doc(db, "users", id));
@@ -124,19 +133,45 @@ onAuthStateChanged(auth, (user) => {
 				};
 			});
 		});
+
+		const unsub2 = onSnapshot(collection(db, "subAdmin"), (collection) => {
+			document.getElementById("subAdminListWrap").replaceChildren();
+			adminList = [];
+			collection.forEach((doc) => {
+				adminList.push(doc.id);
+				document.getElementById("subAdminListWrap").insertAdjacentHTML(
+					"afterbegin",
+					`
+					<div class="subAdmin" id="${doc.id}">
+						<span class="subAdminEmail">${doc.id}</span>
+						<span class="material-symbols-outlined removeSubAdmin">close</span>
+					</div>
+					`
+				);
+			});
+			document.querySelectorAll(".removeSubAdmin").forEach((el) => {
+				el.onclick = async (e) => {
+					let id = e.target.parentElement.id;
+					if (id === firebaseUser.email) {
+						alert("Cannot removed admin privileges from self");
+						return;
+					}
+					let userDoc = await getDoc(doc(db, "users", id));
+					if (userDoc.exists()) {
+						userDoc = userDoc.data();
+						if (userDoc.isAdmin) {
+							userDoc.isAdmin = false;
+							await setDoc(doc(db, "users", id), userDoc);
+						}
+					}
+					await deleteDoc(doc(db, "subAdmin", id));
+				};
+			});
+		});
+		addListeners();
 	} else {
 		window.location.href = "../index.html";
 	}
-});
-
-document.getElementById("signOutWrap").addEventListener("click", () => {
-	signOut(auth)
-		.then(() => {
-			window.location.href = `${isAdminPage ? "../" : ""}index.html`;
-		})
-		.catch((error) => {
-			alert(`There was a error signing out: ${error}`);
-		});
 });
 
 const updateWeekend = () => {
@@ -187,17 +222,33 @@ document.getElementById("weekendForward").addEventListener("click", () => {
 weekendSelect.addEventListener("change", updateWeekend);
 
 document.getElementById("addAdminButton").onclick = async () => {
-	let email = document.getElementById("adminIn");
-	if (email.checkValidity()) {
-		await setDoc(doc(db, "admin", email.value), {})
-		let userDoc = await getDoc(doc(db, "users", email.value))
+	let emailIn = document.getElementById("adminIn")
+	if (emailIn.checkValidity()) {
+		await setDoc(doc(db, "admin", emailIn.value), {});
+		let userDoc = await getDoc(doc(db, "users", emailIn.value));
 		if (userDoc.exists()) {
-			userDoc = userDoc.data()
-			userDoc.isAdmin = true
-			await setDoc(doc(db, "users", email), userDoc)
+			let userInfo = userDoc.data();
+			userInfo.isAdmin = true;
+			await setDoc(doc(db, "users", emailIn.value), userInfo);
 		}
-		email.value = ""
+		emailIn.value = "";
 	} else {
-		alert("Please enter a valid email.")
+		alert("Please enter a valid email.");
+	}
+};
+
+document.getElementById("addSubAdminButton").onclick = async () => {
+	let emailIn = document.getElementById("subAdminIn");
+	if (emailIn.checkValidity()) {
+		await setDoc(doc(db, "subAdmin", emailIn.value), {});
+		let userDoc = await getDoc(doc(db, "users", emailIn.value));
+		if (userDoc.exists()) {
+			let userInfo = userDoc.data();
+			userInfo.isAdmin = true;
+			await setDoc(doc(db, "users", emailIn.value), userInfo);
+		}
+		emailIn.value = "";
+	} else {
+		alert("Please enter a valid email.");
 	}
 };

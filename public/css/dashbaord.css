@@ -96,7 +96,7 @@ body {
 	color: blue;
 }
 
-#adminWrap {
+#adminWrap, #subAdminWrap {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -106,7 +106,7 @@ body {
 
 
 
-#adminListWrap {
+#adminListWrap, #subAdminListWrap {
 	border: 1px solid black;
 	border-radius: 2vh;
 	width: 98%;
@@ -114,7 +114,7 @@ body {
 	background-color: whitesmoke;
 }
 
-.admin {
+.admin, .subAdmin {
 	font-size: 1.5vh;
 	display: flex;
 	flex-direction: row;
@@ -123,18 +123,18 @@ body {
 	width: 100%;
 }
 
-.removeAdmin {
+.removeAdmin, .removeSubAdmin {
 	margin-left: 2%;
 	font-size: 1vh;
 		cursor: pointer;
 	transition: .1s ease color;
 }
 
-.removeAdmin:hover {
+.removeAdmin:hover, .removeSubAdmin:hover {
 	color: rgb(95, 95, 95);
 }
 
-.removeAdmin:active {
+.removeAdmin:active, .removeSubAdmin:active {
 	color: rgb(180, 180, 180);
 }
 
