@@ -83,7 +83,7 @@ class Weekend {
 				}
 			}
 		}
-		return this.startDate && this.endDate;
+		return (this.startDate && this.endDate) ? true : false
 	}
 
 	updateFromTemplate(template, num) {
@@ -214,12 +214,15 @@ const formatTime = (timeString) => {
 	return timeString.slice(1) + "am";
 };
 
-const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", name = null) => {
+const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", name = null, openIDs = []) => {
 	let fullHTMLString = "";
 	const startDate = new Date(information.startDate + "T00:00:00");
 	const startDay = startDate.getDay();
 	const endDate = new Date(information.endDate + "T00:00:00");
 	let numDays = 1 + (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+	while (information.days.length < numDays) {
+		information.days.push([]);
+	}
 	let scheduleHtmlString = "";
 	for (let i = 0; i < numDays; i++) {
 		let dayHTMLString = "";
@@ -228,9 +231,14 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 		for (let event of information.days[i]) {
 			let attendeesString = "";
 			let inEvent = false;
-			let eventDate = new Date()
-			eventDate.setTime(startDate.getTime() + 1000 * 60 * 60 * 24 * i + Number(event.timeStart.slice(0,2)) * 1000 * 60 * 60 + Number(event.timeStart.slice(3)) * 1000 * 60)
-			let eventPassed = eventDate < (new Date())
+			let eventDate = new Date();
+			eventDate.setTime(
+				startDate.getTime() +
+					1000 * 60 * 60 * 24 * i +
+					Number(event.timeStart.slice(0, 2)) * 1000 * 60 * 60 +
+					Number(event.timeStart.slice(3)) * 1000 * 60
+			);
+			let eventPassed = eventDate < new Date();
 
 			for (let element of event.signups) {
 				if (element.displayName === name) {
@@ -238,9 +246,14 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 				}
 				attendeesString += `<li class="attendee ${element.status}">${element.displayName}</li>`;
 			}
-			eventsHTMLString += `<div class="eventWrap" id="${
-				type === "editor" ? event.id : i + "-" + eventNum
-			}"><div class="eventHeadWrap eIWrap"><span class="material-symbols-outlined collapse"> expand_circle_right </span><h2 class="eventTitle">${
+			let eventID = i + "-" + eventNum
+			eventsHTMLString += `<div class="eventWrap${
+				type != "editor" && openIDs.includes(eventID) ? " open" : ""
+			}" id="${
+				type === "editor" ? event.id : eventID
+			}"><div class="eventHeadWrap eIWrap"><span class="material-symbols-outlined eventCollapse${
+				type != "editor" && openIDs.includes(eventID) ? " open" : ""
+			}"> expand_circle_right </span><h2 class="eventTitle">${
 				event.title
 			}</h2><span class="eventTime">${formatTime(event.timeStart)}-${formatTime(event.timeEnd)}</span>${
 				type === "editor" ? '<span class="material-symbols-outlined addIcon deleteButton">delete</span>' : ""
@@ -262,9 +275,19 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 							type === "editor"
 								? '<span class="material-symbols-outlined">block</span>'
 								: `<span class="material-symbols-outlined ${
-										eventPassed ? "addDisabled" : (type === "schedule" || type === "editor" ? "addIcon" : "checkInLaunch")
+										eventPassed
+											? "addDisabled"
+											: type === "schedule" || type === "editor"
+											? "addIcon"
+											: "checkInLaunch"
 								  }"> ${
-										eventPassed ? "block" :(type === "schedule" ? (!inEvent ? "add_circle" : "cancel") : "task_alt")
+										eventPassed
+											? "block"
+											: type === "schedule"
+											? !inEvent
+												? "add_circle"
+												: "cancel"
+											: "task_alt"
 								  } </span>`
 					  }<span class="singedUpNum">${event.signups.length}</span>/<span class="eventSpots">${
 							event.numSpots
@@ -310,32 +333,28 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 	return parser.parseFromString(fullHTMLString + scheduleHtmlString, "text/html");
 };
 
-const handleClick = (click) => {
-	if (click.target.tagName === "SPAN") {
-		click.target.classList.toggle("open");
-		click.target.parentElement.parentElement.classList.toggle("open");
-	} else if (click.target.tagName === "path") {
-		click.target.parentElement.classList.toggle("open");
-		if (click.target.parentElement.classList.contains("dayCollapse")) {
-			click.target.parentElement.parentElement.parentElement.classList.toggle("open");
-		} else {
-			click.target.parentElement.parentElement.classList.toggle("open");
-		}
-	} else {
-		click.target.classList.toggle("open");
-		if (click.target.classList.contains("dayCollapse")) {
-			click.target.parentElement.parentElement.classList.toggle("open");
-		} else {
-			click.target.parentElement.classList.toggle("open");
-		}
-	}
-};
-
-const addListeners = () => {
-	let collapsing = document.querySelectorAll(".collapse, .dayCollapse");
+const addListeners = (openIDs = undefined) => {
+	let collapsing = document.querySelectorAll(".eventCollapse, .dayCollapse, .collapse");
 
 	for (let el of collapsing) {
-		el.addEventListener("click", handleClick);
+		if (el.classList.contains("eventCollapse") || el.classList.contains("dayCollapse")) {
+			el.onclick = (click) => {
+				el.classList.toggle("open");
+				el.parentElement.parentElement.classList.toggle("open");
+				if (openIDs != undefined && el.classList.contains("eventCollapse")) {
+					let id = el.parentElement.parentElement.id
+					if (openIDs.includes(id)) openIDs.splice(openIDs.indexOf(id), 1)
+					else openIDs.push(id)
+					console.log(openIDs);
+					
+				}
+			};
+		} else {
+			el.onclick = (click) => {
+				el.classList.toggle("open");
+				el.parentElement.classList.toggle("open");
+			};
+		}
 	}
 	let sideWrap = document.getElementById("sideMenuWrap");
 	if (sideWrap) {

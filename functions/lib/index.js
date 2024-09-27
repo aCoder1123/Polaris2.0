@@ -60,7 +60,7 @@ exports.handleSignup = onCall({
         if (event.signups[signupNum].email === email) {
             currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.splice(signupNum, 1);
             attendeeRemoved = true;
-            if ((eventDate.getTime() - currentDate.getTime()) < 1000 * 60 * 60 * 2) {
+            if (eventDate.getTime() - currentDate.getTime() < 1000 * 60 * 60 * 2) {
                 let studentDoc = db.collection("users").doc(email).get().data();
                 studentDoc.credit -= 5;
                 db.collection("users").doc(email).set(studentDoc);
@@ -88,7 +88,7 @@ exports.handleSignup = onCall({
                     admitStatus = "approved";
                 }
                 studentDoc = await db.collection("users").doc(request.auth.token.email).get();
-                student = JSON.parse(studentDoc.data().information);
+                student = studentDoc.data();
                 credit = student.credit;
                 currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.push({
                     displayName: displayName,
@@ -99,7 +99,7 @@ exports.handleSignup = onCall({
                 break;
             case "credit":
                 studentDoc = await db.collection("users").doc(request.auth.token.email).get();
-                student = JSON.parse(studentDoc.data().information);
+                student = studentDoc.data();
                 credit = student.credit;
                 currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.push({
                     displayName: displayName,
@@ -131,7 +131,10 @@ exports.handleSignup = onCall({
         }
     }
     try {
-        let setRes = await db.collection("activeWeekend").doc("default").set({
+        let setRes = await db
+            .collection("activeWeekend")
+            .doc("default")
+            .set({
             information: JSON.stringify(currentWeekend),
         });
         let attendeesRes = await manageAttendees(currentWeekend.days[Number(id[0])][Number(id.slice(2))]);
@@ -159,14 +162,19 @@ const saveEvents = async (request) => {
                 }
             }
             let startDate = new Date(activeWeekend.startDate + `T${event.timeStart}:00`);
+            startDate.setTime(startDate.getTime() + 1000 * 60 * 60 * 24 * i);
             template.start.dateTime = startDate.toISOString().substring(0, 23);
             let endDate = new Date(activeWeekend.startDate + `T${event.timeEnd}:00`);
+            endDate.setTime(endDate.getTime() + 1000 * 60 * 60 * 24 * i);
             template.end.dateTime = endDate.toISOString().substring(0, 23);
             let result = await createEventFromJSON(template);
             activeWeekend.days[i][eventNum].calID = result.data.id;
         }
     }
-    let setRes = await db.collection("activeWeekend").doc("default").set({
+    let setRes = await db
+        .collection("activeWeekend")
+        .doc("default")
+        .set({
         information: JSON.stringify(activeWeekend),
     });
     return JSON.stringify(setRes);
@@ -223,7 +231,10 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
         let current = new Date();
         if (releaseDate.getTime() - current.getTime() < 1000 * 60 * 10) {
             data.release.released = true;
-            await db.collection("activeWeekend").doc("default").set({ information: JSON.stringify(data) });
+            await db
+                .collection("activeWeekend")
+                .doc("default")
+                .set({ information: JSON.stringify(data) });
             await db.collection("activeWeekend").doc("queued").delete();
             await saveEvents({});
         }
@@ -233,15 +244,17 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
     if (!weekendRef.exists)
         return { status: "sucess", information: "No weekend currently exists" };
     let activeWeekend = JSON.parse(weekendRef.data().information);
-    let weekendEndDate = new Date(activeWeekend.endDate + "T23:59:59");
+    // let weekendEndDate = new Date(activeWeekend.endDate + "T23:59:59");
     let currentDate = new Date();
-    if (weekendEndDate.getTime() - currentDate.getTime() < 0)
-        return { status: "sucess", information: "No future weekend" };
+    // if (weekendEndDate.getTime() - currentDate.getTime() < 0)
+    // 	return { status: "sucess", information: "No future weekend" };
     for (let dayNum = 0; dayNum < activeWeekend.days.length; dayNum++) {
         for (let eventNum = 0; eventNum < activeWeekend.days[dayNum].length; eventNum++) {
             let event = activeWeekend.days[dayNum][eventNum];
             if ((event.admission.val === "creditLottery" || event.admission.val === "randLottery") &&
-                !event.admission.filtered && !activeWeekend.admission.filtered) {
+                !event.admission.filtered //&& !activeWeekend.admission.filtered
+            ) {
+                console.log("trying update");
                 let startDate;
                 if (activeWeekend.admission && activeWeekend.admission.lotteryTime) {
                     startDate = new Date(activeWeekend.admission.lotteryTime);
@@ -251,7 +264,7 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
                     startDate.setTime(startDate.getTime() + 1000 * 60 * 60 * 12); /* 12pm on the first day*/
                 }
                 let diff = startDate.getTime() - currentDate.getTime();
-                if (diff > 0 && diff < 1000 * 60 * 15) {
+                if (!event.admission.filtered && diff < 1000 * 60 * 15) {
                     changed = true;
                     let array = activeWeekend.days[dayNum][eventNum].signups;
                     activeWeekend.days[dayNum][eventNum].admission.filtered = true;
@@ -267,6 +280,13 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
                             const j = Math.floor(Math.random() * (i + 1));
                             [array[i], array[j]] = [array[j], array[i]];
                         }
+                    }
+                    for (let i = 0; i < array.length; i++) {
+                        if (i < event.numSpots) {
+                            array[i].status = array[i].status === "checkedIn" ? "checkedIn" : "approved";
+                        }
+                        else
+                            break;
                     }
                     await manageAttendees(activeWeekend.days[dayNum][eventNum]);
                     activeWeekend.admission.filtered = true;

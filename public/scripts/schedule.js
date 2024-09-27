@@ -39,6 +39,8 @@ let weekendInformation;
 let currentEventID;
 let idAsArray;
 
+let openIDs = []
+
 if (window.location.hostname === "127.0.0.1") {
 	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
@@ -60,13 +62,13 @@ onAuthStateChanged(auth, (user) => {
 				for (let node of document.querySelectorAll("body .dayWrap")) {
 					node.remove();
 				}
-				let nodes = dataToFullHTML(weekendInformation, scheduleType, firebaseUser.displayName);
+				let nodes = dataToFullHTML(weekendInformation, scheduleType, firebaseUser.displayName, openIDs);
 
 				let elements = nodes.querySelectorAll(".dayWrap");
 				for (let i = 0; i < elements.length; i++) {
 					wrap.append(elements[i]);
 				}
-				addListeners();
+				addListeners(openIDs);
 				document.querySelectorAll(".addIcon").forEach((el) => {
 					el.addEventListener("click", handleSignup);
 				});
@@ -94,7 +96,7 @@ onAuthStateChanged(auth, (user) => {
 						alert(`There was a error signing out: ${error}`);
 					});
 			});
-			addListeners();
+			addListeners(openIDs);
 		});
 	} else {
 		window.location.href = `index.html`;

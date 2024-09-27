@@ -127,25 +127,25 @@
 	transform: rotate(0deg);
 }
 
-.collapse:hover,
-.dayCollapse:hover {
+.eventCollapse:hover,
+.dayCollapse:hover, .collapse:hover {
 	color: hsl(0, 0%, 40%);
 	fill: hsl(0, 0%, 80%) !important;
 }
 
-.collapse:active,
-.dayCollapse:active {
+.eventCollapse:active,
+.dayCollapse:active, .collapse:active {
 	color: hsl(0, 0%, 60%);
 	fill: hsl(0, 0%, 60%) !important;
 }
 
-.collapse {
+.eventCollapse, .collapse {
 	cursor: pointer;
 	transition: linear 0.2s fill;
 	animation: forwards twist2 ease var(--collapseTime);
 }
 
-.collapse.open {
+.eventCollapse.open {
 	animation: forwards twist1 ease var(--collapseTime);
 }
 
@@ -227,8 +227,11 @@
 }
 
 .descWrap {
-	margin: -1.5vh 0;
 	font-size: 1.75vh;
+}
+
+.descWrap p {
+	margin: auto 0;
 }
 
 .descIcon {

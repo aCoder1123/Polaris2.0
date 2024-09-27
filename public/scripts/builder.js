@@ -147,12 +147,10 @@ onAuthStateChanged(auth, (user) => {
 const updateWeekend = () => {
 	let valid = workingWeekend.updateSelf();
 	if (valid) {
-		let wrap = document.getElementsByTagName("body")[0];
+		let wrap = document.getElementById("weekendInfo");
 		for (let node of document.querySelectorAll("body .dayWrap")) node.remove();
-
 		let elements = dataToFullHTML(workingWeekend, "editor").querySelectorAll(".dayWrap");
-		for (let i = 0; i < elements.length; i++) wrap.append(elements[i]);
-
+		for (let i = elements.length - 1; i >= 0; i--) wrap.insertAdjacentElement("afterend", elements[i]);
 		const startDate = new Date(workingWeekend.startDate + "T00:00:00");
 		const startDay = startDate.getDay();
 		let select = document.getElementById("daySelect");

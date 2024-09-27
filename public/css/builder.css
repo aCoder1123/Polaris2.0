@@ -12,10 +12,14 @@ body {
 }
 
 body section:nth-of-type(2) {
-	margin-left: calc(30vw + .15vw);
+	margin-left: calc(30vw + 0.15vw);
 }
 body section:last-of-type {
 	border-right: none;
+}
+
+#sideMenuWrap {
+	position: fixed;
 }
 
 /* Start of Schedule */
@@ -221,7 +225,6 @@ button {
 	display: block;
 }
 
-
 #buttonsWrap {
 	width: 90%;
 	display: flex;
@@ -254,6 +257,12 @@ button {
 		height: 100vh;
 		flex-shrink: 0;
 	}
+
+	#weekendInfo {
+		position: relative;
+		margin: 0;
+	}
+
 	#daysContainer {
 		min-width: max-content;
 	}
@@ -264,5 +273,9 @@ button {
 	.dayWrap {
 		min-width: 30px;
 		border-width: 2px;
+	}
+
+	body section:nth-of-type(2) {
+		margin-left: 0;
 	}
 }
