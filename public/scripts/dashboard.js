@@ -18,12 +18,15 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import {
 	getFunctions,
+	httpsCallable,
+	connectFunctionsEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 
 import { dataToFullHTML, addListeners, getUserFromEmail, getMenuHTMLString } from "./util.js";
 import { firebaseConfig, siteKey } from "./config.js";
 
 const app = initializeApp(firebaseConfig);
+if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
 	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
@@ -32,7 +35,13 @@ const appCheck = initializeAppCheck(app, {
 const auth = getAuth(app);
 const db = getFirestore(app, "maindb");
 const functions = getFunctions(app);
+const updateUserInfo = httpsCallable(functions, "updateUserInfo");
 addListeners();
+
+if (window.location.hostname === "127.0.0.1") {
+	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+	console.log("Connecting Firebase Emulator");
+}
 
 const weekendSelect = document.getElementById("dateSelect");
 
@@ -100,8 +109,8 @@ onAuthStateChanged(auth, (user) => {
 				throw error;
 			});
 		const unsub = onSnapshot(collection(db, "admin"), (collection) => {
-			document.getElementById("adminListWrap").replaceChildren()
-			adminList = []
+			document.getElementById("adminListWrap").replaceChildren();
+			adminList = [];
 			collection.forEach((doc) => {
 				adminList.push(doc.id);
 				document.getElementById("adminListWrap").insertAdjacentHTML(
@@ -118,8 +127,8 @@ onAuthStateChanged(auth, (user) => {
 				el.onclick = async (e) => {
 					let id = e.target.parentElement.id;
 					if (id === firebaseUser.email) {
-						alert("Cannot remove admin privileges from self")
-						return
+						alert("Cannot remove admin privileges from self");
+						return;
 					}
 					let userDoc = await getDoc(doc(db, "users", id));
 					if (userDoc.exists()) {
@@ -168,6 +177,12 @@ onAuthStateChanged(auth, (user) => {
 				};
 			});
 		});
+
+		const unsub3 = onSnapshot(doc(db, "settings", "config"), (doc) => {
+			document.getElementById("dataSheetURLIn").value = doc.data().dataSheet.URL;
+			document.getElementById("extractedID").value = doc.data().dataSheet.ID;
+		});
+
 		addListeners();
 	} else {
 		window.location.href = "../index.html";
@@ -222,7 +237,7 @@ document.getElementById("weekendForward").addEventListener("click", () => {
 weekendSelect.addEventListener("change", updateWeekend);
 
 document.getElementById("addAdminButton").onclick = async () => {
-	let emailIn = document.getElementById("adminIn")
+	let emailIn = document.getElementById("adminIn");
 	if (emailIn.checkValidity()) {
 		await setDoc(doc(db, "admin", emailIn.value), {});
 		let userDoc = await getDoc(doc(db, "users", emailIn.value));
@@ -251,4 +266,55 @@ document.getElementById("addSubAdminButton").onclick = async () => {
 	} else {
 		alert("Please enter a valid email.");
 	}
+};
+
+document.getElementById("dataSheetURLIn").onchange = (e) => {
+	if (!e.target.checkValidity()) return;
+	let extractedID = e.target.value.substring(39, 39 + 44); //ids start at index 39 in the link and are 44 characters long
+	if (extractedID.includes("/")) {
+		alert(
+			"Valid ID could not be parsed. Are you using the correct sharing link for the spreadsheet you wish to pull data from?"
+		);
+		return;
+	}
+	document.getElementById("extractedID").value = extractedID;
+};
+
+document.getElementById("dataSheetSubmit").onclick = async (e) => {
+	let linkIn = document.getElementById("dataSheetURLIn");
+	if (!linkIn.checkValidity()) {
+		alert("Please enter a valid link.");
+		return;
+	}
+	if (
+		!confirm("Are you sure you want to update the link? Is the sheet shared with or owned by polaris@westtown.edu?")
+	) {
+		return;
+	}
+	e.target.disabled = true;
+	try {
+		await updateDoc(doc(db, "settings", "config"), {
+			dataSheet: {
+				ID: document.getElementById("extractedID").value,
+				URL: document.getElementById("dataSheetURLIn").value,
+			},
+		});
+		alert("Link updated successfully. Press update now to realize changes.");
+	} catch (error) {
+		alert(`There was an error updating the link: ${error.message}`);
+		console.log(error);
+	}
+	e.target.disabled = false;
+};
+
+document.getElementById("infoUpdateButton").onclick = async (e) => {
+	e.target.disabled = true;
+	try {
+		await updateUserInfo();
+		alert("Information successfully updated.");
+	} catch (error) {
+		alert(`Error updating information: ${error.message}`);
+		console.log(error);
+	}
+	e.target.disabled = false;
 };

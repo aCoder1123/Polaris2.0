@@ -5,6 +5,7 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { sendMail, emailOptions } = require("./gmail/main");
 const { createEventFromJSON, manageAttendees, eventTemplate, deleteCalendarEvent } = require("./calendar/main");
+const { getSheetAsJSON } = require("./drive/main");
 admin.initializeApp();
 const db = getFirestore("maindb");
 const send = async (options) => {
@@ -335,5 +336,42 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
         return { status: "success", information: setRef };
     }
     return { status: "success", information: "no changes made" };
+});
+const updateUserInfoFunc = async () => {
+    let configDoc = await db.collection("settings").doc("config").get();
+    if (!configDoc.exists)
+        return;
+    configDoc = configDoc.data();
+    console.log(configDoc);
+    if (!configDoc.dataSheet)
+        return;
+    let sheet = await getSheetAsJSON(configDoc.dataSheet.ID);
+    console.log(sheet);
+    if (sheet.status === "error")
+        return;
+    if (!(sheet.data[0].email && sheet.data[0].cell && sheet.data[0].grade))
+        return;
+    let infoJSON = {};
+    for (let row of sheet.data) {
+        infoJSON[row.email] = row;
+    }
+    let batch = db.batch();
+    let usersSnap = await db.collection("users").get();
+    usersSnap.forEach((element) => {
+        if (infoJSON[element.id]) {
+            let updateData = { cell: infoJSON[element.id].cell, grade: infoJSON[element.id].grade };
+            batch.update(db.collection("users").doc(element.id), updateData);
+        }
+    });
+    await batch.commit();
+};
+exports.updateUserInfoPeriodic = onSchedule("0 12 * 1-6,9-12 fri", async (request) => {
+    // https://crontab.guru/#0_12_*_1-6,9-12_fri
+    await updateUserInfoFunc();
+});
+exports.updateUserInfo = onCall({
+    enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+}, async (request) => {
+    await updateUserInfoFunc();
 });
 //# sourceMappingURL=index.js.map
