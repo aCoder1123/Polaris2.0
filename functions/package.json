@@ -22,7 +22,8 @@
 		"fs": "^0.0.1-security",
 		"googleapis": "^105.0.0",
 		"ics": "^3.7.6",
-		"nodemailer": "^6.9.14"
+		"nodemailer": "^6.9.14",
+		"pdfkit": "^0.15.0"
 	},
 	"devDependencies": {
 		"@typescript-eslint/eslint-plugin": "^8.0.1",

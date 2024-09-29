@@ -36,12 +36,14 @@ const auth = getAuth(app);
 const db = getFirestore(app, "maindb");
 const functions = getFunctions(app);
 const updateUserInfo = httpsCallable(functions, "updateUserInfo");
-addListeners();
+const resetCreditFunction = httpsCallable(functions, "resetCredit");
 
 if (window.location.hostname === "127.0.0.1") {
 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 	console.log("Connecting Firebase Emulator");
 }
+
+addListeners();
 
 const weekendSelect = document.getElementById("dateSelect");
 
@@ -60,13 +62,6 @@ onAuthStateChanged(auth, (user) => {
 			}
 			userInformation = data;
 		});
-
-		// let pfp = document.querySelector("#menuPF img");
-		// if (pfp) {
-		// 	pfp.loading = "lazy";
-		// 	pfp.src = user.photoURL;
-		// 	document.getElementById("userName").innerText = user.displayName;
-		// }
 
 		document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, true, true));
 
@@ -318,3 +313,15 @@ document.getElementById("infoUpdateButton").onclick = async (e) => {
 	}
 	e.target.disabled = false;
 };
+
+document.getElementById("creditReset").onclick = async (e) => {
+	e.target.disabled = true
+	if (prompt("Are you sure you want to do this. All credit accrued by all students will be set to zero. This cannot be undone. Type \"RESET\" to confirm.") === "RESET") {
+		let res = await resetCreditFunction()
+		if (res.data.status === "error") alert(`Error resetting credit: ${res.data.information}`)
+		else alert("Credit reset successfully.")
+	} else {
+		alert("Credit not reset.")
+	}
+	e.target.disabled = false
+}

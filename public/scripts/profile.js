@@ -30,6 +30,17 @@ onAuthStateChanged(auth, (user) => {
 		getUserFromEmail(user.email, user.displayName, db, functions).then((data) => {
 			userInformation = data;
 			document.getElementById("credit").innerText = userInformation.credit;
+			let pastEventsString = "";
+			for (let event of userInformation.events) {
+				pastEventsString += `<div class="pastEventWrap">
+										<span class="eventDate">${event.date}</span> - 
+										<span class="eventTitle">${event.title}</span>
+									</div>`;
+			}
+			if (pastEventsString) {
+				document.getElementById("eventsWrap").innerHTML = pastEventsString
+				document.getElementById("eventsHead").innerText = `Past Events: (${userInformation.events.length})`;
+			}
 		});
 
 		let adminDoc = getDoc(doc(db, "admin", user.email)).then((doc) => {
@@ -50,7 +61,6 @@ onAuthStateChanged(auth, (user) => {
 			el.innerText = user.displayName;
 		}
 		document.getElementById("userPFP").src = user.photoURL;
-		
 	} else {
 		window.location.href = `index.html`;
 	}

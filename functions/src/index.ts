@@ -350,6 +350,9 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request: any
 							data = data.data();
 							if (!data.exists) continue;
 							data.credit += 10;
+							let eventDate = new Date(activeWeekend.startDate + "T00:00:00");
+							eventDate.setTime(eventDate.getTime() + 1000 * 60 * 60 * 24 * dayNum)
+							data.events.push({ title: event.title, date: eventDate.toDateString()});
 							await docRef.set(data);
 						} else if (student.status === "noShow" && i <= event.signupNum) {
 							let docRef = db.collection("users").doc(student.email);
@@ -414,5 +417,29 @@ exports.updateUserInfo = onCall(
 	},
 	async (request: any) => {
 		await updateUserInfoFunc();
+	}
+);
+
+exports.resetCredit = onCall(
+	{
+		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+	},
+	async (request: any) => {
+		let admin = await db.collection("admin").doc(request.auth.token.email).get()
+		if (!admin.exists) return {status: "error", information: "User not admin."}
+		let users = await db.collection("users").get()
+		let batch = db.batch()
+		users.forEach((user:any) => {
+			if (!user.data().isAdmin) {
+				batch.update(db.collection("users").doc(user.id), {credit: 0});
+			}
+		})
+		try {
+			await batch.commit()
+			return {status: "success", information: "All credit set to zero."}
+		} catch (error: any) {
+			return { status: "error", information: error.message };
+		}
+
 	}
 );

@@ -184,6 +184,18 @@ body {
 	margin: 0 0.75vw;
 }
 
+#creditResetWrap {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+#creditReset {
+	margin: 1vh 0;
+}
+
 @media all and (orientation: portrait) {
 	html {
 		width: 100vw;
