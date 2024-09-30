@@ -38,7 +38,7 @@ async function loadSavedCredentialsIfExist() {
  * @param {OAuth2Client} client
  * @return {Promise<void>}
  */
-async function saveCredentials(client: any) {
+async function saveCredentials(client) {
 	const content = await fs.readFile(CREDENTIALS_PATH);
 	const keys = JSON.parse(content);
 	const key = keys.installed || keys.web;
@@ -95,7 +95,7 @@ exports.eventTemplate = {
 	},
 };
 
-exports.createEventFromJSON = async (eventDetails: object) => {
+exports.createEventFromJSON = async (eventDetails) => {
 	let auth = await authorize();
 	const calendar = google.calendar({ version: "v3", auth });
 	let result = await calendar.events.insert(
@@ -109,7 +109,7 @@ exports.createEventFromJSON = async (eventDetails: object) => {
 	return result
 };
 
-exports.manageAttendees = async (event: any, calendarID = "primary") => {
+exports.manageAttendees = async (event, calendarID = "primary") => {
 	if (!event.calID) return
 	let auth = await authorize();
 	const calendar = google.calendar({ version: "v3", auth });
@@ -135,7 +135,7 @@ exports.manageAttendees = async (event: any, calendarID = "primary") => {
 	}
 };
 
-exports.deleteCalendarEvent = async (eventID: string, calendarID = "primary") => {
+exports.deleteCalendarEvent = async (eventID, calendarID = "primary") => {
 	let auth = await authorize();
 	const calendar = google.calendar({ version: "v3", auth });
 	await calendar.events
@@ -143,9 +143,9 @@ exports.deleteCalendarEvent = async (eventID: string, calendarID = "primary") =>
 			calendarId: calendarID,
 			eventId: eventID,
 		})
-		.then((res: any) => {
+		.then((res) => {
 			return res;
-		}).catch((error: any) => {
+		}).catch((error) => {
 			return error.message
 		})
 };

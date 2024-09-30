@@ -10,7 +10,7 @@ const { getSheetAsJSON } = require("./drive/main")
 admin.initializeApp();
 const db = getFirestore("maindb");
 
-const send = async (options: object) => {
+const send = async (options) => {
 	let messageId = await sendMail(options);
 	return messageId;
 };
@@ -19,7 +19,7 @@ exports.sendEmail = onCall(
 	{
 		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
 	},
-	(request: any) => {
+	(request) => {
 		let messageOptions = emailOptions;
 		messageOptions.to = request.data.email;
 		messageOptions.subject = request.data.subject;
@@ -31,9 +31,9 @@ exports.sendEmail = onCall(
 
 exports.bugReport = onCall(
 	{
-		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+		enforceAppCheck: true, 
 	},
-	(request: any) => {
+	(request) => {
 		let messageOptions = emailOptions;
 		messageOptions.to = "bailey.tuckman@westtown.edu";
 		messageOptions.subject = `Polaris bug report: ${request.data.page}`;
@@ -42,7 +42,7 @@ exports.bugReport = onCall(
 			year: "numeric",
 			month: "short",
 			day: "numeric",
-		})} there was a bug reported on  ${request.data.page} by ${
+		})} there was a bug reported on ${request.data.page} by ${
 			request.data.email ? request.data.email : "anonymous"
 		}.\n\nDescription:\n${request.data.description}\n\nSteps to Reproduce: ${request.data.repro}`;
 
@@ -52,9 +52,9 @@ exports.bugReport = onCall(
 
 exports.handleSignup = onCall(
 	{
-		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+		enforceAppCheck: true, 
 	},
-	async (request: any) => {
+	async (request) => {
 		if (request.auth === null) return { status: "failed", information: "User not signed in." };
 		let currentWeekendDoc = await db.collection("activeWeekend").doc("default").get();
 		let currentWeekend = JSON.parse(currentWeekendDoc.data().information);
@@ -131,7 +131,7 @@ exports.handleSignup = onCall(
 						credit: credit,
 					});
 					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.sort(
-						(a: any, b: any) => b.credit - a.credit
+						(a, b) => b.credit - a.credit
 					);
 					break;
 				default:
@@ -168,13 +168,13 @@ exports.handleSignup = onCall(
 				});
 			let attendeesRes = await manageAttendees(currentWeekend.days[Number(id[0])][Number(id.slice(2))]);
 			return { status: "success", information: JSON.stringify({ db: setRes, GCal: attendeesRes }) };
-		} catch (error: any) {
+		} catch (error) {
 			return { status: "error", information: error.message };
 		}
 	}
 );
 
-const saveEvents = async (request: any) => {
+const saveEvents = async (request) => {
 	let activeWeekend = await db.collection("activeWeekend").doc("default").get();
 	activeWeekend = JSON.parse(activeWeekend.data().information);
 	for (let i = 0; i < activeWeekend.days.length; i++) {
@@ -212,13 +212,13 @@ const saveEvents = async (request: any) => {
 
 exports.saveWeekendEvents = onCall(
 	{
-		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+		enforceAppCheck: true, 
 	},
-	(request: any) => {
+	(request) => {
 		try {
 			let res = saveEvents(request);
 			return { status: "sucess", information: res };
-		} catch (error: any) {
+		} catch (error) {
 			return { status: "error", information: error.message };
 		}
 	}
@@ -226,15 +226,15 @@ exports.saveWeekendEvents = onCall(
 
 exports.deleteEvent = onCall(
 	{
-		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+		enforceAppCheck: true, 
 	},
-	async (request: any) => {
+	async (request) => {
 		if (request.data.eventID) return await deleteCalendarEvent(request.data.eventID);
 		try {
 			for (let id of request.data.eventIDs) {
 				await deleteCalendarEvent(id);
 			}
-		} catch (error: any) {
+		} catch (error) {
 			return { status: "error", information: error.message };
 		}
 	}
@@ -242,9 +242,9 @@ exports.deleteEvent = onCall(
 
 exports.createNewUser = onCall(
 	{
-		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+		enforceAppCheck: true, 
 	},
-	async (request: any) => {
+	async (request) => {
 		const userDoc = {
 			isAdmin: false,
 			email: "",
@@ -262,7 +262,7 @@ exports.createNewUser = onCall(
 	}
 );
 
-exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request: any) => {
+exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => {
 	let queuedRef = await db.collection("activeWeekend").doc("queued").get();
 	if (queuedRef.exists) {
 		let data = queuedRef.data().information;
@@ -282,20 +282,20 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request: any
 
 	let weekendRef = await db.collection("activeWeekend").doc("default").get();
 	let changed = false;
-	if (!weekendRef.exists) return { status: "sucess", information: "No weekend currently exists" };
+	if (!weekendRef.exists) return { status: "success", information: "No weekend currently exists" };
 	let activeWeekend = JSON.parse(weekendRef.data().information);
-	// let weekendEndDate = new Date(activeWeekend.endDate + "T23:59:59");
+	let weekendEndDate = new Date(activeWeekend.endDate + "T23:59:59");
 	let currentDate = new Date();
-	// if (weekendEndDate.getTime() - currentDate.getTime() < 0)
-	// 	return { status: "sucess", information: "No future weekend" };
+	if (weekendEndDate.getTime() - currentDate.getTime() < 0)
+		return { status: "success", information: "No future weekend" };
 	for (let dayNum = 0; dayNum < activeWeekend.days.length; dayNum++) {
 		for (let eventNum = 0; eventNum < activeWeekend.days[dayNum].length; eventNum++) {
 			let event = activeWeekend.days[dayNum][eventNum];
 			if (
 				(event.admission.val === "creditLottery" || event.admission.val === "randLottery") &&
-				!event.admission.filtered //&& !activeWeekend.admission.filtered
+				!event.admission.filtered 
 			) {
-				console.log("trying update")
+				
 				let startDate;
 				if (activeWeekend.admission && activeWeekend.admission.lotteryTime) {
 					startDate = new Date(activeWeekend.admission.lotteryTime);
@@ -312,7 +312,7 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request: any
 						for (let attendee of array) {
 							attendee.creditVal = (1 + Math.floor(attendee.credit / 10)) * Math.random();
 						}
-						array.sort((a: any, b: any) => b.creditVal - a.creditVal);
+						array.sort((a, b) => b.creditVal - a.creditVal);
 					} else {
 						// https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 						for (let i = array.length - 1; i >= 0; i--) {
@@ -382,13 +382,11 @@ const updateUserInfoFunc = async () => {
 	let configDoc = await db.collection("settings").doc("config").get();
 	if (!configDoc.exists) return;
 	configDoc = configDoc.data();
-	console.log(configDoc)
 	if (!configDoc.dataSheet) return;
 	let sheet = await getSheetAsJSON(configDoc.dataSheet.ID);
-	console.log(sheet)
 	if (sheet.status === "error") return;
 	if (!(sheet.data[0].email && sheet.data[0].cell && sheet.data[0].grade)) return;
-	let infoJSON: any = {};
+	let infoJSON = {};
 
 	for (let row of sheet.data) {
 		infoJSON[row.email] = row;
@@ -396,7 +394,7 @@ const updateUserInfoFunc = async () => {
 	let batch = db.batch();
 
 	let usersSnap = await db.collection("users").get();
-	usersSnap.forEach((element: any) => {
+	usersSnap.forEach((element) => {
 		if (infoJSON[element.id]) {
 			let updateData = { cell: infoJSON[element.id].cell, grade: infoJSON[element.id].grade };
 			batch.update(db.collection("users").doc(element.id), updateData);
@@ -406,30 +404,30 @@ const updateUserInfoFunc = async () => {
 	await batch.commit();
 }
 
-exports.updateUserInfoPeriodic = onSchedule("0 12 * 1-6,9-12 fri", async (request: any) => {
+exports.updateUserInfoPeriodic = onSchedule("0 12 * 1-6,9-12 fri", async (request) => {
 	// https://crontab.guru/#0_12_*_1-6,9-12_fri
 	await updateUserInfoFunc()
 });
 
 exports.updateUserInfo = onCall(
 	{
-		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+		enforceAppCheck: true, 
 	},
-	async (request: any) => {
+	async (request) => {
 		await updateUserInfoFunc();
 	}
 );
 
 exports.resetCredit = onCall(
 	{
-		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+		enforceAppCheck: true, 
 	},
-	async (request: any) => {
+	async (request) => {
 		let admin = await db.collection("admin").doc(request.auth.token.email).get()
 		if (!admin.exists) return {status: "error", information: "User not admin."}
 		let users = await db.collection("users").get()
 		let batch = db.batch()
-		users.forEach((user:any) => {
+		users.forEach((user) => {
 			if (!user.data().isAdmin) {
 				batch.update(db.collection("users").doc(user.id), {credit: 0});
 			}
@@ -437,7 +435,7 @@ exports.resetCredit = onCall(
 		try {
 			await batch.commit()
 			return {status: "success", information: "All credit set to zero."}
-		} catch (error: any) {
+		} catch (error) {
 			return { status: "error", information: error.message };
 		}
 
