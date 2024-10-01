@@ -152,7 +152,6 @@ const formatCheckIn = () => {
 			wrap.appendChild(node);
 		}
 	}
-	console.log("setting link")
 	document.getElementById("mailLink").href = `mailto:${attendeesEmails.join(",")}?subject=${
 		document.getElementById("windowHead").innerText
 	}`;
@@ -165,7 +164,6 @@ const handleCheckIn = (e) => {
 	currentEventID = event.id;
 	idAsArray = [Number(currentEventID[0]), Number(currentEventID.slice(2))];
 	formatCheckIn();
-	console.log("doing check in")
 };
 
 document.getElementById("exitSignup").addEventListener("click", (e) => {
@@ -179,7 +177,7 @@ document.getElementById("sortType").addEventListener("click", (e) => {
 	formatCheckIn();
 });
 
-document.getElementById("checkInSaveButton").onclick = () => {
+const saveCheckIn = async () => {
 	let statuses = document.querySelectorAll("#attendeesWrap .statusSelect");
 	for (let status of statuses) {
 		let attendeeStatus = status.value;
@@ -193,7 +191,7 @@ document.getElementById("checkInSaveButton").onclick = () => {
 			}
 		}
 	}
-	setDoc(doc(db, "activeWeekend", "default"), { information: JSON.stringify(weekendInformation) })
+	await setDoc(doc(db, "activeWeekend", "default"), { information: JSON.stringify(weekendInformation) })
 		.then((val) => {
 			document.getElementById("checkInWindow").classList.toggle("active");
 		})
@@ -201,6 +199,8 @@ document.getElementById("checkInSaveButton").onclick = () => {
 			alert(`Error saving statuses: ${error}`);
 		});
 };
+
+document.getElementById("checkInSaveButton").onclick = saveCheckIn
 
 function setPrint() {
 	const closePrint = () => {
@@ -211,17 +211,51 @@ function setPrint() {
 	this.contentWindow.print();
 }
 
-document.getElementById("attendeesPrint").onclick = (e) => {
-	let printFrame = document.createElement("iframe")
-	let currentEvent = weekendInformation.days[idAsArray[0]][idAsArray[1]]
-	let srcString = `<h1>${currentEvent.title}</h1>`
-	for (let attendee of currentEvent.signups) {
-		if (attendee.status === "checkedIn") {
-			srcString += `<br><h3>${attendee.displayName}</h3>`;
-		}
+document.getElementById("attendeesPrint").onclick = async (e) => {
+	await saveCheckIn();
+	let event = weekendInformation.days[idAsArray[0]][idAsArray[1]];
+	let printString = `
+	----------------------------\n\r
+	| Westtown School Weekends |\n\r
+	----------------------------\n\r
+	\n\r
+	\n\r
+	${event.title}\n\r
+	\n\r
+	`;
+	let i = 1;
+	for (let attendee of event.signups) {
+		let attendeeDoc = await getDoc(doc(db, "users", attendee.email));
+		if (!attendeeDoc.exists()) return;
+		attendeeDoc = attendeeDoc.data();
+		printString += `${i}. ${attendee.displayName}${attendeeDoc.cell ? " - " + attendeeDoc.cell : ""} - ${
+			attendee.email
+		}\n\r`;
+		i++;
 	}
-	printFrame.srcdoc = srcString
-	printFrame.onload = setPrint
-	printFrame.style.display = "none"
-	document.body.appendChild(printFrame);
+	console.log(printString);
+
+	const timeout = 5000;
+
+	const controller = new AbortController();
+	const id = setTimeout(() => {
+		controller.abort();
+	}, timeout);
+
+	try {
+		await fetch("http://weekendprinter.westtown.edu:9100/", {
+			method: "POST",
+			body: printString,
+			signal: controller.signal,
+		});
+	} catch (error) {
+		if (error.name === "TypeError") {
+			alert("Printer not found. Are you connected to wifi-secure?");
+		} else if (error.name === "AbortError") {
+			alert("Printing initialized.");
+		} else {
+			alert(`Error printing: ${error.message}`);
+		}
+		clearTimeout(id);
+	}
 };

@@ -7,16 +7,18 @@ body {
 	height: 100vh;
 	margin: 0;
 	position: static;
+	overflow: auto;
 }
 
 /* Start of Schedule */
 #weekendInfo {
 	width: 24.8vw;
-	height: 100vh;
+	min-height: 100vh;
 	background-color: rgb(255, 255, 255);
 	border-right: 0.15vw solid black;
 	flex-shrink: 0;
 	flex-grow: 0;
+	overflow-y: scroll;
 }
 
 #infoHead,
@@ -34,6 +36,11 @@ body {
 	font-size: 4vh;
 	background-color: var(--header-blue);
 	color: white;
+}
+
+#infoHead {
+	position: sticky;
+	top: 0;
 }
 
 #infoContainer {

@@ -83,7 +83,7 @@ class Weekend {
 				}
 			}
 		}
-		return (this.startDate && this.endDate) ? true : false
+		return this.startDate && this.endDate ? true : false;
 	}
 
 	updateFromTemplate(template, num) {
@@ -246,7 +246,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 				}
 				attendeesString += `<li class="attendee ${element.status}">${element.displayName}</li>`;
 			}
-			let eventID = i + "-" + eventNum
+			let eventID = i + "-" + eventNum;
 			eventsHTMLString += `<div class="eventWrap${
 				type != "editor" && openIDs.includes(eventID) ? " open" : ""
 			}" id="${
@@ -275,19 +275,15 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 							type === "editor"
 								? '<span class="material-symbols-outlined">block</span>'
 								: `<span class="material-symbols-outlined ${
-										eventPassed
-											? "addDisabled"
-											: type === "schedule" || type === "editor"
-											? "addIcon"
-											: "checkInLaunch"
+										type === "admin" ? "checkInLaunch" : eventPassed ? "addDisabled" : "addIcon"
 								  }"> ${
-										eventPassed
+										type === "admin"
+											? "task_alt"
+											: eventPassed
 											? "block"
-											: type === "schedule"
-											? !inEvent
-												? "add_circle"
-												: "cancel"
-											: "task_alt"
+											: !inEvent
+											? "add_circle"
+											: "cancel"
 								  } </span>`
 					  }<span class="singedUpNum">${event.signups.length}</span>/<span class="eventSpots">${
 							event.numSpots
@@ -342,11 +338,10 @@ const addListeners = (openIDs = undefined) => {
 				el.classList.toggle("open");
 				el.parentElement.parentElement.classList.toggle("open");
 				if (openIDs != undefined && el.classList.contains("eventCollapse")) {
-					let id = el.parentElement.parentElement.id
-					if (openIDs.includes(id)) openIDs.splice(openIDs.indexOf(id), 1)
-					else openIDs.push(id)
+					let id = el.parentElement.parentElement.id;
+					if (openIDs.includes(id)) openIDs.splice(openIDs.indexOf(id), 1);
+					else openIDs.push(id);
 					console.log(openIDs);
-					
 				}
 			};
 		} else {
@@ -495,7 +490,7 @@ const getMenuHTMLString = (user, adminPage, admin = false) => {
 			</div>
 		</div>
 	`;
-}
+};
 
 const handleDBError = (error) => {
 	if (error.message.includes("permissions")) {
