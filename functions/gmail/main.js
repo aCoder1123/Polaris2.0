@@ -33,8 +33,8 @@ exports.sendMail = async (options) => {
 
 exports.emailOptions = {
 		to: "",
-		cc: "bailey.tuckman@gmail.com",
-		replyTo: "bailey.tuckman@gmail.com",
+		cc: "",
+		replyTo: "polaris@westtown.edu",
 		subject: "",
 		text: "",
 		html: "",

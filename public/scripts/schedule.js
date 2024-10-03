@@ -20,6 +20,7 @@ import { firebaseConfig, siteKey } from "./config.js";
 import { dataToFullHTML, addListeners, getUserFromEmail, getMenuHTMLString } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
+if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
 	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
@@ -30,6 +31,7 @@ const db = getFirestore(app, "maindb");
 const functions = getFunctions(app);
 
 const handleSignupFunc = httpsCallable(functions, "handleSignup");
+const printRosterFunc = httpsCallable(functions, "printRoster");
 
 let scheduleType = "schedule";
 let userInformation;
@@ -213,49 +215,11 @@ function setPrint() {
 
 document.getElementById("attendeesPrint").onclick = async (e) => {
 	await saveCheckIn();
-	let event = weekendInformation.days[idAsArray[0]][idAsArray[1]];
-	let printString = `
-	----------------------------\n\r
-	| Westtown School Weekends |\n\r
-	----------------------------\n\r
-	\n\r
-	\n\r
-	${event.title}\n\r
-	\n\r
-	`;
-	let i = 1;
-	for (let attendee of event.signups) {
-		let attendeeDoc = await getDoc(doc(db, "users", attendee.email));
-		if (!attendeeDoc.exists()) return;
-		attendeeDoc = attendeeDoc.data();
-		printString += `${i}. ${attendee.displayName}${attendeeDoc.cell ? " - " + attendeeDoc.cell : ""} - ${
-			attendee.email
-		}\n\r`;
-		i++;
-	}
-	console.log(printString);
-
-	const timeout = 5000;
-
-	const controller = new AbortController();
-	const id = setTimeout(() => {
-		controller.abort();
-	}, timeout);
-
 	try {
-		await fetch("http://weekendprinter.westtown.edu:9100/", {
-			method: "POST",
-			body: printString,
-			signal: controller.signal,
-		});
+		await printRosterFunc({ idAsArray: idAsArray })
+		alert("Roster printed to the Marry Leads Room printer")
 	} catch (error) {
-		if (error.name === "TypeError") {
-			alert("Printer not found. Are you connected to wifi-secure?");
-		} else if (error.name === "AbortError") {
-			alert("Printing initialized.");
-		} else {
-			alert(`Error printing: ${error.message}`);
-		}
-		clearTimeout(id);
+		alert(`Error printing roster: ${error.message}`)
 	}
+
 };

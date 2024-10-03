@@ -2,10 +2,12 @@ const { onCall, HttpsError, onRequest } = require("firebase-functions/v2/https")
 const admin = require("firebase-admin");
 const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
+const fs = require("fs");
+const PDFDocument = require("pdfkit");
 
 const { sendMail, emailOptions } = require("./gmail/main");
 const { createEventFromJSON, manageAttendees, eventTemplate, deleteCalendarEvent } = require("./calendar/main");
-const { getSheetAsJSON } = require("./drive/main")
+const { getSheetAsJSON } = require("./drive/main");
 
 admin.initializeApp();
 const db = getFirestore("maindb");
@@ -31,7 +33,7 @@ exports.sendEmail = onCall(
 
 exports.bugReport = onCall(
 	{
-		enforceAppCheck: true, 
+		enforceAppCheck: true,
 	},
 	(request) => {
 		let messageOptions = emailOptions;
@@ -52,7 +54,7 @@ exports.bugReport = onCall(
 
 exports.handleSignup = onCall(
 	{
-		enforceAppCheck: true, 
+		enforceAppCheck: true,
 	},
 	async (request) => {
 		if (request.auth === null) return { status: "failed", information: "User not signed in." };
@@ -130,9 +132,7 @@ exports.handleSignup = onCall(
 						status: admitStatus,
 						credit: credit,
 					});
-					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.sort(
-						(a, b) => b.credit - a.credit
-					);
+					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.sort((a, b) => b.credit - a.credit);
 					break;
 				default:
 					if (event.signups.length < event.numSpots) {
@@ -212,7 +212,7 @@ const saveEvents = async (request) => {
 
 exports.saveWeekendEvents = onCall(
 	{
-		enforceAppCheck: true, 
+		enforceAppCheck: true,
 	},
 	(request) => {
 		try {
@@ -226,7 +226,7 @@ exports.saveWeekendEvents = onCall(
 
 exports.deleteEvent = onCall(
 	{
-		enforceAppCheck: true, 
+		enforceAppCheck: true,
 	},
 	async (request) => {
 		if (request.data.eventID) return await deleteCalendarEvent(request.data.eventID);
@@ -242,7 +242,7 @@ exports.deleteEvent = onCall(
 
 exports.createNewUser = onCall(
 	{
-		enforceAppCheck: true, 
+		enforceAppCheck: true,
 	},
 	async (request) => {
 		const userDoc = {
@@ -293,9 +293,8 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 			let event = activeWeekend.days[dayNum][eventNum];
 			if (
 				(event.admission.val === "creditLottery" || event.admission.val === "randLottery") &&
-				!event.admission.filtered 
+				!event.admission.filtered
 			) {
-				
 				let startDate;
 				if (activeWeekend.admission && activeWeekend.admission.lotteryTime) {
 					startDate = new Date(activeWeekend.admission.lotteryTime);
@@ -319,12 +318,11 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 							const j = Math.floor(Math.random() * (i + 1));
 							[array[i], array[j]] = [array[j], array[i]];
 						}
-						
 					}
 					for (let i = 0; i < array.length; i++) {
 						if (i < event.numSpots) {
-							array[i].status = array[i].status === "checkedIn" ? "checkedIn" : "approved"
-						} else break
+							array[i].status = array[i].status === "checkedIn" ? "checkedIn" : "approved";
+						} else break;
 					}
 					await manageAttendees(activeWeekend.days[dayNum][eventNum]);
 					activeWeekend.admission.filtered = true;
@@ -351,15 +349,15 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 							if (!data.exists) continue;
 							data.credit += 10;
 							let eventDate = new Date(activeWeekend.startDate + "T00:00:00");
-							eventDate.setTime(eventDate.getTime() + 1000 * 60 * 60 * 24 * dayNum)
-							data.events.push({ title: event.title, date: eventDate.toDateString()});
+							eventDate.setTime(eventDate.getTime() + 1000 * 60 * 60 * 24 * dayNum);
+							data.events.push({ title: event.title, date: eventDate.toDateString() });
 							await docRef.set(data);
 						} else if (student.status === "noShow" && i <= event.signupNum) {
 							let docRef = db.collection("users").doc(student.email);
 							let data = await docRef.get();
 							if (!data.exists) continue;
 							data = data.data();
-							data.credit -= 5;
+							data.credit = data.credit >= 5 ? data.credit - 5 : 0;
 							await docRef.set(data);
 						}
 					}
@@ -392,26 +390,44 @@ const updateUserInfoFunc = async () => {
 		infoJSON[row.email] = row;
 	}
 	let batch = db.batch();
-
+	let batchList = [];
 	let usersSnap = await db.collection("users").get();
+	let i = 0;
+
 	usersSnap.forEach((element) => {
 		if (infoJSON[element.id]) {
-			let updateData = { cell: infoJSON[element.id].cell, grade: infoJSON[element.id].grade };
+			console.log(infoJSON[element.id]);
+			let userData = element.data();
+			let updateData = {
+				cell: infoJSON[element.id].cell ? infoJSON[element.id].cell : "",
+				grade: infoJSON[element.id].grade,
+				day_boarding: infoJSON[element.id].day_boarding,
+				gradyear: infoJSON[element.id].gradyear,
+				displayName: `${infoJSON[element.id].preferredname} ${infoJSON[element.id].lastname}`,
+			};
 			batch.update(db.collection("users").doc(element.id), updateData);
+			i++;
+			if (i > 50) {
+				batchList.push(batch.commit());
+				batch = db.batch();
+				i = 0;
+			}
 		}
 	});
-
-	await batch.commit();
-}
+	if (i != 0) batchList.push(batch.commit());
+	await Promise.all(batchList).catch((e) => {
+		return { status: "error", information: JSON.stringify(e) };
+	});
+};
 
 exports.updateUserInfoPeriodic = onSchedule("0 12 * 1-6,9-12 fri", async (request) => {
 	// https://crontab.guru/#0_12_*_1-6,9-12_fri
-	await updateUserInfoFunc()
+	await updateUserInfoFunc();
 });
 
 exports.updateUserInfo = onCall(
 	{
-		enforceAppCheck: true, 
+		enforceAppCheck: true,
 	},
 	async (request) => {
 		await updateUserInfoFunc();
@@ -420,24 +436,98 @@ exports.updateUserInfo = onCall(
 
 exports.resetCredit = onCall(
 	{
-		enforceAppCheck: true, 
+		enforceAppCheck: true,
 	},
 	async (request) => {
-		let admin = await db.collection("admin").doc(request.auth.token.email).get()
-		if (!admin.exists) return {status: "error", information: "User not admin."}
-		let users = await db.collection("users").get()
-		let batch = db.batch()
+		let admin = await db.collection("admin").doc(request.auth.token.email).get();
+		if (!admin.exists) return { status: "error", information: "User not admin." };
+		let users = await db.collection("users").get();
+		let batch = db.batch();
 		users.forEach((user) => {
 			if (!user.data().isAdmin) {
-				batch.update(db.collection("users").doc(user.id), {credit: 0});
+				batch.update(db.collection("users").doc(user.id), { credit: 0 });
 			}
-		})
+		});
 		try {
-			await batch.commit()
-			return {status: "success", information: "All credit set to zero."}
+			await batch.commit();
+			return { status: "success", information: "All credit set to zero." };
 		} catch (error) {
 			return { status: "error", information: error.message };
 		}
+	}
+);
 
+exports.printRoster = onCall(
+	{
+		enforceAppCheck: true,
+	},
+	async (request) => {
+		let requesterDoc = await db.collection("users").doc(request.auth.token.email).get();
+		if (!requesterDoc.data().isAdmin)
+			return { status: "fail", information: "Request created by non-Admin account." };
+		let activeWeekend = (await db.collection("activeWeekend").doc("default").get()).data();
+		if (!activeWeekend) return { status: "fail", information: "No active weekend found." };
+		activeWeekend = JSON.parse(activeWeekend.information);
+		let event = activeWeekend.days[request.data.idAsArray[0]][request.data.idAsArray[1]];
+		let people = [];
+		for (let signup of event.signups) {
+			if (signup.status != "checkedIn") continue;
+			let personDoc = (await db.collection("users").doc(signup.email).get()).data();
+			people.push({
+				email: signup.email,
+				name: personDoc.displayName,
+				cell: personDoc.cell ? personDoc.cell : "",
+				grade: personDoc.grade,
+			});
+		}
+		people.sort((a, b) => {
+			[a.displayName, b.displayName].sort()[0] === a.displayName ? 1 : -1;
+		});
+
+		const docWidth = 595.28;
+		const docHeight = 841.89;
+
+		const doc = new PDFDocument({ font: "Courier", size: "A4" });
+		// doc.pipe(fs.createWriteStream("testing.pdf"));
+
+		doc.image("polarisLogo.png", (docWidth - 200) / 2, 10, {
+			width: 200,
+			align: "center",
+			valign: "center",
+		});
+
+		doc.image("WTLogo.jpeg", (docWidth - 30) / 2, 90, {
+			width: 30,
+			align: "center",
+			valign: "center",
+		});
+		doc.moveDown(6);
+		doc.fontSize(24).text(event.title, { align: "center" });
+		doc.moveDown(2);
+		let counter = 1;
+		for (let student of people) {
+			doc.fontSize(10).text(
+				`${counter}. ${student.name} - ${student.email} - ${
+					student.cell ? student.cell : "no phone number"
+				} - ${student.grade}th Grade`,
+				{ align: "left" }
+			);
+			counter++;
+		}
+		doc.end();
+
+		("attachments");
+
+		let messageOptions = emailOptions;
+		messageOptions.to ="pkkjx65dthv83@hpeprint.com";
+		// messageOptions.subject = request.data.subject;
+		// messageOptions.text = request.data.text;
+		messageOptions.attachments = {
+			// path: "./testing.pdf",
+			filename: "Roster.pdf",
+			content: doc
+		};
+
+		return send(messageOptions);
 	}
 );

@@ -453,6 +453,10 @@ const getMenuHTMLString = (user, adminPage, admin = false) => {
 				/>
 				<h2 id="userName">${user ? user.displayName : ""}</h2>
 			</a>
+			<a class="menuWrap" href="${adminPage ? "../schedule.html" : "./schedule.html"}">
+				<span class="material-symbols-outlined">calendar_month</span>
+				<span class="menuText">Schedule</span>
+			</a>
 			${
 				admin
 					? `
