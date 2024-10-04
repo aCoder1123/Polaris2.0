@@ -32,6 +32,7 @@ import {
 import { firebaseConfig, siteKey } from "./config.js";
 
 const app = initializeApp(firebaseConfig);
+if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
 	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
@@ -425,7 +426,6 @@ const editLotteryTime = () => {
 		return;
 	}
 	workingWeekend.admission.dateTime = dateTimeString;
-	console.log(workingWeekend);
 	updateWeekend();
 };
 

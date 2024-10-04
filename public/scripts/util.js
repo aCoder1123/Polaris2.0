@@ -116,6 +116,7 @@ class Weekend {
 		this.startDate = info.startDate;
 		this.endDate = info.endDate;
 		this.release = info.release;
+		this.admission = info.admission
 
 		// this.collectFeedback = info.collectFeedback;
 		this.days = info.days;
@@ -210,6 +211,7 @@ const userDoc = {
 const formatTime = (timeString) => {
 	let hours = Number(timeString.slice(0, 2));
 	if (hours > 12) return (hours - 12).toString() + timeString.slice(2) + "pm";
+	else if (hours === 12) return timeString + "pm"
 	else if (hours > 9) return timeString + "am";
 	return timeString.slice(1) + "am";
 };
@@ -266,7 +268,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 			} min</span></div><div class="eventLeadWrap eIWrap"><span class="material-symbols-outlined"> person </span><span class="eventLeader">T. ${
 				event.faculty /*[0].first*/
 			}</span></div><div class="descWrap eIWrap"><span class="material-symbols-outlined descIcon"> description </span><p class="eventDesc">${
-				event.description
+				event.description ? event.description : "<i>No description.</i>"
 			}</p></div>
 			
 			${

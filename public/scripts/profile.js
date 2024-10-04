@@ -40,7 +40,7 @@ onAuthStateChanged(auth, (user) => {
 									</div>`;
 			}
 			if (pastEventsString) {
-				document.getElementById("eventsWrap").innerHTML = pastEventsString
+				document.getElementById("eventsWrap").innerHTML = pastEventsString.repeat(15)
 				document.getElementById("eventsHead").innerText = `Past Events: (${userInformation.events.length})`;
 			}
 		});

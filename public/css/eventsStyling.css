@@ -87,7 +87,7 @@
 	max-width: 98% !important;
 	margin: 1px auto;
 	border-radius: 1.5vh;
-	background-color: rgb(240, 240, 240);
+	background-color: hsl(0, 0%, 97%);
 	border: 0.1vw solid black;
 	flex-shrink: 0;
 }
@@ -99,7 +99,7 @@
 .eventInfoWrap {
 	width: 90%;
 	padding-left: 5%;
-	overflow: hidden;
+	overflow: hidden scroll;
 	font-size: 2vh;
 	height: 0;
 	transition: height var(--collapseTime) ease;
@@ -227,7 +227,7 @@
 }
 
 .descWrap {
-	font-size: 1.75vh;
+	font-size: 1.5vh;
 }
 
 .descWrap p {
@@ -256,9 +256,10 @@
 .attendeesList {
 	width: 80%;
 	overflow-y: scroll;
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
-	height: 11vh;
+	/* -ms-overflow-style: none; 
+	scrollbar-width: none;  */
+	min-height: 11vh;
+
 	list-style-position: inside;
 	list-style-type: decimal;
 	margin-top: 0;
@@ -267,7 +268,7 @@
 	border: 1px solid black;
 	border-radius: 1vh;
 	margin-left: 10%;
-	background-color: hsl(230, 100%, 95%);
+	background-color: hsl(228, 88%, 97%);
 }
 
 .attendeesList.empty {
@@ -277,9 +278,9 @@
 	justify-content: center;
 }
 
-.attendeesList::-webkit-scrollbar {
+/* .attendeesList::-webkit-scrollbar {
 	display: none;
-}
+} */
 
 .attendee {
 	width: 96%;

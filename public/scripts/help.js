@@ -60,19 +60,21 @@ if (window.location.hostname === "127.0.0.1") {
 
 const bugReport = httpsCallable(functions, "bugReport");
 
-document.getElementById("reportForm").addEventListener("submit", (e) => {
+document.getElementById("reportForm").addEventListener("submit", async (e) => {
 	e.preventDefault();
+	document.getElementById("submitBtn").disabled = true
 	let formData = new FormData(e.target);
 	let data = {};
 	formData.forEach((value, key) => (data[key] = value));
-	bugReport(data)
-		.then((res) => {
-			if (res.data) {
-				alert("Thank you for submitting your bug. We will take care of it as soon as possible.");
-			}
-		})
-		.catch((error) => {
-			console.error(error);
-			alert("Bug Report failed.");
-		});
+	await bugReport(data)
+	.then((res) => {
+		if (res.data) {
+			alert("Thank you for submitting your bug. We will take care of it as soon as possible.");
+		}
+	})
+	.catch((error) => {
+		console.error(error);
+		alert("Bug Report failed. Please try again or email bailey.tuckman@westtown.edu. Thank you.");
+	});
+	document.getElementById("submitBtn").disabled = false
 });

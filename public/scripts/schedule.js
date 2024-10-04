@@ -146,8 +146,8 @@ const formatCheckIn = () => {
 		let array = Array.from(wrap.children);
 		array.sort((a, b) => {
 			return [a.childNodes[3].innerText, a.childNodes[3].innerText].sort()[0] === a.childNodes[3].innerText
-				? -1
-				: 1;
+				? 1
+				: -1;
 		});
 		wrap.replaceChildren();
 		for (let node of array) {

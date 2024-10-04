@@ -217,7 +217,7 @@ exports.saveWeekendEvents = onCall(
 	(request) => {
 		try {
 			let res = saveEvents(request);
-			return { status: "sucess", information: res };
+			return { status: "success", information: res };
 		} catch (error) {
 			return { status: "error", information: error.message };
 		}
@@ -329,13 +329,8 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 				}
 			}
 			if (!event.admission.credited) {
-				let endDate = new Date(activeWeekend.startDate + "T00:00:00");
+				let endDate = new Date(activeWeekend.startDate + `T${event.timeEnd}:00`);
 				endDate.setTime(endDate.getTime() + 1000 * 60 * 60 * 24 * dayNum); /* add day offset*/
-				endDate.setTime(
-					endDate.getTime() +
-						(1000 * 60 * 60 * Number(event.timeEnd.slice(0, 2)) +
-							1000 * 60 * Number(event.timeEnd.slice(3)))
-				);
 				let diff = endDate.getTime() - currentDate.getTime();
 				if (diff < 1000 * 60 * 10) {
 					activeWeekend.days[dayNum][eventNum].admission.credited = true;
@@ -346,7 +341,8 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 							let docRef = db.collection("users").doc(student.email);
 							let data = await docRef.get();
 							data = data.data();
-							if (!data.exists) continue;
+							console.log(data)
+							if (!data) continue;
 							data.credit += 10;
 							let eventDate = new Date(activeWeekend.startDate + "T00:00:00");
 							eventDate.setTime(eventDate.getTime() + 1000 * 60 * 60 * 24 * dayNum);
@@ -487,7 +483,16 @@ exports.printRoster = onCall(
 		const docWidth = 595.28;
 		const docHeight = 841.89;
 
-		const doc = new PDFDocument({ font: "Courier", size: "A4" });
+		const doc = new PDFDocument({
+			font: "Courier",
+			size: "A4",
+			margins: {
+				top: 72,
+				bottom: 20,
+				left: 15,
+				right: 15,
+			},
+		});
 		// doc.pipe(fs.createWriteStream("testing.pdf"));
 
 		doc.image("polarisLogo.png", (docWidth - 200) / 2, 10, {
@@ -501,17 +506,20 @@ exports.printRoster = onCall(
 			align: "center",
 			valign: "center",
 		});
-		doc.moveDown(6);
+		doc.moveDown(9);
 		doc.fontSize(24).text(event.title, { align: "center" });
-		doc.moveDown(2);
+		doc.moveDown(1);
 		let counter = 1;
 		for (let student of people) {
-			doc.fontSize(10).text(
-				`${counter}. ${student.name} - ${student.email} - ${
-					student.cell ? student.cell : "no phone number"
-				} - ${student.grade}th Grade`,
-				{ align: "left" }
-			);
+			doc.font("Courier-BoldOblique")
+				.fontSize(12)
+				.text(
+					`${counter}. ${student.name} - ${student.email} - ${
+						student.cell ? student.cell : "no phone number"
+					} - ${student.grade}th`,
+					{ align: "left" }
+				);
+			doc.moveDown(1);
 			counter++;
 		}
 		doc.end();
@@ -519,13 +527,13 @@ exports.printRoster = onCall(
 		("attachments");
 
 		let messageOptions = emailOptions;
-		messageOptions.to ="pkkjx65dthv83@hpeprint.com";
+		messageOptions.to = "pkkjx65dthv83@hpeprint.com";
 		// messageOptions.subject = request.data.subject;
 		// messageOptions.text = request.data.text;
 		messageOptions.attachments = {
 			// path: "./testing.pdf",
 			filename: "Roster.pdf",
-			content: doc
+			content: doc,
 		};
 
 		return send(messageOptions);
