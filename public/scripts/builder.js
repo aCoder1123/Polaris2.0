@@ -380,13 +380,13 @@ const editCurrentWeekend = (e) => {
 		if (workingWeekend.release.released) release.disabled = true;
 		else {
 			release.disabled = false;
-			release.value = workingWeekend.release.dateTime;
+			release.value = (new Date(workingWeekend.release.dateTime)).toISOString().substring(0, 16);
 		}
 		let lottery = document.getElementById("lotteryDate");
 		if (workingWeekend.admission.filtered) lottery.disabled = true;
 		else {
 			lottery.disabled = false;
-			lottery.value = workingWeekend.admission.dateTime;
+			lottery.value = workingWeekend.admission.dateTime ? (new Date(workingWeekend.admission.dateTime)).toISOString().substring(0, 16) : ""
 		}
 	} else {
 		e.target.innerText = "Edit Active Weekend";
@@ -406,10 +406,18 @@ const editReleaseTime = () => {
 	let dateTimeString = document.getElementById("releaseDate").value;
 	let newDate = new Date(dateTimeString);
 	let current = new Date();
+	let endDate = new Date(workingWeekend.endDate + "T23:59")
 	if (newDate < current) {
 		alert("Cannot set release to past time. To release immediately clear the release date.");
+		document.getElementById("releaseDate").value = ""
 		return;
 	}
+	if (endDate < newDate) {
+		alert("Cannot set release to after the schedule ends.") 
+		document.getElementById("releaseDate").value = "";
+		return
+	}
+	
 	workingWeekend.release.dateTime = dateTimeString;
 	updateWeekend();
 };
@@ -421,8 +429,21 @@ const editLotteryTime = () => {
 	let dateTimeString = document.getElementById("lotteryDate").value;
 	let newDate = new Date(dateTimeString);
 	let current = new Date();
+	let startDate = new Date(workingWeekend.startDate);
+	let endDate = new Date(workingWeekend.endDate + "T23:59");
 	if (newDate < current) {
 		alert("Cannot set lottery to past time.");
+		document.getElementById("releaseDate").value = "";
+		return;
+	}
+	if (startDate > newDate) {
+		alert("Cannot set release to before the schedule starts. To release immediately leave this field blank.");
+		document.getElementById("releaseDate").value = "";
+		return;
+	}
+	if (endDate < newDate) {
+		alert("Cannot set release to after the schedule ends.");
+		document.getElementById("releaseDate").value = "";
 		return;
 	}
 	workingWeekend.admission.dateTime = dateTimeString;

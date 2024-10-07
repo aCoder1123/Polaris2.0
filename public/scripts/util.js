@@ -59,12 +59,19 @@ class Weekend {
 		let oldEnd = this.endDate;
 		this.startDate = document.getElementById("startDate").value;
 		this.endDate = document.getElementById("endDate").value;
+		
 		// this.collectFeedback = document.getElementById("feedback").checked;
 
 		if (this.startDate && this.endDate) {
 			let startDate = new Date(this.startDate);
 			let endDate = new Date(this.endDate);
 			let numDays = 1 + (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+			if (numDays > 7) {
+				this.startDate = null
+				this.endDate = null
+				alert("Cannot make a schedule longer than one week.")
+				return false
+			}
 			if (numDays > this.days.length) {
 				for (let i = 0; i < numDays - this.days.length; i++) {
 					if (this.startDate === oldStart) {
@@ -142,6 +149,8 @@ class Weekend {
 			alert("Please enter valid information before saving.");
 			return;
 		}
+		this.release.dateTime = (new Date(this.release.dateTime).getTime())
+		this.admission.dateTime = (new Date(this.admission.dateTime).getTime())
 		return { information: JSON.stringify(this) };
 	}
 
@@ -216,7 +225,7 @@ const formatTime = (timeString) => {
 	return timeString.slice(1) + "am";
 };
 
-const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", name = null, openIDs = []) => {
+const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", email = null, openIDs = []) => {
 	let fullHTMLString = "";
 	const startDate = new Date(information.startDate + "T00:00:00");
 	const startDay = startDate.getDay();
@@ -243,7 +252,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 			let eventPassed = eventDate < new Date();
 
 			for (let element of event.signups) {
-				if (element.displayName === name) {
+				if (element.email === email) {
 					inEvent = true;
 				}
 				attendeesString += `<li class="attendee ${element.status}">${element.displayName}</li>`;
@@ -253,7 +262,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", nam
 				type != "editor" && openIDs.includes(eventID) ? " open" : ""
 			}" id="${
 				type === "editor" ? event.id : eventID
-			}"><div class="eventHeadWrap eIWrap"><span class="material-symbols-outlined eventCollapse${
+			}"><div class="eventHeadWrap eIWrap ${inEvent ? "inEvent" : event.signups.length >= event.numSpots ? "full" : ""}"><span class="material-symbols-outlined eventCollapse${
 				type != "editor" && openIDs.includes(eventID) ? " open" : ""
 			}"> expand_circle_right </span><h2 class="eventTitle">${
 				event.title
@@ -343,7 +352,6 @@ const addListeners = (openIDs = undefined) => {
 					let id = el.parentElement.parentElement.id;
 					if (openIDs.includes(id)) openIDs.splice(openIDs.indexOf(id), 1);
 					else openIDs.push(id);
-					console.log(openIDs);
 				}
 			};
 		} else {

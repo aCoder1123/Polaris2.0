@@ -24,6 +24,7 @@
 	justify-content: start;
 	overflow-x: scroll;
 	overflow-y: hidden;
+	
 }
 
 .dayWrap {
@@ -161,14 +162,26 @@
 }
 
 .eventHeadWrap {
+	--inEventColor: hsl(0, 92%, 70%);
+	--eventFullColor: hsl(51, 92%, 70%);
+	--eventHeadColor: hsl(220, 93%, 80%);
 	width: 96%;
 	height: fit-content;
 	padding: 1% 2%;
-	background-color: hsl(220, 93%, 80%);
+	background-color: var(--eventHeadColor);
 	overflow: hidden;
 	border-bottom: 0vh solid black;
 	transition: border-bottom ease var(--collapseTime);
 }
+
+.eventHeadWrap.full {
+	background-color: var(--eventFullColor);
+}
+
+.eventHeadWrap.inEvent {
+	background-color: var(--inEventColor);
+}
+
 .eventHeadWrap * {
 	margin-top: 0;
 	margin-bottom: 0;

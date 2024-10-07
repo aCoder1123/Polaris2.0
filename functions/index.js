@@ -1,3 +1,5 @@
+process.env.TZ = "America/New_York";
+
 const { onCall, HttpsError, onRequest } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { getFirestore } = require("firebase-admin/firestore");
@@ -85,8 +87,8 @@ exports.handleSignup = onCall(
 				currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.splice(signupNum, 1);
 				attendeeRemoved = true;
 				if (eventDate.getTime() - currentDate.getTime() < 1000 * 60 * 60 * 2) {
-					let studentDoc = db.collection("users").doc(email).get().data();
-					studentDoc.credit -= 5;
+					let studentDoc = (await db.collection("users").doc(email).get()).data();
+					studentDoc.credit = studentDoc.credit >= 5 ? studentDoc.credit - 5 : 0;
 					db.collection("users").doc(email).set(studentDoc);
 				}
 			}
@@ -154,8 +156,9 @@ exports.handleSignup = onCall(
 			event.admission.val === "credit"
 		) {
 			for (let i = 0; i < event.signups.length; i++) {
-				currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups[i].status =
-					i < event.numSpots ? "approved" : "pending";
+				if (event.signups[i].status === "pending") {
+					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups[i].status = "approved";
+				}
 			}
 		}
 
@@ -245,6 +248,8 @@ exports.createNewUser = onCall(
 		enforceAppCheck: true,
 	},
 	async (request) => {
+		const usersDoc = await db.collection("settings").doc("config").get();
+		let usersData = usersDoc.data().data;
 		const userDoc = {
 			isAdmin: false,
 			email: "",
@@ -253,8 +258,13 @@ exports.createNewUser = onCall(
 			displayName: "",
 		};
 		let userInfo = userDoc;
-		userInfo.email = request.auth.token.email;
-		userInfo.displayName = request.data.displayName;
+		let email = request.auth.token.email;
+		userInfo.email = email;
+		userInfo.displayName = `${usersData[email].preferredname} ${usersData[email].lastname}`;
+		userInfo.cell = usersData[email].cell ? usersData[email].cell : "";
+		userInfo.grade = usersData[email].grade;
+		userInfo.day_boarding = usersData[email].day_boarding;
+		userInfo.gradyear = usersData[email].gradyear;
 		let adminRef = await db.collection("admin").doc(request.auth.token.email).get();
 		userInfo.isAdmin = adminRef.exists;
 		await db.collection("users").doc(request.auth.token.email).set(userInfo);
@@ -341,7 +351,7 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 							let docRef = db.collection("users").doc(student.email);
 							let data = await docRef.get();
 							data = data.data();
-							console.log(data)
+							console.log(data);
 							if (!data) continue;
 							data.credit += 10;
 							let eventDate = new Date(activeWeekend.startDate + "T00:00:00");
@@ -385,6 +395,8 @@ const updateUserInfoFunc = async () => {
 	for (let row of sheet.data) {
 		infoJSON[row.email] = row;
 	}
+
+	await db.collection("settings").doc("config").update({ data: infoJSON });
 	let batch = db.batch();
 	let batchList = [];
 	let usersSnap = await db.collection("users").get();
@@ -392,7 +404,6 @@ const updateUserInfoFunc = async () => {
 
 	usersSnap.forEach((element) => {
 		if (infoJSON[element.id]) {
-			console.log(infoJSON[element.id]);
 			let userData = element.data();
 			let updateData = {
 				cell: infoJSON[element.id].cell ? infoJSON[element.id].cell : "",
@@ -477,8 +488,10 @@ exports.printRoster = onCall(
 			});
 		}
 		people.sort((a, b) => {
-			[a.displayName, b.displayName].sort()[0] === a.displayName ? 1 : -1;
+			return [a.name, b.name].sort()[0] === a.name ? -1 : 1;
 		});
+
+		console.log(people);
 
 		const docWidth = 595.28;
 		const docHeight = 841.89;
@@ -493,7 +506,7 @@ exports.printRoster = onCall(
 				right: 15,
 			},
 		});
-		// doc.pipe(fs.createWriteStream("testing.pdf"));
+		doc.pipe(fs.createWriteStream("testing.pdf"));
 
 		doc.image("polarisLogo.png", (docWidth - 200) / 2, 10, {
 			width: 200,
@@ -524,8 +537,6 @@ exports.printRoster = onCall(
 		}
 		doc.end();
 
-		("attachments");
-
 		let messageOptions = emailOptions;
 		messageOptions.to = "pkkjx65dthv83@hpeprint.com";
 		// messageOptions.subject = request.data.subject;
@@ -536,6 +547,6 @@ exports.printRoster = onCall(
 			content: doc,
 		};
 
-		return send(messageOptions);
+		// return send(messageOptions);
 	}
 );

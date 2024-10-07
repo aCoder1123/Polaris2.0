@@ -32,7 +32,7 @@ body {
 	align-items: center;
 	justify-content: center;
 	margin: 0;
-	font-size: 4vh;
+	font-size: 3.75vh;
 	background-color: var(--header-blue);
 	color: white;
 }
@@ -60,7 +60,8 @@ body {
 .checkInLaunch,
 #exitSignup,
 #sortType,
-.attendeeLink {
+.attendeeLink,
+#addAttendee {
 	cursor: pointer;
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none; /* Safari */
@@ -74,23 +75,25 @@ body {
 .checkInLaunch:hover,
 #exitSignup:hover,
 #sortType:hover,
-.attendeeLink:hover {
-	color: grey !important;
+.attendeeLink:hover,
+#addAttendee:hover {
+	color: grey;
 }
 
 .checkInLaunch:active,
 #exitSignup:active,
 #sortType:active,
-.attendeeLink:active {
-	color: darkgray !important;
+.attendeeLink:active,
+#addAttendee:active {
+	color: darkgray;
 }
 
 #checkInWindow {
-	width: 40vw;
+	width: 60vw;
 	height: 70vh;
 	position: absolute;
 	top: 15vh;
-	left: 30vw;
+	left: 20vw;
 	background-color: whitesmoke;
 	border: 1px solid black;
 	border-radius: 2vh;
@@ -169,8 +172,37 @@ body {
 	cursor: pointer;
 }
 
-#attendeesMail {
-	margin: 2% 0;
+#attendeeLinks {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
+
+#attendeeLinks * {
+	margin: 0 1%;
+}
+
+@keyframes loading {
+	0% {
+		transform: rotate(0);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+
+.loading {
+	animation: loading linear infinite 1s;
+}
+
+#mailLink {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
 }
 
 #checkInSaveButton {
