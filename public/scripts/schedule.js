@@ -29,7 +29,7 @@ import { firebaseConfig, siteKey } from "./config.js";
 import { dataToFullHTML, addListeners, getUserFromEmail, getMenuHTMLString, handleDBError } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
-if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+// if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
 	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
@@ -62,119 +62,117 @@ if (window.location.hostname === "127.0.0.1") {
 	console.log("Connecting Firebase Emulator");
 }
 
-getRedirectResult(auth).then(console.log)
 
+onAuthStateChanged(auth, (user) => {
+	console.log(user)
+	alert("reloging")
+	if (user) {
+		firebaseUser = user;
+		getUserFromEmail(user.email, user.displayName, db, functions).then((data) => {
+			userInformation = data;
+			if (userInformation.isAdmin) {
+				scheduleType = "admin";
+				const q = query(collection(db, "users"), where("isAdmin", "==", false));
 
-// onAuthStateChanged(auth, (user) => {
-// 	console.log(user)
-// 	alert("Waiting")
-// 	if (user) {
-// 		firebaseUser = user;
-// 		getUserFromEmail(user.email, user.displayName, db, functions).then((data) => {
-// 			userInformation = data;
-// 			if (userInformation.isAdmin) {
-// 				scheduleType = "admin";
-// 				const q = query(collection(db, "users"), where("isAdmin", "==", false));
+				getDocs(q)
+					.then((docs) => {
+						docs.forEach((student) => {
+							students.push(student.data());
+							studentsMap[student.id] = student.data();
+						});
+						students.sort((a, b) => ([a.displayName, b.displayName].sort()[0] === a.displayName ? -1 : 1));
+						let htmlString = "";
+						for (let student of students)
+							htmlString += `<option value="${student.email}">${student.displayName}</option>`;
+						document.getElementById("studentsList").insertAdjacentHTML("afterbegin", htmlString);
+					})
+					.catch(handleDBError);
+				document.getElementById("addAttendee").onclick = async (e) => {
+					e.target.disabled = true;
+					if (!document.getElementById("attendeeInput").checkValidity()) {
+						alert("Please enter a valid email address.");
+						return;
+					}
+					let email = document.getElementById("attendeeInput").value;
+					if (!studentsMap[email]) {
+						alert("Please enter the email address of a student.");
+						return;
+					}
+					if (!document.getElementById("attendeeNumIn").checkValidity()) {
+						alert("Please enter which spot you would like to add this attendee to.");
+						return;
+					}
+					let attendeeInfo = {
+						status: "approved",
+						email: email,
+						displayName: studentsMap[email].displayName,
+					};
+					weekendInformation.days[idAsArray[0]][idAsArray[1]].signups.splice(
+						document.getElementById("attendeeNumIn").value - 1,
+						0,
+						attendeeInfo
+					);
 
-// 				getDocs(q)
-// 					.then((docs) => {
-// 						docs.forEach((student) => {
-// 							students.push(student.data());
-// 							studentsMap[student.id] = student.data();
-// 						});
-// 						students.sort((a, b) => ([a.displayName, b.displayName].sort()[0] === a.displayName ? -1 : 1));
-// 						let htmlString = "";
-// 						for (let student of students)
-// 							htmlString += `<option value="${student.email}">${student.displayName}</option>`;
-// 						document.getElementById("studentsList").insertAdjacentHTML("afterbegin", htmlString);
-// 					})
-// 					.catch(handleDBError);
-// 				document.getElementById("addAttendee").onclick = async (e) => {
-// 					e.target.disabled = true;
-// 					if (!document.getElementById("attendeeInput").checkValidity()) {
-// 						alert("Please enter a valid email address.");
-// 						return;
-// 					}
-// 					let email = document.getElementById("attendeeInput").value;
-// 					if (!studentsMap[email]) {
-// 						alert("Please enter the email address of a student.");
-// 						return;
-// 					}
-// 					if (!document.getElementById("attendeeNumIn").checkValidity()) {
-// 						alert("Please enter which spot you would like to add this attendee to.");
-// 						return;
-// 					}
-// 					let attendeeInfo = {
-// 						status: "approved",
-// 						email: email,
-// 						displayName: studentsMap[email].displayName,
-// 					};
-// 					weekendInformation.days[idAsArray[0]][idAsArray[1]].signups.splice(
-// 						document.getElementById("attendeeNumIn").value - 1,
-// 						0,
-// 						attendeeInfo
-// 					);
+					await setDoc(doc(db, "activeWeekend", "default"), {
+						information: JSON.stringify(weekendInformation),
+					})
+						.then((val) => {
+							// document.getElementById("checkInWindow").classList.toggle("active");
+							formatCheckIn();
+						})
+						.catch((error) => {
+							alert(`Error saving statuses: ${error}`);
+						});
+					e.target.disabled = false;
+				};
+			}
 
-// 					await setDoc(doc(db, "activeWeekend", "default"), {
-// 						information: JSON.stringify(weekendInformation),
-// 					})
-// 						.then((val) => {
-// 							// document.getElementById("checkInWindow").classList.toggle("active");
-// 							formatCheckIn();
-// 						})
-// 						.catch((error) => {
-// 							alert(`Error saving statuses: ${error}`);
-// 						});
-// 					e.target.disabled = false;
-// 				};
-// 			}
+			const unsub = onSnapshot(doc(db, "activeWeekend", "default"), (doc) => {
+				weekendInformation = JSON.parse(doc.data().information);
+				let wrap = document.getElementsByTagName("body")[0];
+				for (let node of document.querySelectorAll("body .dayWrap")) {
+					node.remove();
+				}
+				let nodes = dataToFullHTML(weekendInformation, scheduleType, userInformation.email, openIDs);
 
-// 			const unsub = onSnapshot(doc(db, "activeWeekend", "default"), (doc) => {
-// 				weekendInformation = JSON.parse(doc.data().information);
-// 				let wrap = document.getElementsByTagName("body")[0];
-// 				for (let node of document.querySelectorAll("body .dayWrap")) {
-// 					node.remove();
-// 				}
-// 				let nodes = dataToFullHTML(weekendInformation, scheduleType, userInformation.email, openIDs);
+				let elements = nodes.querySelectorAll(".dayWrap");
+				for (let i = 0; i < elements.length; i++) {
+					wrap.append(elements[i]);
+				}
+				addListeners(openIDs);
+				document.querySelectorAll(".addIcon").forEach((el) => {
+					el.addEventListener("click", handleSignup);
+				});
+				document.querySelectorAll(".checkInLaunch").forEach((el) => {
+					el.addEventListener("click", handleCheckIn);
+				});
 
-// 				let elements = nodes.querySelectorAll(".dayWrap");
-// 				for (let i = 0; i < elements.length; i++) {
-// 					wrap.append(elements[i]);
-// 				}
-// 				addListeners(openIDs);
-// 				document.querySelectorAll(".addIcon").forEach((el) => {
-// 					el.addEventListener("click", handleSignup);
-// 				});
-// 				document.querySelectorAll(".checkInLaunch").forEach((el) => {
-// 					el.addEventListener("click", handleCheckIn);
-// 				});
+				let scheduleContainer = document.getElementById("scheduleContainer");
+				scheduleContainer.replaceChildren();
+				for (let node of nodes.querySelectorAll(".scheduleDay")) {
+					scheduleContainer.appendChild(node);
+				}
+			});
+		});
 
-// 				let scheduleContainer = document.getElementById("scheduleContainer");
-// 				scheduleContainer.replaceChildren();
-// 				for (let node of nodes.querySelectorAll(".scheduleDay")) {
-// 					scheduleContainer.appendChild(node);
-// 				}
-// 			});
-// 		});
+		let adminDoc = getDoc(doc(db, "admin", user.email)).then((doc) => {
+			document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, false, doc.exists()));
 
-// 		let adminDoc = getDoc(doc(db, "admin", user.email)).then((doc) => {
-// 			document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, false, doc.exists()));
-
-// 			document.getElementById("signOutWrap").addEventListener("click", () => {
-// 				signOut(auth)
-// 					.then(() => {
-// 						window.location.href = `../index.html`;
-// 					})
-// 					.catch((error) => {
-// 						alert(`There was a error signing out: ${error}`);
-// 					});
-// 			});
-// 			addListeners(openIDs);
-// 		});
-// 	} else {
-// 		window.location.href = `index.html`;
-// 	}
-// });
+			document.getElementById("signOutWrap").addEventListener("click", () => {
+				signOut(auth)
+					.then(() => {
+						window.location.href = `../index.html`;
+					})
+					.catch((error) => {
+						alert(`There was a error signing out: ${error}`);
+					});
+			});
+			addListeners(openIDs);
+		});
+	} else {
+		window.location.href = `index.html`;
+	}
+});
 
 const handleSignup = async (e) => {
 	let button = e.target;
