@@ -1,6 +1,6 @@
 export const firebaseConfig = {
 	apiKey: "AIzaSyB63H-EFCTZgmVmlxPmIyEmy-TLevxfFLU",
-	authDomain: "polaris-60dce.firebaseapp.com",
+	authDomain: "polaris-60dce.web.app",
 	projectId: "polaris-60dce",
 	storageBucket: "polaris-60dce.appspot.com",
 	messagingSenderId: "336111467040",
@@ -8,7 +8,7 @@ export const firebaseConfig = {
 	measurementId: "G-G1LENEB1DR",
 
 	clientId: "336111467040-cojq8q2affejt04ip43bo98cf50nb2f2.apps.googleusercontent.com",
-	scopes: ["email", "profile", "https://www.googleapis.com/auth/calendar"],
+	scopes: ["email", "profile"],
 	discoveryDocs: "https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest",
 };
 
