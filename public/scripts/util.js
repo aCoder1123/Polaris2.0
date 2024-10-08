@@ -262,7 +262,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 				type != "editor" && openIDs.includes(eventID) ? " open" : ""
 			}" id="${
 				type === "editor" ? event.id : eventID
-			}"><div class="eventHeadWrap eIWrap ${inEvent ? "inEvent" : event.signups.length >= event.numSpots ? "full" : ""}"><span class="material-symbols-outlined eventCollapse${
+			}"><div class="eventHeadWrap eIWrap ${event.admission.val === "none" ? "" : inEvent ? "inEvent" : event.signups.length >= event.numSpots ? "full" : ""}"><span class="material-symbols-outlined eventCollapse${
 				type != "editor" && openIDs.includes(eventID) ? " open" : ""
 			}"> expand_circle_right </span><h2 class="eventTitle">${
 				event.title
