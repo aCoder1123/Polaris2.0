@@ -37,6 +37,7 @@ const db = getFirestore(app, "maindb");
 const functions = getFunctions(app);
 const updateUserInfo = httpsCallable(functions, "updateUserInfo");
 const resetCreditFunction = httpsCallable(functions, "resetCredit");
+const testFunc = httpsCallable(functions, "test")
 
 if (window.location.hostname === "127.0.0.1") {
 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
@@ -323,5 +324,17 @@ document.getElementById("creditReset").onclick = async (e) => {
 	} else {
 		alert("Credit not reset.")
 	}
+	e.target.disabled = false
+}
+
+document.getElementById("testButton").onclick = async (e) => {
+	e.target.disabled = true
+	try {
+		let res = await testFunc()
+		console.log(res)
+	} catch (error) {
+		console.log(error)
+	}
+
 	e.target.disabled = false
 }

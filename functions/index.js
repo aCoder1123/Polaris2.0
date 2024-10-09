@@ -550,3 +550,8 @@ exports.printRoster = onCall(
 		// return send(messageOptions);
 	}
 );
+
+exports.test = onCall(async () => {
+	let current = new Date()
+	return {info: current.toString()}
+})
