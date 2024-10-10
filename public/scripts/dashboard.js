@@ -327,14 +327,16 @@ document.getElementById("creditReset").onclick = async (e) => {
 	e.target.disabled = false
 }
 
-document.getElementById("testButton").onclick = async (e) => {
-	e.target.disabled = true
-	try {
-		let res = await testFunc()
-		console.log(res)
-	} catch (error) {
-		console.log(error)
+let testButton = document.getElementById("testButton")
+if (testButton) {
+	testButton.onclick = async (e) => {
+		e.target.disabled = true
+		try {
+			let res = await testFunc()
+			console.log(res)
+		} catch (error) {
+			console.log(error)
+		}
+		e.target.disabled = false
 	}
-
-	e.target.disabled = false
 }

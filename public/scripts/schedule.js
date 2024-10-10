@@ -43,8 +43,8 @@ let firebaseUser;
 let weekendInformation;
 let students = [];
 let studentsMap = {};
-let signingUp = false
-let signUpQueue = []
+let signingUp = false;
+let signUpQueue = [];
 
 let currentEventID;
 let idAsArray;
@@ -121,8 +121,10 @@ onAuthStateChanged(auth, (user) => {
 
 			const unsub = onSnapshot(doc(db, "activeWeekend", "default"), (doc) => {
 				weekendInformation = JSON.parse(doc.data().information);
-				let wrap = document.getElementsByTagName("body")[0];
+				let wrap = document.body;
+				let positionList = [];
 				for (let node of document.querySelectorAll("body .dayWrap")) {
+					positionList.push(node.scrollTop);
 					node.remove();
 				}
 				let nodes = dataToFullHTML(weekendInformation, scheduleType, userInformation.email, openIDs);
@@ -131,6 +133,12 @@ onAuthStateChanged(auth, (user) => {
 				for (let i = 0; i < elements.length; i++) {
 					wrap.append(elements[i]);
 				}
+
+				let wrapNodes = document.querySelectorAll(".dayWrap");
+				for (let num = 0; num < wrapNodes.length; num++) {
+					wrapNodes[num].scroll(0, positionList[num]);
+				}
+
 				addListeners(openIDs);
 				document.querySelectorAll(".addIcon").forEach((el) => {
 					el.addEventListener("click", handleSignup);
@@ -169,23 +177,23 @@ onAuthStateChanged(auth, (user) => {
 const handleSignup = async (e) => {
 	let button = e.target;
 	if (button.innerText === "progress_activity") return;
-	
+
 	let eID = button.parentElement.parentElement.parentElement.id;
 	button.innerText = "progress_activity";
-	button.classList.toggle("loading")
+	button.classList.toggle("loading");
 	button.disabled = true;
 	if (signingUp) {
-		signUpQueue.push(eID)
-		return
+		signUpQueue.push(eID);
+		return;
 	}
 	signingUp = true;
-	await handleSignupFunc({ id: eID })
+	await handleSignupFunc({ id: eID });
 	while (signUpQueue.length) {
 		await handleSignupFunc({ id: signUpQueue[0] });
-		signUpQueue.shift()
+		signUpQueue.shift();
 		for (let id of signUpQueue) {
 			document.querySelectorAll(".addIcon").forEach((node) => {
-				console.log(node)
+				console.log(node);
 				if (node.parentElement.parentElement.parentElement.id === id) {
 					node.classList.toggle("loading");
 					node.innerText = "progress_activity";
@@ -193,7 +201,7 @@ const handleSignup = async (e) => {
 			});
 		}
 	}
-	signingUp = false
+	signingUp = false;
 };
 
 const formatCheckIn = () => {
@@ -297,3 +305,14 @@ document.getElementById("attendeesPrint").onclick = async (e) => {
 		alert(`Error printing roster: ${error.message}`);
 	}
 };
+
+// setTimeout(() => {
+// 	const element = document.querySelector(".dayWrap");
+
+// 	element.addEventListener("scroll", () => {
+// 		console.log("Vertical Scroll:", element.scrollTop);
+// 		// if (element.scrollTop > 200) {
+// 		// 	element.scroll(100, 0);
+// 		// }
+// 	});
+// }, 1000);
