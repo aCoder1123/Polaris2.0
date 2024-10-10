@@ -6,6 +6,7 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const fs = require("fs");
 const PDFDocument = require("pdfkit");
+const { getTimezoneOffset } = require("date-fns-tz");
 
 const { sendMail, emailOptions } = require("./gmail/main");
 const { createEventFromJSON, manageAttendees, eventTemplate, deleteCalendarEvent } = require("./calendar/main");
@@ -178,6 +179,8 @@ exports.handleSignup = onCall(
 );
 
 const saveEvents = async (request) => {
+	const UTCOffset = getTimezoneOffset("America/New_York");
+
 	let activeWeekend = await db.collection("activeWeekend").doc("default").get();
 	activeWeekend = JSON.parse(activeWeekend.data().information);
 	for (let i = 0; i < activeWeekend.days.length; i++) {
@@ -194,10 +197,10 @@ const saveEvents = async (request) => {
 				}
 			}
 			let startDate = new Date(activeWeekend.startDate + `T${event.timeStart}:00`);
-			startDate.setTime(startDate.getTime() + 1000 * 60 * 60 * 24 * i);
+			startDate.setTime(startDate.getTime() + 1000 * 60 * 60 * 24 * i + UTCOffset);
 			template.start.dateTime = startDate.toISOString().substring(0, 23);
 			let endDate = new Date(activeWeekend.startDate + `T${event.timeEnd}:00`);
-			endDate.setTime(endDate.getTime() + 1000 * 60 * 60 * 24 * i);
+			endDate.setTime(endDate.getTime() + 1000 * 60 * 60 * 24 * i + UTCOffset);
 			template.end.dateTime = endDate.toISOString().substring(0, 23);
 			let result = await createEventFromJSON(template);
 			activeWeekend.days[i][eventNum].calID = result.data.id;
@@ -260,13 +263,18 @@ exports.createNewUser = onCall(
 		let userInfo = userDoc;
 		let email = request.auth.token.email;
 		userInfo.email = email;
-		userInfo.displayName = `${usersData[email].preferredname} ${usersData[email].lastname}`;
-		userInfo.cell = usersData[email].cell ? usersData[email].cell : "";
-		userInfo.grade = usersData[email].grade;
-		userInfo.day_boarding = usersData[email].day_boarding;
-		userInfo.gradyear = usersData[email].gradyear;
+		if (usersData[email]) {
+			userInfo.displayName = `${usersData[email].preferredname} ${usersData[email].lastname}`;
+			userInfo.cell = usersData[email].cell ? usersData[email].cell : "";
+			userInfo.grade = usersData[email].grade;
+			userInfo.day_boarding = usersData[email].day_boarding;
+			userInfo.gradyear = usersData[email].gradyear;
+		} else {
+			userInfo.displayName = request.data.displayName;
+		}
 		let adminRef = await db.collection("admin").doc(request.auth.token.email).get();
-		userInfo.isAdmin = adminRef.exists;
+		let subAdminRef = await db.collection("admin").doc(request.auth.token.email).get();
+		userInfo.isAdmin = adminRef.exists || subAdminRef.exists
 		await db.collection("users").doc(request.auth.token.email).set(userInfo);
 		return userInfo;
 	}
@@ -552,6 +560,6 @@ exports.printRoster = onCall(
 );
 
 exports.test = onCall(async () => {
-	let current = new Date()
-	return {info: current.toString()}
-})
+	let current = new Date();
+	return { info: current.toString() };
+});
