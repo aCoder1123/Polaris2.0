@@ -162,6 +162,7 @@ body {
 	align-items: center;
 	justify-content: flex-start;
 	padding: 0 3%;
+	overflow-y: scroll;
 }
 
 .attendeeWrap {

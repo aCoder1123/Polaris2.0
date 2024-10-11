@@ -429,6 +429,30 @@ const updateUserInfoFunc = async () => {
 			}
 		}
 	});
+
+	let adminDataSheet = (await db.collection("settings").doc("adminList").get()).data()
+	console.log("Getting sheet")
+	let adminSheet = await getSheetAsJSON(adminDataSheet.dataSheet.ID)
+	if (adminSheet.status != "error") {
+		await db.collection("settings").doc("adminList").update({data: adminSheet.data});
+		for (let row of adminSheet.data) {
+			batch.set(db.collection("subAdmin").doc(row.Email), {})
+			if ((await db.collection("users").doc(row.Email).get()).exists) {
+				batch.update(db.collection("users").doc(row.Email), {
+					isAdmin: true,
+					displayName: row.First_Name + " " + row.Last_Name,
+				});
+				i++
+			}
+			i ++
+			if (i > 50) {
+				batchList.push(batch.commit());
+				batch = db.batch();
+				i = 0;
+			}
+		}
+	}
+
 	if (i != 0) batchList.push(batch.commit());
 	await Promise.all(batchList).catch((e) => {
 		return { status: "error", information: JSON.stringify(e) };
