@@ -156,7 +156,7 @@ exports.handleSignup = onCall(
 			event.admission.val === "advLottery" ||
 			event.admission.val === "credit"
 		) {
-			for (let i = 0; i < event.signups.length; i++) {
+			for (let i = 0; i < event.numSpots; i++) {
 				if (event.signups[i].status === "pending") {
 					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups[i].status = "approved";
 				}
@@ -273,7 +273,7 @@ exports.createNewUser = onCall(
 			userInfo.displayName = request.data.displayName;
 		}
 		let adminRef = await db.collection("admin").doc(request.auth.token.email).get();
-		let subAdminRef = await db.collection("admin").doc(request.auth.token.email).get();
+		let subAdminRef = await db.collection("subAdmin").doc(request.auth.token.email).get();
 		userInfo.isAdmin = adminRef.exists || subAdminRef.exists
 		await db.collection("users").doc(request.auth.token.email).set(userInfo);
 		return userInfo;
@@ -501,9 +501,6 @@ exports.printRoster = onCall(
 		enforceAppCheck: true,
 	},
 	async (request) => {
-		let requesterDoc = await db.collection("users").doc(request.auth.token.email).get();
-		if (!requesterDoc.data().isAdmin)
-			return { status: "fail", information: "Request created by non-Admin account." };
 		let activeWeekend = (await db.collection("activeWeekend").doc("default").get()).data();
 		if (!activeWeekend) return { status: "fail", information: "No active weekend found." };
 		activeWeekend = JSON.parse(activeWeekend.information);
@@ -538,7 +535,7 @@ exports.printRoster = onCall(
 				right: 15,
 			},
 		});
-		doc.pipe(fs.createWriteStream("testing.pdf"));
+		// doc.pipe(fs.createWriteStream("testing.pdf"));
 
 		doc.image("polarisLogo.png", (docWidth - 200) / 2, 10, {
 			width: 200,
@@ -571,7 +568,8 @@ exports.printRoster = onCall(
 
 		let messageOptions = emailOptions;
 		messageOptions.to = "pkkjx65dthv83@hpeprint.com";
-		// messageOptions.subject = request.data.subject;
+		messageOptions.cc = "polaris@westtown.edu"
+		messageOptions.subject = "Roster";
 		// messageOptions.text = request.data.text;
 		messageOptions.attachments = {
 			// path: "./testing.pdf",
@@ -579,7 +577,20 @@ exports.printRoster = onCall(
 			content: doc,
 		};
 
-		// return send(messageOptions);
+		return send(messageOptions);
+	}
+);
+
+exports.manageAttendees = onCall(
+	{
+		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
+	},
+	async (request) => {
+		let id = request.data.id
+		let activeWeekend = (await db.collection("activeWeekend").doc("default").get()).data()
+		activeWeekend = JSON.parse(activeWeekend.information)
+		let event = activeWeekend.days[id[0]][id[1]]
+		return (await manageAttendees(event))
 	}
 );
 

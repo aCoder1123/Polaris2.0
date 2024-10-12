@@ -37,7 +37,7 @@ const db = getFirestore(app, "maindb");
 const functions = getFunctions(app);
 const updateUserInfo = httpsCallable(functions, "updateUserInfo");
 const resetCreditFunction = httpsCallable(functions, "resetCredit");
-const testFunc = httpsCallable(functions, "test")
+const testFunc = httpsCallable(functions, "test");
 
 if (window.location.hostname === "127.0.0.1") {
 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
@@ -175,8 +175,10 @@ onAuthStateChanged(auth, (user) => {
 		});
 
 		const unsub3 = onSnapshot(doc(db, "settings", "config"), (doc) => {
-			document.getElementById("dataSheetURLIn").value = doc.data().dataSheet.URL;
-			document.getElementById("extractedID").value = doc.data().dataSheet.ID;
+			document.getElementById("studentDataSheetURLIn").value = doc.data().dataSheet.URL;
+		});
+		const unsub4 = onSnapshot(doc(db, "settings", "adminList"), (doc) => {
+			document.getElementById("subAdminDataSheetURLIn").value = doc.data().dataSheet.URL;
 		});
 
 		addListeners();
@@ -264,7 +266,7 @@ document.getElementById("addSubAdminButton").onclick = async () => {
 	}
 };
 
-document.getElementById("dataSheetURLIn").onchange = (e) => {
+document.getElementById("studentDataSheetURLIn").onchange = (e) => {
 	if (!e.target.checkValidity()) return;
 	let extractedID = e.target.value.substring(39, 39 + 44); //ids start at index 39 in the link and are 44 characters long
 	if (extractedID.includes("/")) {
@@ -276,8 +278,8 @@ document.getElementById("dataSheetURLIn").onchange = (e) => {
 	document.getElementById("extractedID").value = extractedID;
 };
 
-document.getElementById("dataSheetSubmit").onclick = async (e) => {
-	let linkIn = document.getElementById("dataSheetURLIn");
+document.getElementById("sDataSheetSubmit").onclick = async (e) => {
+	let linkIn = document.getElementById("studentDataSheetURLIn");
 	if (!linkIn.checkValidity()) {
 		alert("Please enter a valid link.");
 		return;
@@ -289,10 +291,49 @@ document.getElementById("dataSheetSubmit").onclick = async (e) => {
 	}
 	e.target.disabled = true;
 	try {
+		let link = document.getElementById("studentDataSheetURLIn").value;
+		if (link.length <( 39+44-1) || link.substring(39, 39 + 44).includes("/")) {
+			alert("Cannot extract valid ID from link. Double check the link and try again.");
+			e.target.disabled = false;
+			return;
+		}
 		await updateDoc(doc(db, "settings", "config"), {
 			dataSheet: {
-				ID: document.getElementById("extractedID").value,
-				URL: document.getElementById("dataSheetURLIn").value,
+				ID: link.substring(39, 39 + 44),
+				URL: link,
+			},
+		});
+		alert("Link updated successfully. Press update now to realize changes.");
+	} catch (error) {
+		alert(`There was an error updating the link: ${error.message}`);
+		console.log(error);
+	}
+	e.target.disabled = false;
+};
+
+document.getElementById("aDataSheetSubmit").onclick = async (e) => {
+	let linkIn = document.getElementById("subAdminDataSheetURLIn");
+	if (!linkIn.checkValidity()) {
+		alert("Please enter a valid link.");
+		return;
+	}
+	if (
+		!confirm("Are you sure you want to update the link? Is the sheet shared with or owned by polaris@westtown.edu?")
+	) {
+		return;
+	}
+	e.target.disabled = true;
+	try {
+		let link = document.getElementById("subAdminDataSheetURLIn").value;
+		if (link.length <( 39+44-1) || link.substring(39, 39 + 44).includes("/")) {
+			alert("Cannot extract valid ID from link. Double check the link and try again.");
+			e.target.disabled = false;
+			return;
+		}
+		await updateDoc(doc(db, "settings", "adminList"), {
+			dataSheet: {
+				ID: link.substring(39, 39 + 44),
+				URL: link,
 			},
 		});
 		alert("Link updated successfully. Press update now to realize changes.");
@@ -316,27 +357,31 @@ document.getElementById("infoUpdateButton").onclick = async (e) => {
 };
 
 document.getElementById("creditReset").onclick = async (e) => {
-	e.target.disabled = true
-	if (prompt("Are you sure you want to do this. All credit accrued by all students will be set to zero. This cannot be undone. Type \"RESET\" to confirm.") === "RESET") {
-		let res = await resetCreditFunction()
-		if (res.data.status === "error") alert(`Error resetting credit: ${res.data.information}`)
-		else alert("Credit reset successfully.")
+	e.target.disabled = true;
+	if (
+		prompt(
+			'Are you sure you want to do this. All credit accrued by all students will be set to zero. This cannot be undone. Type "RESET" to confirm.'
+		) === "RESET"
+	) {
+		let res = await resetCreditFunction();
+		if (res.data.status === "error") alert(`Error resetting credit: ${res.data.information}`);
+		else alert("Credit reset successfully.");
 	} else {
-		alert("Credit not reset.")
+		alert("Credit not reset.");
 	}
-	e.target.disabled = false
-}
+	e.target.disabled = false;
+};
 
-let testButton = document.getElementById("testButton")
+let testButton = document.getElementById("testButton");
 if (testButton) {
 	testButton.onclick = async (e) => {
-		e.target.disabled = true
+		e.target.disabled = true;
 		try {
-			let res = await testFunc()
-			console.log(res)
+			let res = await testFunc();
+			console.log(res);
 		} catch (error) {
-			console.log(error)
+			console.log(error);
 		}
-		e.target.disabled = false
-	}
+		e.target.disabled = false;
+	};
 }

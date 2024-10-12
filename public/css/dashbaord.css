@@ -119,6 +119,8 @@ body {
 	width: 98%;
 	padding: .5vw;
 	background-color: whitesmoke;
+	max-height: 30vh;
+	overflow-y: scroll;
 }
 
 .admin, .subAdmin {
@@ -170,25 +172,16 @@ body {
 	font-size: 1.7vh;
 }
 
-#extractedID {
-	outline: none;
-	cursor: default;
+#dataSheetWrap button {
+	margin: .5vh 0;
+}
+
+#dataSheetWrap h4 {
+	margin: 1.5vh 0;
 }
 
 #dataSheetWrap input, #dataSheetWrap div {
 	margin: .4vh 0;
-}
-
-#sheetButtonsWrap {
-	width: 100%;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: center;
-}
-
-#sheetButtonsWrap button {
-	margin: 0 0.75vw;
 }
 
 #creditResetWrap {

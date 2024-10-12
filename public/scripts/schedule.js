@@ -36,6 +36,7 @@ const functions = getFunctions(app);
 
 const handleSignupFunc = httpsCallable(functions, "handleSignup");
 const printRosterFunc = httpsCallable(functions, "printRoster");
+const manageAttendeesFunc = httpsCallable(functions, "manageAttendees")
 
 let scheduleType = "schedule";
 let userInformation;
@@ -288,6 +289,9 @@ const saveCheckIn = async () => {
 	await setDoc(doc(db, "activeWeekend", "default"), { information: JSON.stringify(weekendInformation) })
 		.then((val) => {
 			document.getElementById("checkInWindow").classList.toggle("active");
+			manageAttendeesFunc({id: idAsArray}).then(console.log).catch((error) => {
+				alert(`Error saving statuses: ${error}`);
+			});
 		})
 		.catch((error) => {
 			alert(`Error saving statuses: ${error}`);
