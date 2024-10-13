@@ -41,6 +41,7 @@ exports.bugReport = onCall(
 	(request) => {
 		let messageOptions = emailOptions;
 		messageOptions.to = "bailey.tuckman@westtown.edu";
+		messageOptions.cc = "polaris@westtown.edu"
 		messageOptions.subject = `Polaris bug report: ${request.data.page}`;
 		messageOptions.text = `On ${new Date().toLocaleString("en-US", {
 			weekday: "long",
@@ -64,6 +65,7 @@ exports.handleSignup = onCall(
 		let currentWeekendDoc = await db.collection("activeWeekend").doc("default").get();
 		let currentWeekend = JSON.parse(currentWeekendDoc.data().information);
 		let attendeeRemoved = false;
+		let gcalChanged = false
 
 		const id = request.data.id;
 		const displayName = request.auth.token.name;
@@ -71,12 +73,8 @@ exports.handleSignup = onCall(
 		let event = currentWeekend.days[Number(id[0])][Number(id.slice(2))];
 
 		let currentDate = new Date();
-		let eventDate = new Date(currentWeekend.startDate + "T00:00:00");
+		let eventDate = new Date(currentWeekend.startDate + `T${event.timeStart}:00`);
 		eventDate.setTime(eventDate.getTime() + 1000 * 60 * 60 * 24 * Number(id[0]));
-		eventDate.setTime(
-			eventDate.getTime() +
-				(1000 * 60 * 60 * Number(event.timeStart.slice(0, 2)) + 1000 * 60 * Number(event.timeStart.slice(3)))
-		);
 
 		if (event.admission.val === "none") return { status: "fail", information: "Event has no signup" };
 		if (eventDate < currentDate) {
@@ -85,13 +83,17 @@ exports.handleSignup = onCall(
 
 		for (let signupNum in event.signups) {
 			if (event.signups[signupNum].email === email) {
-				currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.splice(signupNum, 1);
+				if (["approved", "checkedIn"].includes(event.signups[signupNum].status)) {
+					gcalChanged = true
+				}
+					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.splice(signupNum, 1);
 				attendeeRemoved = true;
 				if (eventDate.getTime() - currentDate.getTime() < 1000 * 60 * 60 * 2) {
 					let studentDoc = (await db.collection("users").doc(email).get()).data();
 					studentDoc.credit = studentDoc.credit >= 5 ? studentDoc.credit - 5 : 0;
 					db.collection("users").doc(email).set(studentDoc);
 				}
+
 			}
 		}
 
@@ -104,6 +106,7 @@ exports.handleSignup = onCall(
 				case "randLottery":
 					if (event.admission.filtered && event.signups.length < event.numSpots) {
 						admitStatus = "approved";
+						gcalChanged = true
 					}
 					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.push({
 						displayName: displayName,
@@ -114,6 +117,7 @@ exports.handleSignup = onCall(
 				case "creditLottery":
 					if (event.admission.filtered && event.signups.length < event.numSpots) {
 						admitStatus = "approved";
+						gcalChanged = true;
 					}
 					studentDoc = await db.collection("users").doc(request.auth.token.email).get();
 					student = studentDoc.data();
@@ -136,10 +140,16 @@ exports.handleSignup = onCall(
 						credit: credit,
 					});
 					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.sort((a, b) => b.credit - a.credit);
-					break;
+					let i = 0
+					for (let signup of event.signups) {
+						if (signup.email === email && i < event.numSpots) {
+							gcalChanged = true
+						}
+					}
 				default:
 					if (event.signups.length < event.numSpots) {
 						admitStatus = "approved";
+						gcalChanged = true;
 					}
 					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.push({
 						displayName: displayName,
@@ -170,7 +180,9 @@ exports.handleSignup = onCall(
 				.set({
 					information: JSON.stringify(currentWeekend),
 				});
-			let attendeesRes = await manageAttendees(currentWeekend.days[Number(id[0])][Number(id.slice(2))]);
+			if (gcalChanged) {
+				let attendeesRes = await manageAttendees(currentWeekend.days[Number(id[0])][Number(id.slice(2))]);
+			}
 			return { status: "success", information: JSON.stringify({ db: setRes, GCal: attendeesRes }) };
 		} catch (error) {
 			return { status: "error", information: error.message };
@@ -359,7 +371,6 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 							let docRef = db.collection("users").doc(student.email);
 							let data = await docRef.get();
 							data = data.data();
-							console.log(data);
 							if (!data) continue;
 							data.credit += 10;
 							let eventDate = new Date(activeWeekend.startDate + "T00:00:00");
@@ -397,61 +408,65 @@ const updateUserInfoFunc = async () => {
 	if (!configDoc.dataSheet) return;
 	let sheet = await getSheetAsJSON(configDoc.dataSheet.ID);
 	if (sheet.status === "error") return;
-	if (!(sheet.data[0].email && sheet.data[0].cell && sheet.data[0].grade)) return;
-	let infoJSON = {};
-
+	let studentInfoJSON = {};
+	
 	for (let row of sheet.data) {
-		infoJSON[row.email] = row;
+		studentInfoJSON[row.email] = row;
 	}
-
-	await db.collection("settings").doc("config").update({ data: infoJSON });
+	await db.collection("settings").doc("config").update({ data: studentInfoJSON });
+	
+	let adminDataSheet = (await db.collection("settings").doc("adminList").get()).data()
+	let adminSheet = await getSheetAsJSON(adminDataSheet.dataSheet.ID)
+	if (adminSheet.status === "error") return;
+	let adminInfoJSON = {}
+	
 	let batch = db.batch();
 	let batchList = [];
-	let usersSnap = await db.collection("users").get();
 	let i = 0;
-
-	usersSnap.forEach((element) => {
-		if (infoJSON[element.id]) {
-			let userData = element.data();
-			let updateData = {
-				cell: infoJSON[element.id].cell ? infoJSON[element.id].cell : "",
-				grade: infoJSON[element.id].grade,
-				day_boarding: infoJSON[element.id].day_boarding,
-				gradyear: infoJSON[element.id].gradyear,
-				displayName: `${infoJSON[element.id].preferredname} ${infoJSON[element.id].lastname}`,
-			};
-			batch.update(db.collection("users").doc(element.id), updateData);
-			i++;
-			if (i > 50) {
-				batchList.push(batch.commit());
-				batch = db.batch();
-				i = 0;
-			}
-		}
-	});
-
-	let adminDataSheet = (await db.collection("settings").doc("adminList").get()).data()
-	console.log("Getting sheet")
-	let adminSheet = await getSheetAsJSON(adminDataSheet.dataSheet.ID)
-	if (adminSheet.status != "error") {
-		await db.collection("settings").doc("adminList").update({data: adminSheet.data});
-		for (let row of adminSheet.data) {
-			batch.set(db.collection("subAdmin").doc(row.Email), {})
-			if ((await db.collection("users").doc(row.Email).get()).exists) {
-				batch.update(db.collection("users").doc(row.Email), {
-					isAdmin: true,
-					displayName: row.First_Name + " " + row.Last_Name,
-				});
-				i++
-			}
-			i ++
-			if (i > 50) {
-				batchList.push(batch.commit());
-				batch = db.batch();
-				i = 0;
-			}
+	
+	let subAdminList = {}
+	let subAdmin = await db.collection("subAdmin").get()
+	subAdmin.forEach((el) => {
+		subAdminList[el.id] = true
+	})
+	
+	for (let row of adminSheet.data) {
+		adminInfoJSON[row.email] = row;
+		if (!subAdminList[row.email]) {
+			batch.set(db.collection("subAdmin").doc(row.Email), {});
+			i++
 		}
 	}
+	await db.collection("settings").doc("adminList").update({ data: adminInfoJSON });
+	
+	let usersSnap = await db.collection("users").get();
+
+	usersSnap.forEach((element) => {
+		let email = element.id
+		if (studentInfoJSON[email]) {
+			let userData = element.data();
+			let updateData = {
+				cell: studentInfoJSON[email].cell ? studentInfoJSON[email].cell : "",
+				grade: studentInfoJSON[email].grade,
+				day_boarding: studentInfoJSON[email].day_boarding,
+				gradyear: studentInfoJSON[email].gradyear,
+				displayName: `${studentInfoJSON[email].preferredname} ${studentInfoJSON[email].lastname}`,
+			};
+			batch.update(db.collection("users").doc(email), updateData);
+			i++;
+		}
+		if (adminInfoJSON[email]) {
+			batch.update(db.collection("users").doc(email), {
+				isAdmin: true,
+				displayName: adminInfoJSON[email].First_Name + " " + adminInfoJSON[email].Last_Name,
+			});
+		}
+		if (i > 50) {
+			batchList.push(batch.commit());
+			batch = db.batch();
+			i = 0;
+		}
+	});
 
 	if (i != 0) batchList.push(batch.commit());
 	await Promise.all(batchList).catch((e) => {
@@ -519,8 +534,6 @@ exports.printRoster = onCall(
 		people.sort((a, b) => {
 			return [a.name, b.name].sort()[0] === a.name ? -1 : 1;
 		});
-
-		console.log(people);
 
 		const docWidth = 595.28;
 		const docHeight = 841.89;

@@ -217,6 +217,38 @@ const userDoc = {
 	displayName: "",
 };
 
+class FunctionQueue {
+	constructor(func, callback = null) {
+		this._func = func
+		this._callbackFN = callback
+		this._queue = [];
+		this._running = false
+	}
+
+	add(item) {
+		this._queue.push(item)
+		if (!this._running) this.runQueue()
+	}
+
+	async runQueue() {
+		this._running = true
+		let res = await this._func(this._queue[0])
+		if (this._callbackFN) {
+			this._callbackFN(this._queue.shift());
+		} else this._queue.shift();
+		if (!this._queue.length) {
+			this._running = false
+			return
+		}
+		this.runQueue()
+	}
+
+	get queue(){ return this._queue }
+	get func(){ return this._func }
+	get running(){return this._running }
+	get callback(){ return this._callbackFN }
+}
+
 const formatTime = (timeString) => {
 	let hours = Number(timeString.slice(0, 2));
 	if (hours > 12) return (hours - 12).toString() + timeString.slice(2) + "pm";
@@ -525,4 +557,5 @@ export {
 	getAdminLinks,
 	handleDBError,
 	getMenuHTMLString,
+	FunctionQueue,
 };

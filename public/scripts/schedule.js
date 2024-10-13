@@ -21,7 +21,7 @@ import {
 	connectFunctionsEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 import { firebaseConfig, siteKey } from "./config.js";
-import { dataToFullHTML, addListeners, getUserFromEmail, getMenuHTMLString, handleDBError } from "./util.js";
+import { dataToFullHTML, addListeners, getUserFromEmail, getMenuHTMLString, handleDBError, FunctionQueue } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
 if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
@@ -44,13 +44,23 @@ let firebaseUser;
 let weekendInformation;
 let students = [];
 let studentsMap = {};
-let signingUp = false;
-let signUpQueue = [];
 
 let currentEventID;
 let idAsArray;
 
 let openIDs = [];
+let signupQueue = new FunctionQueue(handleSignupFunc, (val) => {
+	setTimeout(() => {
+		for (let el of signupQueue.queue) {
+			document.querySelectorAll(".addIcon").forEach((node) => {
+				if (node.parentElement.parentElement.parentElement.id === el.id) {
+					if(!node.classList.contains("loading")) node.classList.toggle("loading");
+					node.innerText = "progress_activity";
+				}
+			});
+		}
+	}, 30);
+})
 
 if (window.location.hostname === "127.0.0.1") {
 	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
@@ -177,32 +187,11 @@ onAuthStateChanged(auth, (user) => {
 
 const handleSignup = async (e) => {
 	let button = e.target;
-	if (button.innerText === "progress_activity") return;
-
 	let eID = button.parentElement.parentElement.parentElement.id;
+	if (button.innerText === "progress_activity" || signupQueue.queue.includes({ id: eID })) return;
 	button.innerText = "progress_activity";
 	button.classList.toggle("loading");
-	button.disabled = true;
-	if (signingUp) {
-		signUpQueue.push(eID);
-		return;
-	}
-	signingUp = true;
-	await handleSignupFunc({ id: eID });
-	while (signUpQueue.length) {
-		await handleSignupFunc({ id: signUpQueue[0] });
-		signUpQueue.shift();
-		for (let id of signUpQueue) {
-			document.querySelectorAll(".addIcon").forEach((node) => {
-				console.log(node);
-				if (node.parentElement.parentElement.parentElement.id === id) {
-					node.classList.toggle("loading");
-					node.innerText = "progress_activity";
-				}
-			});
-		}
-	}
-	signingUp = false;
+	signupQueue.add({id: eID})
 };
 
 const formatCheckIn = () => {
@@ -211,7 +200,6 @@ const formatCheckIn = () => {
 	let attendeesEmails = [];
 	wrap.replaceChildren();
 
-	console.log(`Setting to: ${signups.length}`);
 	document.getElementById("attendeeNumIn").max = signups.length + 1;
 	if (!signups.length) {
 		wrap.innerText = "No Sign-Ups Currently";
@@ -309,14 +297,3 @@ document.getElementById("attendeesPrint").onclick = async (e) => {
 		alert(`Error printing roster: ${error.message}`);
 	}
 };
-
-// setTimeout(() => {
-// 	const element = document.querySelector(".dayWrap");
-
-// 	element.addEventListener("scroll", () => {
-// 		console.log("Vertical Scroll:", element.scrollTop);
-// 		// if (element.scrollTop > 200) {
-// 		// 	element.scroll(100, 0);
-// 		// }
-// 	});
-// }, 1000);
