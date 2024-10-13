@@ -166,10 +166,12 @@ exports.handleSignup = onCall(
 			event.admission.val === "advLottery" ||
 			event.admission.val === "credit"
 		) {
-			for (let i = 0; i < event.numSpots; i++) {
+			let i = 0
+			while (i < event.numSpots && i < event.signups.length) {
 				if (event.signups[i].status === "pending") {
 					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups[i].status = "approved";
 				}
+				i++
 			}
 		}
 

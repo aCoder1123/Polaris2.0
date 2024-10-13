@@ -232,10 +232,19 @@ class FunctionQueue {
 
 	async runQueue() {
 		this._running = true
-		let res = await this._func(this._queue[0])
-		if (this._callbackFN) {
-			this._callbackFN(this._queue.shift());
-		} else this._queue.shift();
+		let res
+		try {
+			res = await this._func(this._queue[0])
+			if (this._callbackFN) {
+				this._callbackFN(this._queue.shift());
+			} else this._queue.shift();
+		} catch (error) {
+			console.log(`An error occurred when running queue function: ${error}`)
+			if (this._callbackFN) {
+				this._callbackFN(error);
+			} 
+			this._queue.shift();
+		}
 		if (!this._queue.length) {
 			this._running = false
 			return

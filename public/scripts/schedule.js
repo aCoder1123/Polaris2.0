@@ -50,6 +50,11 @@ let idAsArray;
 
 let openIDs = [];
 let signupQueue = new FunctionQueue(handleSignupFunc, (val) => {
+	if (val.message) {
+		alert("An error occurred when signing up for the trip. The page will reload and you can try again. If the error persists please fill out a bug report.")
+		window.location.reload()
+		return
+	}
 	setTimeout(() => {
 		for (let el of signupQueue.queue) {
 			document.querySelectorAll(".addIcon").forEach((node) => {
@@ -59,7 +64,7 @@ let signupQueue = new FunctionQueue(handleSignupFunc, (val) => {
 				}
 			});
 		}
-	}, 30);
+	}, 50);
 })
 
 if (window.location.hostname === "127.0.0.1") {
