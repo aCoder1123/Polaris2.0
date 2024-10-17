@@ -221,7 +221,7 @@ const formatCheckIn = () => {
 		}
 		let attendeeHTMLString = `<div class="attendeeWrap">
 					<span class="attendeeNum">${i + 1}.</span>
-					<span class="attendeeName">${signups[i].displayName}</span>
+					<span class="attendeeName ${signups[i].status}">${signups[i].displayName}</span>
 					<select class="statusSelect" id="${signups[i].email}" list="checkInOptions" placeholder="Status: ">
 						<option ${signups[i].status === "checkedIn" ? "selected" : ""} value="checkedIn">Checked In</option>
 						<option ${signups[i].status === "approved" ? "selected" : ""} value="approved">Approved</option>

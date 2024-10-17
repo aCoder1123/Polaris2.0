@@ -118,7 +118,7 @@ class Weekend {
 		let info = JSON.parse(string);
 		document.getElementById("startDate").value = info.startDate;
 		document.getElementById("endDate").value = info.endDate;
-		document.getElementById("releaseDate").value = info.release.dateTime;
+		// document.getElementById("releaseDate").value = info.release.dateTime;
 		// document.getElementById("feedback").checked = info.collectFeedback;
 		this.startDate = info.startDate;
 		this.endDate = info.endDate;

@@ -75,7 +75,7 @@ onAuthStateChanged(auth, (user) => {
 		});
 
 		document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, true, true));
-		
+
 		document.getElementById("signOutWrap").addEventListener("click", () => {
 			signOut(auth)
 				.then(() => {
@@ -377,17 +377,17 @@ const editCurrentWeekend = (e) => {
 		startIn.disabled = true;
 		endIn.disabled = true;
 		let release = document.getElementById("releaseDate");
-		if (workingWeekend.release.released) release.disabled = true;
-		else {
-			release.disabled = false;
-			release.value = (new Date(workingWeekend.release.dateTime)).toISOString().substring(0, 16);
-		}
+		release.disabled =workingWeekend.release.released
+		let releaseDate = new Date(workingWeekend.release.dateTime);
+		releaseDate.setTime(releaseDate.getTime() - 1000 * 60 * releaseDate.getTimezoneOffset());
+		release.value = releaseDate.toISOString().substring(0, 16);
 		let lottery = document.getElementById("lotteryDate");
-		if (workingWeekend.admission.filtered) lottery.disabled = true;
-		else {
-			lottery.disabled = false;
-			lottery.value = workingWeekend.admission.dateTime ? (new Date(workingWeekend.admission.dateTime)).toISOString().substring(0, 16) : ""
-		}
+		lottery.disabled = workingWeekend.admission.filtered;
+		if (workingWeekend.admission.dateTime){
+			let lotteryDate = new Date(workingWeekend.admission.dateTime)
+			lotteryDate.setTime(lotteryDate.getTime() - 1000 * 60 * lotteryDate.getTimezoneOffset());
+			lottery.value = lotteryDate.toISOString().substring(0, 16)
+		} else lottery.value = "";
 	} else {
 		e.target.innerText = "Edit Active Weekend";
 		editingActiveWeekend = false;
@@ -406,18 +406,18 @@ const editReleaseTime = () => {
 	let dateTimeString = document.getElementById("releaseDate").value;
 	let newDate = new Date(dateTimeString);
 	let current = new Date();
-	let endDate = new Date(workingWeekend.endDate + "T23:59")
+	let endDate = new Date(workingWeekend.endDate + "T23:59");
 	if (newDate < current) {
 		alert("Cannot set release to past time. To release immediately clear the release date.");
-		document.getElementById("releaseDate").value = ""
+		document.getElementById("releaseDate").value = "";
 		return;
 	}
 	if (endDate < newDate) {
-		alert("Cannot set release to after the schedule ends.") 
+		alert("Cannot set release to after the schedule ends.");
 		document.getElementById("releaseDate").value = "";
-		return
+		return;
 	}
-	
+
 	workingWeekend.release.dateTime = dateTimeString;
 	updateWeekend();
 };
