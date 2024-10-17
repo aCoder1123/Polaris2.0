@@ -96,12 +96,13 @@ onAuthStateChanged(auth, (user) => {
 					})
 					.catch(handleDBError);
 				document.getElementById("addAttendee").onclick = async (e) => {
+					let emailIn = document.getElementById("attendeeInput");
 					e.target.disabled = true;
-					if (!document.getElementById("attendeeInput").checkValidity()) {
+					if (!emailIn.checkValidity()) {
 						alert("Please enter a valid email address.");
 						return;
 					}
-					let email = document.getElementById("attendeeInput").value;
+					let email = emailIn.value;
 					if (!studentsMap[email]) {
 						alert("Please enter the email address of a student.");
 						return;
@@ -131,6 +132,7 @@ onAuthStateChanged(auth, (user) => {
 						.catch((error) => {
 							alert(`Error saving statuses: ${error}`);
 						});
+					emailIn.value = ""
 					e.target.disabled = false;
 				};
 			}
@@ -168,6 +170,7 @@ onAuthStateChanged(auth, (user) => {
 				for (let node of nodes.querySelectorAll(".scheduleDay")) {
 					scheduleContainer.appendChild(node);
 				}
+				if (idAsArray) formatCheckIn()
 			});
 		});
 
@@ -201,7 +204,8 @@ const handleSignup = async (e) => {
 
 const formatCheckIn = () => {
 	let wrap = document.getElementById("attendeesWrap");
-	let signups = weekendInformation.days[idAsArray[0]][idAsArray[1]].signups;
+	let event = weekendInformation.days[idAsArray[0]][idAsArray[1]]
+	let signups = event.signups;
 	let attendeesEmails = [];
 	wrap.replaceChildren();
 
@@ -240,9 +244,16 @@ const formatCheckIn = () => {
 			wrap.appendChild(node);
 		}
 	}
+	document.querySelectorAll(".statusSelect").forEach((el) => {
+		el.onchange = () => {
+			saveCheckIn(true)
+		}
+	})
 	document.getElementById("mailLink").href = `mailto:${attendeesEmails.join(",")}?subject=${
 		document.getElementById("windowHead").innerText
 	}`;
+	document.getElementById("numSpots").innerText = event.numSpots
+	document.getElementById("checkedInNum").innerText = attendeesEmails.length
 };
 
 const handleCheckIn = (e) => {
@@ -265,7 +276,7 @@ document.getElementById("sortType").addEventListener("click", (e) => {
 	formatCheckIn();
 });
 
-const saveCheckIn = async () => {
+const saveCheckIn = async (persist = false) => {
 	let statuses = document.querySelectorAll("#attendeesWrap .statusSelect");
 	for (let status of statuses) {
 		let attendeeStatus = status.value;
@@ -281,10 +292,13 @@ const saveCheckIn = async () => {
 	}
 	await setDoc(doc(db, "activeWeekend", "default"), { information: JSON.stringify(weekendInformation) })
 		.then((val) => {
-			document.getElementById("checkInWindow").classList.toggle("active");
+			if (!persist) {
+				document.getElementById("checkInWindow").classList.toggle("active");
+			}
 			manageAttendeesFunc({id: idAsArray}).then(console.log).catch((error) => {
 				alert(`Error saving statuses: ${error}`);
 			});
+			formatCheckIn()
 		})
 		.catch((error) => {
 			alert(`Error saving statuses: ${error}`);

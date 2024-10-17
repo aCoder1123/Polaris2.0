@@ -266,11 +266,7 @@ body {
 
 .attendeesList {
 	width: 80%;
-	overflow-y: scroll;
-	/* -ms-overflow-style: none; 
-	scrollbar-width: none;  */
 	min-height: 11vh;
-
 	list-style-position: inside;
 	list-style-type: decimal;
 	margin-top: 0;
