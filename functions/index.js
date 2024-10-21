@@ -88,12 +88,6 @@ exports.handleSignup = onCall(
 				}
 				currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.splice(signupNum, 1);
 				attendeeRemoved = true;
-				if (eventDate.getTime() - currentDate.getTime() < 1000 * 60 * 60 * 2) {
-					let studentDoc = (await db.collection("users").doc(email).get()).data();
-					studentDoc.credit = studentDoc.credit >= 5 ? studentDoc.credit - 5 : 0;
-					db.collection("users").doc(email).set(studentDoc);
-				}
-
 			}
 		}
 
