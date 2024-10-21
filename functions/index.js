@@ -86,7 +86,7 @@ exports.handleSignup = onCall(
 				if (["approved", "checkedIn"].includes(event.signups[signupNum].status)) {
 					gcalChanged = true
 				}
-					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.splice(signupNum, 1);
+				currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.splice(signupNum, 1);
 				attendeeRemoved = true;
 				if (eventDate.getTime() - currentDate.getTime() < 1000 * 60 * 60 * 2) {
 					let studentDoc = (await db.collection("users").doc(email).get()).data();
@@ -303,6 +303,9 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 		let current = new Date();
 		if (releaseDate.getTime() - current.getTime() < 1000 * 60 * 10) {
 			data.release.released = true;
+			let current = await db.collection("activeWeekend").doc("default").get()
+			let info = JSON.parse(current.data().information)
+			await db.collection("weekends").doc(info.startDate + "-" + info.endDate).set({information: JSON.stringify(info)})
 			await db
 				.collection("activeWeekend")
 				.doc("default")
