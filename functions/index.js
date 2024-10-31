@@ -41,7 +41,7 @@ exports.bugReport = onCall(
 	(request) => {
 		let messageOptions = emailOptions;
 		messageOptions.to = "bailey.tuckman@westtown.edu";
-		messageOptions.cc = "polaris@westtown.edu"
+		messageOptions.cc = "polaris@westtown.edu";
 		messageOptions.subject = `Polaris bug report: ${request.data.page}`;
 		messageOptions.text = `On ${new Date().toLocaleString("en-US", {
 			weekday: "long",
@@ -65,7 +65,7 @@ exports.handleSignup = onCall(
 		let currentWeekendDoc = await db.collection("activeWeekend").doc("default").get();
 		let currentWeekend = JSON.parse(currentWeekendDoc.data().information);
 		let attendeeRemoved = false;
-		let gcalChanged = false
+		let gcalChanged = false;
 
 		const id = request.data.id;
 		const displayName = request.auth.token.name;
@@ -84,7 +84,7 @@ exports.handleSignup = onCall(
 		for (let signupNum in event.signups) {
 			if (event.signups[signupNum].email === email) {
 				if (["approved", "checkedIn"].includes(event.signups[signupNum].status)) {
-					gcalChanged = true
+					gcalChanged = true;
 				}
 				currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.splice(signupNum, 1);
 				attendeeRemoved = true;
@@ -100,7 +100,7 @@ exports.handleSignup = onCall(
 				case "randLottery":
 					if (event.admission.filtered && event.signups.length < event.numSpots) {
 						admitStatus = "approved";
-						gcalChanged = true
+						gcalChanged = true;
 					}
 					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.push({
 						displayName: displayName,
@@ -134,12 +134,13 @@ exports.handleSignup = onCall(
 						credit: credit,
 					});
 					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups.sort((a, b) => b.credit - a.credit);
-					let i = 0
+					let i = 0;
 					for (let signup of event.signups) {
 						if (signup.email === email && i < event.numSpots) {
-							gcalChanged = true
+							gcalChanged = true;
 						}
 					}
+					break;
 				default:
 					if (event.signups.length < event.numSpots) {
 						admitStatus = "approved";
@@ -160,12 +161,12 @@ exports.handleSignup = onCall(
 			event.admission.val === "advLottery" ||
 			event.admission.val === "credit"
 		) {
-			let i = 0
+			let i = 0;
 			while (i < event.numSpots && i < event.signups.length) {
 				if (event.signups[i].status === "pending") {
 					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups[i].status = "approved";
 				}
-				i++
+				i++;
 			}
 		}
 
@@ -282,7 +283,7 @@ exports.createNewUser = onCall(
 		}
 		let adminRef = await db.collection("admin").doc(request.auth.token.email).get();
 		let subAdminRef = await db.collection("subAdmin").doc(request.auth.token.email).get();
-		userInfo.isAdmin = adminRef.exists || subAdminRef.exists
+		userInfo.isAdmin = adminRef.exists || subAdminRef.exists;
 		await db.collection("users").doc(request.auth.token.email).set(userInfo);
 		return userInfo;
 	}
@@ -297,9 +298,12 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 		let current = new Date();
 		if (releaseDate.getTime() - current.getTime() < 1000 * 60 * 10) {
 			data.release.released = true;
-			let current = await db.collection("activeWeekend").doc("default").get()
-			let info = JSON.parse(current.data().information)
-			await db.collection("weekends").doc(info.startDate + "-" + info.endDate).set({information: JSON.stringify(info)})
+			let current = await db.collection("activeWeekend").doc("default").get();
+			let info = JSON.parse(current.data().information);
+			await db
+				.collection("weekends")
+				.doc(info.startDate + "-" + info.endDate)
+				.set({ information: JSON.stringify(info) });
 			await db
 				.collection("activeWeekend")
 				.doc("default")
@@ -408,40 +412,40 @@ const updateUserInfoFunc = async () => {
 	let sheet = await getSheetAsJSON(configDoc.dataSheet.ID);
 	if (sheet.status === "error") return;
 	let studentInfoJSON = {};
-	
+
 	for (let row of sheet.data) {
 		studentInfoJSON[row.email] = row;
 	}
 	await db.collection("settings").doc("config").update({ data: studentInfoJSON });
-	
-	let adminDataSheet = (await db.collection("settings").doc("adminList").get()).data()
-	let adminSheet = await getSheetAsJSON(adminDataSheet.dataSheet.ID)
+
+	let adminDataSheet = (await db.collection("settings").doc("adminList").get()).data();
+	let adminSheet = await getSheetAsJSON(adminDataSheet.dataSheet.ID);
 	if (adminSheet.status === "error") return;
-	let adminInfoJSON = {}
-	
+	let adminInfoJSON = {};
+
 	let batch = db.batch();
 	let batchList = [];
 	let i = 0;
-	
-	let subAdminList = {}
-	let subAdmin = await db.collection("subAdmin").get()
+
+	let subAdminList = {};
+	let subAdmin = await db.collection("subAdmin").get();
 	subAdmin.forEach((el) => {
-		subAdminList[el.id] = true
-	})
-	
+		subAdminList[el.id] = true;
+	});
+
 	for (let row of adminSheet.data) {
 		adminInfoJSON[row.email] = row;
 		if (!subAdminList[row.email]) {
 			batch.set(db.collection("subAdmin").doc(row.Email), {});
-			i++
+			i++;
 		}
 	}
 	await db.collection("settings").doc("adminList").update({ data: adminInfoJSON });
-	
+
 	let usersSnap = await db.collection("users").get();
 
 	usersSnap.forEach((element) => {
-		let email = element.id
+		let email = element.id;
 		if (studentInfoJSON[email]) {
 			let userData = element.data();
 			let updateData = {
@@ -580,7 +584,7 @@ exports.printRoster = onCall(
 
 		let messageOptions = emailOptions;
 		messageOptions.to = "pkkjx65dthv83@hpeprint.com";
-		messageOptions.cc = "polaris@westtown.edu"
+		messageOptions.cc = "polaris@westtown.edu";
 		messageOptions.subject = "Roster";
 		// messageOptions.text = request.data.text;
 		messageOptions.attachments = {
@@ -598,11 +602,11 @@ exports.manageAttendees = onCall(
 		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
 	},
 	async (request) => {
-		let id = request.data.id
-		let activeWeekend = (await db.collection("activeWeekend").doc("default").get()).data()
-		activeWeekend = JSON.parse(activeWeekend.information)
-		let event = activeWeekend.days[id[0]][id[1]]
-		return (await manageAttendees(event))
+		let id = request.data.id;
+		let activeWeekend = (await db.collection("activeWeekend").doc("default").get()).data();
+		activeWeekend = JSON.parse(activeWeekend.information);
+		let event = activeWeekend.days[id[0]][id[1]];
+		return await manageAttendees(event);
 	}
 );
 
