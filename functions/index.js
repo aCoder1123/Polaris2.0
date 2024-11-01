@@ -158,32 +158,40 @@ exports.handleSignup = onCall(
 		if (
 			event.admission.filtered ||
 			event.admission.val === "signup" ||
-			event.admission.val === "advLottery" ||
-			event.admission.val === "credit"
+			event.admission.val === "advLottery"
 		) {
 			let i = 0;
 			while (i < event.numSpots && i < event.signups.length) {
 				if (event.signups[i].status === "pending") {
 					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups[i].status = "approved";
+				} 
+				i++;
+			}
+		} else if (event.admission.val === "credit") {
+			let i = 0;
+			while (i < event.signups.length) {
+				if (i < event.numSpots) {
+					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups[i].status = "approved";
+				} else if (event.signups[i].status === "approved") {
+					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups[i].status = "pending";
 				}
 				i++;
 			}
 		}
-
-		try {
-			let setRes = await db
-				.collection("activeWeekend")
-				.doc("default")
-				.set({
-					information: JSON.stringify(currentWeekend),
-				});
-			if (gcalChanged) {
-				let attendeesRes = await manageAttendees(currentWeekend.days[Number(id[0])][Number(id.slice(2))]);
+			try {
+				let setRes = await db
+					.collection("activeWeekend")
+					.doc("default")
+					.set({
+						information: JSON.stringify(currentWeekend),
+					});
+				if (gcalChanged) {
+					let attendeesRes = await manageAttendees(currentWeekend.days[Number(id[0])][Number(id.slice(2))]);
+				}
+				return { status: "success", information: JSON.stringify({ db: setRes, GCal: attendeesRes }) };
+			} catch (error) {
+				return { status: "error", information: error.message };
 			}
-			return { status: "success", information: JSON.stringify({ db: setRes, GCal: attendeesRes }) };
-		} catch (error) {
-			return { status: "error", information: error.message };
-		}
 	}
 );
 
