@@ -21,7 +21,7 @@ const send = async (options) => {
 		let messageId = await sendMail(options);
 		return messageId;
 	} catch (error) {
-		error("There was an error connecting to Gmail: ", {errorMsg: error})
+		error("There was an error connecting to Gmail: ", { errorMsg: error });
 	}
 };
 
@@ -160,16 +160,12 @@ exports.handleSignup = onCall(
 			}
 		}
 
-		if (
-			event.admission.filtered ||
-			event.admission.val === "signup" ||
-			event.admission.val === "advLottery"
-		) {
+		if (event.admission.filtered || event.admission.val === "signup" || event.admission.val === "advLottery") {
 			let i = 0;
 			while (i < event.numSpots && i < event.signups.length) {
 				if (event.signups[i].status === "pending") {
 					currentWeekend.days[Number(id[0])][Number(id.slice(2))].signups[i].status = "approved";
-				} 
+				}
 				i++;
 			}
 		} else if (event.admission.val === "credit") {
@@ -183,20 +179,20 @@ exports.handleSignup = onCall(
 				i++;
 			}
 		}
-			try {
-				let setRes = await db
-					.collection("activeWeekend")
-					.doc("default")
-					.set({
-						information: JSON.stringify(currentWeekend),
-					});
-				if (gcalChanged) {
-					let attendeesRes = await manageAttendees(currentWeekend.days[Number(id[0])][Number(id.slice(2))]);
-				}
-				return { status: "success", information: JSON.stringify({ db: setRes, GCal: attendeesRes }) };
-			} catch (error) {
-				return { status: "error", information: error.message };
+		try {
+			let setRes = await db
+				.collection("activeWeekend")
+				.doc("default")
+				.set({
+					information: JSON.stringify(currentWeekend),
+				});
+			if (gcalChanged) {
+				let attendeesRes = await manageAttendees(currentWeekend.days[Number(id[0])][Number(id.slice(2))]);
 			}
+			return { status: "success", information: JSON.stringify({ db: setRes, GCal: attendeesRes }) };
+		} catch (error) {
+			return { status: "error", information: error.message };
+		}
 	}
 );
 
@@ -304,20 +300,20 @@ exports.createNewUser = onCall(
 
 exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => {
 	let queuedRef = await db.collection("activeWeekend").doc("queued").get();
+	let currentDate = new Date();
 	if (queuedRef.exists) {
 		let data = queuedRef.data().information;
 		data = JSON.parse(data);
 		let releaseDate = new Date(data.release.dateTime);
-		let current = new Date();
-		if (releaseDate.getTime() - current.getTime() < 1000 * 60 * 10) {
+		if (releaseDate.getTime() - currentDate.getTime() < 1000 * 60 * 10) {
 			log("Releasing New Weekend");
 			data.release.released = true;
 			let current = await db.collection("activeWeekend").doc("default").get();
-			let info = JSON.parse(current.data().information);
+			let info = current.data().information;
 			await db
 				.collection("weekends")
 				.doc(info.startDate + "-" + info.endDate)
-				.set({ information: JSON.stringify(info) });
+				.set({ information: info });
 			await db
 				.collection("activeWeekend")
 				.doc("default")
@@ -332,7 +328,6 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 	if (!weekendRef.exists) return { status: "success", information: "No weekend currently exists" };
 	let activeWeekend = JSON.parse(weekendRef.data().information);
 	let weekendEndDate = new Date(activeWeekend.endDate + "T23:59:59");
-	let currentDate = new Date();
 	if (weekendEndDate.getTime() - currentDate.getTime() < 0)
 		return { status: "success", information: "No future weekend" };
 	for (let dayNum = 0; dayNum < activeWeekend.days.length; dayNum++) {
@@ -349,7 +344,7 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 					startDate = new Date(activeWeekend.startDate + "T12:00:00"); /* 12pm on the first day*/
 				}
 				let diff = startDate.getTime() - currentDate.getTime();
-				if (!event.admission.filtered && diff < 1000 * 60 * 15) {
+				if (!event.admission.filtered && diff < 1000 * 60 * 6) {
 					changed = true;
 					let array = activeWeekend.days[dayNum][eventNum].signups;
 					activeWeekend.days[dayNum][eventNum].admission.filtered = true;
@@ -423,7 +418,10 @@ const updateUserInfoFunc = async () => {
 	configDoc = configDoc.data();
 	if (!configDoc.dataSheet) return;
 	let sheet = await getSheetAsJSON(configDoc.dataSheet.ID);
-	if (sheet.status === "error") return;
+	if (sheet.status === "error") {
+		error("Error getting student info Google Sheet.");
+		return;
+	}
 	let studentInfoJSON = {};
 
 	for (let row of sheet.data) {
@@ -433,7 +431,10 @@ const updateUserInfoFunc = async () => {
 
 	let adminDataSheet = (await db.collection("settings").doc("adminList").get()).data();
 	let adminSheet = await getSheetAsJSON(adminDataSheet.dataSheet.ID);
-	if (adminSheet.status === "error") return;
+	if (adminSheet.status === "error") {
+		error("Error getting admin info Google Sheet");
+		return;
+	}
 	let adminInfoJSON = {};
 
 	let batch = db.batch();
@@ -625,7 +626,7 @@ exports.manageAttendees = onCall(
 );
 
 exports.test = onCall(async () => {
-	log("Running Test Function")
+	log("Running Test Function");
 	let current = new Date();
 	return { info: current.toString() };
 });
