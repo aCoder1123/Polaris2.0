@@ -1,5 +1,6 @@
 process.env.TZ = "America/New_York";
 
+const { log, info, debug, warn, error, write } = require("firebase-functions/logger");
 const { onCall, HttpsError, onRequest } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { getFirestore } = require("firebase-admin/firestore");
@@ -16,8 +17,12 @@ admin.initializeApp();
 const db = getFirestore("maindb");
 
 const send = async (options) => {
-	let messageId = await sendMail(options);
-	return messageId;
+	try {
+		let messageId = await sendMail(options);
+		return messageId;
+	} catch (error) {
+		error("There was an error connecting to Gmail: ", {errorMsg: error})
+	}
 };
 
 exports.sendEmail = onCall(
@@ -74,7 +79,7 @@ exports.handleSignup = onCall(
 
 		let currentDate = new Date();
 		let eventDate = new Date(currentWeekend.startDate + `T${event.timeStart}:00`);
-		eventDate.setTime(eventDate.getTime() + 1000 * 60 * 60 * 24 * Number(id[0]));
+		eventDate.setDate(eventDate.getDate() + Number(id[0]));
 
 		if (event.admission.val === "none") return { status: "fail", information: "Event has no signup" };
 		if (eventDate < currentDate) {
@@ -305,6 +310,7 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 		let releaseDate = new Date(data.release.dateTime);
 		let current = new Date();
 		if (releaseDate.getTime() - current.getTime() < 1000 * 60 * 10) {
+			log("Releasing New Weekend");
 			data.release.released = true;
 			let current = await db.collection("activeWeekend").doc("default").get();
 			let info = JSON.parse(current.data().information);
@@ -340,8 +346,7 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 				if (activeWeekend.admission && activeWeekend.admission.lotteryTime) {
 					startDate = new Date(activeWeekend.admission.lotteryTime);
 				} else {
-					startDate = new Date(activeWeekend.startDate + "T00:00:00");
-					startDate.setTime(startDate.getTime() + 1000 * 60 * 60 * 12); /* 12pm on the first day*/
+					startDate = new Date(activeWeekend.startDate + "T12:00:00"); /* 12pm on the first day*/
 				}
 				let diff = startDate.getTime() - currentDate.getTime();
 				if (!event.admission.filtered && diff < 1000 * 60 * 15) {
@@ -371,7 +376,7 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 			}
 			if (!event.admission.credited) {
 				let endDate = new Date(activeWeekend.startDate + `T${event.timeEnd}:00`);
-				endDate.setTime(endDate.getTime() + 1000 * 60 * 60 * 24 * dayNum); /* add day offset*/
+				endDate.setDate(endDate.getDate() + dayNum); /* add day offset*/
 				let diff = endDate.getTime() - currentDate.getTime();
 				if (diff < 1000 * 60 * 10) {
 					activeWeekend.days[dayNum][eventNum].admission.credited = true;
@@ -385,7 +390,7 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 							if (!data) continue;
 							data.credit += 10;
 							let eventDate = new Date(activeWeekend.startDate + "T00:00:00");
-							eventDate.setTime(eventDate.getTime() + 1000 * 60 * 60 * 24 * dayNum);
+							eventDate.setDate(eventDate.getDate() + dayNum);
 							data.events.push({ title: event.title, date: eventDate.toDateString() });
 							await docRef.set(data);
 						} else if (student.status === "noShow" && i <= event.signupNum) {
@@ -515,6 +520,7 @@ exports.resetCredit = onCall(
 		});
 		try {
 			await batch.commit();
+			log(`Credit Reset by: ${request.auth.token.email}`);
 			return { status: "success", information: "All credit set to zero." };
 		} catch (error) {
 			return { status: "error", information: error.message };
@@ -619,6 +625,7 @@ exports.manageAttendees = onCall(
 );
 
 exports.test = onCall(async () => {
+	log("Running Test Function")
 	let current = new Date();
 	return { info: current.toString() };
 });

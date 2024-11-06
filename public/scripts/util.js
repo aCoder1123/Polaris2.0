@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+import { doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 
 const daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -59,7 +59,7 @@ class Weekend {
 		let oldEnd = this.endDate;
 		this.startDate = document.getElementById("startDate").value;
 		this.endDate = document.getElementById("endDate").value;
-		
+
 		// this.collectFeedback = document.getElementById("feedback").checked;
 
 		if (this.startDate && this.endDate) {
@@ -67,10 +67,10 @@ class Weekend {
 			let endDate = new Date(this.endDate);
 			let numDays = 1 + (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
 			if (numDays > 7) {
-				this.startDate = null
-				this.endDate = null
-				alert("Cannot make a schedule longer than one week.")
-				return false
+				this.startDate = null;
+				this.endDate = null;
+				alert("Cannot make a schedule longer than one week.");
+				return false;
 			}
 			if (numDays > this.days.length) {
 				for (let i = 0; i < numDays - this.days.length; i++) {
@@ -123,7 +123,7 @@ class Weekend {
 		this.startDate = info.startDate;
 		this.endDate = info.endDate;
 		this.release = info.release;
-		this.admission = info.admission
+		this.admission = info.admission;
 
 		// this.collectFeedback = info.collectFeedback;
 		this.days = info.days;
@@ -149,12 +149,10 @@ class Weekend {
 			alert("Please enter valid information before saving.");
 			return;
 		}
-		this.release.dateTime = (new Date(this.release.dateTime).getTime())
-		this.admission.dateTime = (new Date(this.admission.dateTime).getTime())
 		return { information: JSON.stringify(this) };
 	}
 
-	async saveSelf(db, name = null) {
+	async saveSelf(db, name = null, editingQueue = false) {
 		this.release.released = this.release.released || !this.release.dateTime;
 		for (let day of this.days) {
 			for (let event of day) {
@@ -186,6 +184,9 @@ class Weekend {
 					information: JSON.stringify(data),
 				});
 				await setDoc(doc(db, "activeWeekend", "default"), this.getInformation());
+				if (editingQueue) {
+					await deleteDoc(doc(db, "activeWeekend", "queued"));
+				}
 			} else {
 				await setDoc(doc(db, "activeWeekend", "default"), this.getInformation());
 			}

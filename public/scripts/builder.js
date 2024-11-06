@@ -293,7 +293,7 @@ const saveWeekend = async () => {
 		else if (idsToDelete.length) await deleteEvent({ eventIDs: idsToDelete });
 		idsToDelete = [];
 
-		await workingWeekend.saveSelf(db);
+		await workingWeekend.saveSelf(db, null, editingQueuedWeekend);
 		await createWeekendEvents();
 		alert("Weekend Saved Successfully");
 		window.location.reload();
@@ -377,17 +377,12 @@ const editCurrentWeekend = (e) => {
 		startIn.disabled = true;
 		endIn.disabled = true;
 		let release = document.getElementById("releaseDate");
-		release.disabled =workingWeekend.release.released
-		let releaseDate = new Date(workingWeekend.release.dateTime);
-		releaseDate.setTime(releaseDate.getTime() - 1000 * 60 * releaseDate.getTimezoneOffset());
-		release.value = releaseDate.toISOString().substring(0, 16);
+		release.disabled = workingWeekend.release.released;
+		release.value = workingWeekend.release.dateTime;
 		let lottery = document.getElementById("lotteryDate");
 		lottery.disabled = workingWeekend.admission.filtered;
-		if (workingWeekend.admission.dateTime){
-			let lotteryDate = new Date(workingWeekend.admission.dateTime)
-			lotteryDate.setTime(lotteryDate.getTime() - 1000 * 60 * lotteryDate.getTimezoneOffset());
-			lottery.value = lotteryDate.toISOString().substring(0, 16)
-		} else lottery.value = "";
+		if (workingWeekend.admission.dateTime) lottery.value = workingWeekend.admission.dateTime;
+		else lottery.value = "";
 	} else {
 		e.target.innerText = "Edit Active Weekend";
 		editingActiveWeekend = false;
