@@ -338,8 +338,8 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 				!event.admission.filtered
 			) {
 				let startDate;
-				if (activeWeekend.admission && activeWeekend.admission.lotteryTime) {
-					startDate = new Date(activeWeekend.admission.lotteryTime);
+				if (activeWeekend.admission && activeWeekend.admission.dateTime) {
+					startDate = new Date(activeWeekend.admission.dateTime);
 				} else {
 					startDate = new Date(activeWeekend.startDate + "T12:00:00"); /* 12pm on the first day*/
 				}
