@@ -294,10 +294,29 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 			let eventPassed = eventDate < new Date();
 
 			for (let element of event.signups) {
+				let status = ""
 				if (element.email === email) {
 					inEvent = true;
 				}
-				attendeesString += `<li class="attendee ${element.status}">${element.displayName}</li>`;
+				if (element.credit) {
+					let credit = element.credit
+					if (credit > 1000) {
+						status = "hundred"
+					} else if (credit > 500) {
+						status = "fifty"
+					} else if (credit > 250) {
+						status = "gold"
+					} else if (credit > 100) {
+						status = "silver"
+					} else if (credit > 50) {
+						status = "bronze"
+					} else {
+						status = ""
+					}
+					attendeesString += `<li class="attendee ${element.status} ${status}">${element.displayName}</li>`;
+				} else {
+					attendeesString += `<li class="attendee ${element.status}">${element.displayName}</li>`;
+				}
 			}
 			let eventID = i + "-" + eventNum;
 			eventsHTMLString += `<div class="eventWrap${

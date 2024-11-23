@@ -276,6 +276,7 @@ body {
 	border-radius: 1vh;
 	margin-left: 10%;
 	background-color: hsl(228, 88%, 97%);
+	overflow: hidden;
 }
 
 .attendeesList.empty {
@@ -290,8 +291,28 @@ body {
 } */
 
 .attendee {
-	width: 96%;
-	margin-left: 2%;
+	width: 100%;
+	/* margin-left: 2%; */
+	padding: 0 1%;
+}
+.attendee::marker {
+	color: black;
+	font-weight: 600;
+}
+.bronze::marker {
+	color: #CB8329;	
+}
+.silver::marker {
+	color:  hsl(0, 0%, 65%);	
+}
+.gold::marker {
+	color: rgb(255, 215, 0);	
+}
+.fifty::marker {
+	color: purple;	
+}
+.hundred::marker {
+	color: blue;	
 }
 
 .attendee span,

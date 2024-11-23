@@ -112,7 +112,7 @@ onAuthStateChanged(auth, (user) => {
 						return;
 					}
 					let attendeeInfo = {
-						status: "approved",
+						status: "checkedIn",
 						email: email,
 						displayName: studentsMap[email].displayName,
 					};
