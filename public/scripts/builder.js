@@ -220,10 +220,8 @@ document.getElementById("weekendTemplateSelector").onchange = updateWeekendFromT
 
 const saveEvent = () => {
 	let inputs = document.querySelectorAll("#eventCreatorWrap input, #eventCreatorWrap select");
-	let valid = true;
-	for (let input of inputs) {
-		valid = input.checkValidity();
-		if (!valid) {
+	for (let input of inputs) {	
+		if (!input.checkValidity()) {
 			alert("Please enter valid event information.");
 			return;
 		}
@@ -234,7 +232,6 @@ const saveEvent = () => {
 				Number(input.value.slice(3)) -
 				(Number(inputTwo.value.slice(0, 2)) * 60 + Number(inputTwo.value.slice(3)));
 			if (diff < 0) {
-				valid = false;
 				alert("Please enter valid times.");
 				return;
 			}
@@ -383,6 +380,7 @@ const editCurrentWeekend = (e) => {
 		lottery.disabled = workingWeekend.admission.filtered;
 		if (workingWeekend.admission.dateTime) lottery.value = workingWeekend.admission.dateTime;
 		else lottery.value = "";
+		document.getElementById("weekendDefaultTimes").disabled = true;
 	} else {
 		e.target.innerText = "Edit Active Weekend";
 		editingActiveWeekend = false;
@@ -390,6 +388,8 @@ const editCurrentWeekend = (e) => {
 		document.getElementById("startDate").disabled = false;
 		document.getElementById("endDate").disabled = false;
 		document.getElementById("releaseDate").disabled = false;
+		document.getElementById("weekendDefaultTimes").disabled = false;
+
 	}
 	updateWeekend();
 };
@@ -462,3 +462,24 @@ const clearDays = () => {
 document.getElementById("clearBtn").onclick = clearDays;
 
 addListeners();
+
+document.getElementById("settingsCollapse").onclick = (e) => document.getElementById("settingsHead").classList.toggle("open")
+
+
+document.getElementById("weekendDefaultTimes").onclick = () => {
+	let startDate = new Date()
+	startDate.setHours(12 - (startDate.getTimezoneOffset() / 60), 0, 0, 0)
+	startDate.setDate(startDate.getDate() + ((7 + 5 - startDate.getDay()) % 7)); //the next friday
+	document.getElementById("startDate").value = startDate.toISOString().substring(0, 10)
+	document.getElementById("lotteryDate").value = startDate.toISOString().substring(0, 16);
+	startDate.setDate(startDate.getDate() + 2)
+	document.getElementById("endDate").value = startDate.toISOString().substring(0, 10);
+	startDate.setDate(startDate.getDate() - 3)
+	startDate.setHours(8 - startDate.getTimezoneOffset() / 60, 0, 0, 0);
+	document.getElementById("releaseDate").value = startDate.toISOString().substring(0, 16);
+	
+	document.getElementById("startDate").dispatchEvent(new Event("change"));
+	document.getElementById("endDate").dispatchEvent(new Event("change"));
+	document.getElementById("releaseDate").dispatchEvent(new Event("change"));
+	document.getElementById("lotteryDate").dispatchEvent(new Event("change"));
+}

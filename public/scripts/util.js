@@ -24,6 +24,7 @@ class WeekendEvent {
 			name: select.options[select.selectedIndex].innerText,
 			filtered: false,
 			credited: false,
+			credit: Number(document.getElementById("eventCredit").value),
 		};
 	}
 
@@ -220,49 +221,57 @@ const userDoc = {
 
 class FunctionQueue {
 	constructor(func, callback = null) {
-		this._func = func
-		this._callbackFN = callback
+		this._func = func;
+		this._callbackFN = callback;
 		this._queue = [];
-		this._running = false
+		this._running = false;
 	}
 
 	add(item) {
-		this._queue.push(item)
-		if (!this._running) this.runQueue()
+		this._queue.push(item);
+		if (!this._running) this.runQueue();
 	}
 
 	async runQueue() {
-		this._running = true
-		let res
+		this._running = true;
+		let res;
 		try {
-			res = await this._func(this._queue[0])
+			res = await this._func(this._queue[0]);
 			if (this._callbackFN) {
 				this._callbackFN(this._queue.shift());
 			} else this._queue.shift();
 		} catch (error) {
-			console.log(`An error occurred when running queue function: ${error}`)
+			console.log(`An error occurred when running queue function: ${error}`);
 			if (this._callbackFN) {
 				this._callbackFN(error);
-			} 
+			}
 			this._queue.shift();
 		}
 		if (!this._queue.length) {
-			this._running = false
-			return
+			this._running = false;
+			return;
 		}
-		this.runQueue()
+		this.runQueue();
 	}
 
-	get queue(){ return this._queue }
-	get func(){ return this._func }
-	get running(){return this._running }
-	get callback(){ return this._callbackFN }
+	get queue() {
+		return this._queue;
+	}
+	get func() {
+		return this._func;
+	}
+	get running() {
+		return this._running;
+	}
+	get callback() {
+		return this._callbackFN;
+	}
 }
 
 const formatTime = (timeString) => {
 	let hours = Number(timeString.slice(0, 2));
 	if (hours > 12) return (hours - 12).toString() + timeString.slice(2) + "pm";
-	else if (hours === 12) return timeString + "pm"
+	else if (hours === 12) return timeString + "pm";
 	else if (hours > 9) return timeString + "am";
 	return timeString.slice(1) + "am";
 };
@@ -294,24 +303,24 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 			let eventPassed = eventDate < new Date();
 
 			for (let element of event.signups) {
-				let status = ""
+				let status = "";
 				if (element.email === email) {
 					inEvent = true;
 				}
 				if (element.credit) {
-					let credit = element.credit
+					let credit = element.credit;
 					if (credit > 1000) {
-						status = "hundred"
+						status = "hundred";
 					} else if (credit > 500) {
-						status = "fifty"
+						status = "fifty";
 					} else if (credit > 250) {
-						status = "gold"
+						status = "gold";
 					} else if (credit > 100) {
-						status = "silver"
+						status = "silver";
 					} else if (credit > 50) {
-						status = "bronze"
+						status = "bronze";
 					} else {
-						status = ""
+						status = "";
 					}
 					attendeesString += `<li class="attendee ${element.status} ${status}">${element.displayName}</li>`;
 				} else {
@@ -321,9 +330,15 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 			let eventID = i + "-" + eventNum;
 			eventsHTMLString += `<div class="eventWrap${
 				type != "editor" && openIDs.includes(eventID) ? " open" : ""
-			}" id="${
-				type === "editor" ? event.id : eventID
-			}"><div class="eventHeadWrap eIWrap ${event.admission.val === "none" ? "" : inEvent ? "inEvent" : event.signups.length >= event.numSpots ? "full" : ""}"><span class="material-symbols-outlined eventCollapse${
+			}" id="${type === "editor" ? event.id : eventID}"><div class="eventHeadWrap eIWrap ${
+				event.admission.val === "none"
+					? ""
+					: inEvent
+					? "inEvent"
+					: event.signups.length >= event.numSpots
+					? "full"
+					: ""
+			}"><span class="material-symbols-outlined eventCollapse${
 				type != "editor" && openIDs.includes(eventID) ? " open" : ""
 			}"> expand_circle_right </span><h2 class="eventTitle">${
 				event.title
@@ -361,13 +376,21 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 							event.numSpots
 								? event.numSpots
 								: '<span class="material-symbols-outlined">all_inclusive</span>'
-					  } ${
-							event.admission.val && event.admission.val != "signup" ? `(${event.admission.name})` : ""
-					  } </span>${
+					  }</span> 
+					<span class = "smallText">
+					${event.admission.val && event.admission.val != "signup" ? `<b> ${event.admission.name}</b> -` : ""} ${
+							event.admission.val != "none"
+								? event.admission.credit || event.admission.credit === 0
+									? `<i> ${event.admission.credit} credit</i>`
+									: "<i> 10 credit</i>"
+								: ""
+					}
+					</span>
+					${
 							attendeesString
 								? `<ol class="attendeesList">${attendeesString}</ol>`
 								: '<div class="attendeesList empty">No Attendees</div>'
-					  }</div>`
+						}</div>`
 					: ""
 			}
 			

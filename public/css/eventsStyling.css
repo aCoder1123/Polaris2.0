@@ -102,6 +102,12 @@ body {
 	font-size: 2vh;
 	height: 0;
 	transition: height var(--collapseTime) ease;
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: 0; /* Firefox */
+}
+
+.eventInfoWrap::-webkit-scrollbar {
+	display: none;
 }
 
 .eventWrap.open .eventInfoWrap {
@@ -262,6 +268,12 @@ body {
 .attendeesWrap {
 	flex-wrap: wrap;
 	width: 100%;
+	white-space: pre;
+}
+
+.smallText {
+	display:contents;
+	font-size: 1.75vh;
 }
 
 .attendeesList {

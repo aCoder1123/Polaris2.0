@@ -32,7 +32,7 @@ body section:last-of-type {
 	flex-shrink: 0;
 	flex-grow: 0;
 	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
+	scrollbar-width: 0; /* Firefox */
 	position: fixed;
 	z-index: 200;
 }
@@ -85,8 +85,40 @@ body section:last-of-type {
 	margin: 1.5vh 0;
 }
 
+
+
+#settingsCollapse {
+	fill: var(--accent-blue);
+	cursor: pointer;
+	margin-bottom: -0.5vh;
+	transition: .1s ease all;
+	transform: rotate(90deg);
+}
+
+#settingsCollapse:hover {
+	filter: brightness(.7);
+}
+
+#settingsCollapse:active {
+	filter: brightness(1.4);
+}
+
+#settingsHead.open #settingsCollapse {
+	transform: rotate(0deg);
+}
+
+#settingsHead.open ~ #settingsInfoWrap {
+	height: 20vh;
+}
+
 #settingsWrap {
 	width: 80%;
+}
+
+#settingsInfoWrap {
+	transition: .25s ease height;
+	height: 0vh;
+	overflow: hidden;
 }
 
 #topButtons {
@@ -94,16 +126,16 @@ body section:last-of-type {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
 }
 
-#editWeekend {
-	font-size: 1.75vh;
-	margin-right: 10%;
-}
-
-#clearBtn {
+#topButtons button {
 	font-size: 1.5vh;
+}
+
+#weekendDefaultTimes:disabled {
+	cursor: not-allowed;
 }
 
 #weekendTemplateSelector {
