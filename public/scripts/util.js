@@ -22,7 +22,7 @@ class WeekendEvent {
 		this.admission = {
 			val: select.value,
 			name: select.options[select.selectedIndex].innerText,
-			filtered: false,
+			filtered: document.getElementById("eventFiltered").checked,
 			credited: false,
 			credit: Number(document.getElementById("eventCredit").value),
 		};
@@ -342,8 +342,12 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 				type != "editor" && openIDs.includes(eventID) ? " open" : ""
 			}"> expand_circle_right </span><h2 class="eventTitle">${
 				event.title
-			}</h2><span class="eventTime">${formatTime(event.timeStart)}-${formatTime(event.timeEnd)}</span>${
-				type === "editor" ? '<span class="material-symbols-outlined addIcon deleteButton">delete</span>' : ""
+			}</h2><span class="eventTime">${formatTime(event.timeStart)}-${formatTime(event.timeEnd)}</span>
+			${
+				type === "editor" && !event.admission.credited ? '<span class="material-symbols-outlined editButton">edit</span>' : ""
+			}
+			${
+				type === "editor" ? '<span class="material-symbols-outlined deleteButton">delete</span>' : ""
 			}</div><div class="eventInfoWrap ${
 				event.admission.val === "none" ? " noAdmit" : event.admission.name
 			}"><div class="eventLocationWrap eIWrap"><span class="material-symbols-outlined"> location_on </span><span class="eventAddress">${

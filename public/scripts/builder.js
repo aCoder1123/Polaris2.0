@@ -166,7 +166,7 @@ const updateWeekend = () => {
 		}
 	}
 
-	document.getElementById("debugCode").innerText = JSON.stringify(workingWeekend);
+	document.getElementById("debugCode").innerText = JSON.stringify(workingWeekend).replaceAll(",", ",\n").replaceAll("{", "{\n").replaceAll("[", "[\n")
 	addListeners();
 	for (let deleteButton of document.querySelectorAll(".deleteButton")) {
 		deleteButton.onclick = (e) => {
@@ -175,6 +175,60 @@ const updateWeekend = () => {
 				for (let i = 0; i < day.length; i++) {
 					if (day[i].id === Number(eventNode.id)) {
 						if (day[i].calID) idsToDelete.push(day[i].calID);
+						day.splice(i, 1);
+						updateWeekend();
+						return;
+					}
+				}
+			}
+		};
+	}
+	for (let editButton of document.querySelectorAll(".editButton")) {
+		editButton.onclick = (e) => {
+			let eventNode = e.target.parentElement.parentElement;
+			for (let day of workingWeekend.days) {
+				for (let i = 0; i < day.length; i++) {
+					if (day[i].id === Number(eventNode.id)) {
+						if (day[i].admission.credited) return;
+						if (day[i].calID) idsToDelete.push(day[i].calID);
+						document.getElementById("titleIn").value = day[i].title;
+						document.getElementById("desc").value = day[i].description;
+						document.getElementById("eventLocation").value = day[i].location;
+						document.getElementById("travelTime").value = day[i].travelTime;
+						document.getElementById("eventFaculty").value = day[i].faculty;
+						document.getElementById("slotsIn").value = day[i].numSpots;
+						document.getElementById("eventCredit").value = day[i].admission.credit;
+						document.getElementById("criteriaSelector").selectedIndex = [
+							"signup",
+							"advLottery",
+							"creditLottery",
+							"credit",
+							"randLottery",
+							"none",
+						].indexOf(day[i].admission.val);
+						document.getElementById("eventEnd").value = day[i].timeEnd;
+						document.getElementById("eventStart").value = day[i].timeStart;
+						document.getElementById("daySelect").selectedIndex = workingWeekend.days.indexOf(day);
+						document.getElementById("saveAsTemplate").checked = day[i].saveAsTemplate;
+
+						document.getElementById("eventFiltered").value = day[i].admission.filtered;
+						for (let attendee of day[i].signups) {
+							document.getElementById("mAttendeesList").insertAdjacentHTML(
+								"beforeend",
+								`<div class="mAttendeeWrap">
+									<input required type="email" list="studentsList" class="attendeeInput" onchange="verifyAttendee(this)" value="${attendee.email}"/>
+									<select class="statusSelect" placeholder="Status: ">
+										<option ${attendee.status === "checkedIn" ? "selected" : ""} value="checkedIn">Checked In</option>
+										<option ${attendee.status === "approved" ? "selected" : ""} value="approved">Approved</option>
+										<option ${attendee.status === "pending" ? "selected" : ""} value="pending">Pending</option>
+										<option ${attendee.status === "noShow" ? "selected" : ""} value="noShow">No-Show</option>
+										<option ${attendee.status === "removed" ? "selected" : ""} value="removed">Removed</option>
+									</select>
+									<span class="material-symbols-outlined removeAttendee" onclick="this.parentElement.remove()">close</span>
+								</div>`
+							);
+							for (let el of document.querySelectorAll(".attendeeInput")) el.onchange = verifyAttendee;
+						}
 						day.splice(i, 1);
 						updateWeekend();
 						return;
@@ -220,7 +274,7 @@ document.getElementById("weekendTemplateSelector").onchange = updateWeekendFromT
 
 const saveEvent = () => {
 	let inputs = document.querySelectorAll("#eventCreatorWrap input, #eventCreatorWrap select");
-	for (let input of inputs) {	
+	for (let input of inputs) {
 		if (!input.checkValidity()) {
 			alert("Please enter valid event information.");
 			return;
@@ -242,6 +296,7 @@ const saveEvent = () => {
 	let eventToAdd = new WeekendEvent(currentEventNum);
 	currentEventNum++;
 
+
 	for (let attendee of document.querySelectorAll(".attendeeInput")) {
 		let attendeeInfo;
 		for (let student of students) {
@@ -255,10 +310,12 @@ const saveEvent = () => {
 			return;
 		}
 
+		console.log(attendee.parentElement.childNodes);
+
 		eventToAdd.signups.push({
 			displayName: attendeeInfo.displayName,
 			email: attendeeInfo.email,
-			status: "approved",
+			status: attendee.parentElement.childNodes[3].value,
 		});
 	}
 
@@ -337,6 +394,13 @@ const addAttendee = () => {
 		"afterbegin",
 		`<div class="mAttendeeWrap">
 			<input required type="email" list="studentsList" class="attendeeInput" onchange="verifyAttendee(this)"/>
+			<select class="statusSelect" placeholder="Status: ">
+				<option value="checkedIn">Checked In</option>
+				<option selected value="approved">Approved</option>
+				<option value="pending">Pending</option>
+				<option value="noShow">No-Show</option>
+				<option value="removed">Removed</option>
+			</select>
 			<span class="material-symbols-outlined removeAttendee" onclick="this.parentElement.remove()">close</span>
 		</div>`
 	);
@@ -389,7 +453,6 @@ const editCurrentWeekend = (e) => {
 		document.getElementById("endDate").disabled = false;
 		document.getElementById("releaseDate").disabled = false;
 		document.getElementById("weekendDefaultTimes").disabled = false;
-
 	}
 	updateWeekend();
 };
@@ -463,23 +526,23 @@ document.getElementById("clearBtn").onclick = clearDays;
 
 addListeners();
 
-document.getElementById("settingsCollapse").onclick = (e) => document.getElementById("settingsHead").classList.toggle("open")
-
+document.getElementById("settingsCollapse").onclick = (e) =>
+	document.getElementById("settingsHead").classList.toggle("open");
 
 document.getElementById("weekendDefaultTimes").onclick = () => {
-	let startDate = new Date()
-	startDate.setHours(12 - (startDate.getTimezoneOffset() / 60), 0, 0, 0)
+	let startDate = new Date();
+	startDate.setHours(12 - startDate.getTimezoneOffset() / 60, 0, 0, 0);
 	startDate.setDate(startDate.getDate() + ((7 + 5 - startDate.getDay()) % 7)); //the next friday
-	document.getElementById("startDate").value = startDate.toISOString().substring(0, 10)
+	document.getElementById("startDate").value = startDate.toISOString().substring(0, 10);
 	document.getElementById("lotteryDate").value = startDate.toISOString().substring(0, 16);
-	startDate.setDate(startDate.getDate() + 2)
+	startDate.setDate(startDate.getDate() + 2);
 	document.getElementById("endDate").value = startDate.toISOString().substring(0, 10);
-	startDate.setDate(startDate.getDate() - 3)
+	startDate.setDate(startDate.getDate() - 3);
 	startDate.setHours(8 - startDate.getTimezoneOffset() / 60, 0, 0, 0);
 	document.getElementById("releaseDate").value = startDate.toISOString().substring(0, 16);
-	
+
 	document.getElementById("startDate").dispatchEvent(new Event("change"));
 	document.getElementById("endDate").dispatchEvent(new Event("change"));
 	document.getElementById("releaseDate").dispatchEvent(new Event("change"));
 	document.getElementById("lotteryDate").dispatchEvent(new Event("change"));
-}
+};

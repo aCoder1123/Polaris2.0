@@ -91,7 +91,7 @@ body section:last-of-type {
 	fill: var(--accent-blue);
 	cursor: pointer;
 	margin-bottom: -0.5vh;
-	transition: .1s ease all;
+	transition: .25s ease all;
 	transform: rotate(90deg);
 }
 
@@ -220,16 +220,13 @@ button {
 .mAttendeeWrap {
 	width: 95%;
 	padding-left: 5%;
-	height: 2vh;
+	/* height: 2vh; */
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: flex-start;
+	flex-wrap: wrap;
 	margin: 1vh 0;
-}
-
-.mAttendeeWrap input {
-	margin: 0 2%;
 }
 
 #eventSaveButton {
@@ -248,7 +245,7 @@ button {
 	word-wrap: break-word;
 	page-break-inside: avoid;
 	text-wrap: wrap;
-	max-height: 10vh;
+	max-height: 50vh;
 	margin: 0 0 0.2vh 0;
 	-ms-overflow-style: none; /* IE and Edge */
 	scrollbar-width: none; /* Firefox */
@@ -314,4 +311,17 @@ button {
 	body section:nth-of-type(2) {
 		margin-left: 0;
 	}
+}
+
+.editButton, .deleteButton {
+	transition: .1s ease all;
+	cursor: pointer;
+}
+
+.editButton:hover, .deleteButton:hover {
+	color: rgb(60, 60, 60);
+}
+
+.editButton:active, .deleteButton:active {
+	color: rgb(105, 105, 105);
 }

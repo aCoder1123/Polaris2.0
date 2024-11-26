@@ -33,6 +33,7 @@ body {
 	background-image: url("../images/starrySky.jpeg");
 	background-position: bottom;
 	background-size: cover;
+	overscroll-behavior: none;
 }
 
 h1,

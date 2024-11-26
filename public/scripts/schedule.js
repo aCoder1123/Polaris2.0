@@ -133,6 +133,7 @@ onAuthStateChanged(auth, (user) => {
 							alert(`Error saving statuses: ${error}`);
 						});
 					emailIn.value = ""
+					document.getElementById("attendeeNumIn").value = ""
 					e.target.disabled = false;
 				};
 			}
