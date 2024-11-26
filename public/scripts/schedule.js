@@ -112,7 +112,7 @@ onAuthStateChanged(auth, (user) => {
 						return;
 					}
 					let attendeeInfo = {
-						status: "approved",
+						status: "checkedIn",
 						email: email,
 						displayName: studentsMap[email].displayName,
 					};
@@ -133,6 +133,7 @@ onAuthStateChanged(auth, (user) => {
 							alert(`Error saving statuses: ${error}`);
 						});
 					emailIn.value = ""
+					document.getElementById("attendeeNumIn").value = ""
 					e.target.disabled = false;
 				};
 			}

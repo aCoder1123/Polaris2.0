@@ -110,7 +110,7 @@ onAuthStateChanged(auth, (user) => {
 			collection.forEach((doc) => {
 				adminList.push(doc.id);
 				document.getElementById("adminListWrap").insertAdjacentHTML(
-					"afterbegin",
+					"beforeend",
 					`
 					<div class="admin" id="${doc.id}">
 						<span class="adminEmail">${doc.id}</span>
@@ -145,7 +145,7 @@ onAuthStateChanged(auth, (user) => {
 			collection.forEach((doc) => {
 				adminList.push(doc.id);
 				document.getElementById("subAdminListWrap").insertAdjacentHTML(
-					"afterbegin",
+					"beforeend",
 					`
 					<div class="subAdmin" id="${doc.id}">
 						<span class="subAdminEmail">${doc.id}</span>

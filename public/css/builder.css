@@ -32,7 +32,7 @@ body section:last-of-type {
 	flex-shrink: 0;
 	flex-grow: 0;
 	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
+	scrollbar-width: 0; /* Firefox */
 	position: fixed;
 	z-index: 200;
 }
@@ -85,8 +85,40 @@ body section:last-of-type {
 	margin: 1.5vh 0;
 }
 
+
+
+#settingsCollapse {
+	fill: var(--accent-blue);
+	cursor: pointer;
+	margin-bottom: -0.5vh;
+	transition: .25s ease all;
+	transform: rotate(90deg);
+}
+
+#settingsCollapse:hover {
+	filter: brightness(.7);
+}
+
+#settingsCollapse:active {
+	filter: brightness(1.4);
+}
+
+#settingsHead.open #settingsCollapse {
+	transform: rotate(0deg);
+}
+
+#settingsHead.open ~ #settingsInfoWrap {
+	height: 20vh;
+}
+
 #settingsWrap {
 	width: 80%;
+}
+
+#settingsInfoWrap {
+	transition: .25s ease height;
+	height: 0vh;
+	overflow: hidden;
 }
 
 #topButtons {
@@ -94,16 +126,16 @@ body section:last-of-type {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	justify-content: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
 }
 
-#editWeekend {
-	font-size: 1.75vh;
-	margin-right: 10%;
-}
-
-#clearBtn {
+#topButtons button {
 	font-size: 1.5vh;
+}
+
+#weekendDefaultTimes:disabled {
+	cursor: not-allowed;
 }
 
 #weekendTemplateSelector {
@@ -188,16 +220,13 @@ button {
 .mAttendeeWrap {
 	width: 95%;
 	padding-left: 5%;
-	height: 2vh;
+	/* height: 2vh; */
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: flex-start;
+	flex-wrap: wrap;
 	margin: 1vh 0;
-}
-
-.mAttendeeWrap input {
-	margin: 0 2%;
 }
 
 #eventSaveButton {
@@ -216,7 +245,7 @@ button {
 	word-wrap: break-word;
 	page-break-inside: avoid;
 	text-wrap: wrap;
-	max-height: 10vh;
+	max-height: 50vh;
 	margin: 0 0 0.2vh 0;
 	-ms-overflow-style: none; /* IE and Edge */
 	scrollbar-width: none; /* Firefox */
@@ -282,4 +311,17 @@ button {
 	body section:nth-of-type(2) {
 		margin-left: 0;
 	}
+}
+
+.editButton, .deleteButton {
+	transition: .1s ease all;
+	cursor: pointer;
+}
+
+.editButton:hover, .deleteButton:hover {
+	color: rgb(60, 60, 60);
+}
+
+.editButton:active, .deleteButton:active {
+	color: rgb(105, 105, 105);
 }
