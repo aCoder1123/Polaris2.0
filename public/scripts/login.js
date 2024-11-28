@@ -3,14 +3,9 @@ import {
 	initializeAppCheck,
 	ReCaptchaV3Provider,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app-check.js";
-
 import {
 	GoogleAuthProvider,
 	getAuth,
-	signInWithPopup,
-	signOut,
-	setPersistence,
-	browserSessionPersistence,
 	signInWithCredential
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 import { firebaseConfig, siteKey } from "./config.js";

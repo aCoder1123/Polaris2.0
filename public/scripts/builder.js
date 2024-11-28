@@ -310,8 +310,6 @@ const saveEvent = () => {
 			return;
 		}
 
-		console.log(attendee.parentElement.childNodes);
-
 		eventToAdd.signups.push({
 			displayName: attendeeInfo.displayName,
 			email: attendeeInfo.email,
