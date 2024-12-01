@@ -23,6 +23,11 @@
 * [Basics](https://firebase.google.com/docs/app-check/web/recaptcha-provider)
 * [Dashboard](https://www.google.com/recaptcha/admin/site/707324660)
 
+##Google Sign-In
+
+* [Setup](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid#one-tap-using-fedcm)
+* [Firebase Integration](https://firebase.google.com/docs/auth/web/google-signin#expandable-2)
+
 ##Firebase
 
 * [Firebase Setup](https://firebase.google.com/docs/web/setup#add-sdks-initialize)

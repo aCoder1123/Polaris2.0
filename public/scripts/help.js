@@ -49,7 +49,12 @@ onAuthStateChanged(auth, (user) => {
 			});
 			addListeners();
 		});
-
+		getDoc(doc(db, "settings", "versions")).then((doc) => {
+			let versionsDoc = doc.data();
+			document
+				.getElementById("menuFooter")
+				.insertAdjacentHTML("afterbegin", `<span>v${versionsDoc.current}</span>`);
+		});
 	} else {
 		window.location.href = `index.html`;
 	}
@@ -63,19 +68,19 @@ const bugReport = httpsCallable(functions, "bugReport");
 
 document.getElementById("reportForm").addEventListener("submit", async (e) => {
 	e.preventDefault();
-	document.getElementById("submitBtn").disabled = true
+	document.getElementById("submitBtn").disabled = true;
 	let formData = new FormData(e.target);
 	let data = {};
 	formData.forEach((value, key) => (data[key] = value));
 	await bugReport(data)
-	.then((res) => {
-		if (res.data) {
-			alert("Thank you for submitting your bug. We will take care of it as soon as possible.");
-		}
-	})
-	.catch((error) => {
-		console.error(error);
-		alert("Bug Report failed. Please try again or email bailey.tuckman@westtown.edu. Thank you.");
-	});
-	document.getElementById("submitBtn").disabled = false
+		.then((res) => {
+			if (res.data) {
+				alert("Thank you for submitting your bug. We will take care of it as soon as possible.");
+			}
+		})
+		.catch((error) => {
+			console.error(error);
+			alert("Bug Report failed. Please try again or email bailey.tuckman@westtown.edu. Thank you.");
+		});
+	document.getElementById("submitBtn").disabled = false;
 });

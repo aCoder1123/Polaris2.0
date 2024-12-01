@@ -40,7 +40,7 @@ onAuthStateChanged(auth, (user) => {
 									</div>`;
 			}
 			if (pastEventsString) {
-				document.getElementById("eventsWrap").innerHTML = pastEventsString
+				document.getElementById("eventsWrap").innerHTML = pastEventsString;
 				document.getElementById("eventsHead").innerText = `Past Events: (${userInformation.events.length})`;
 			}
 		});
@@ -59,6 +59,14 @@ onAuthStateChanged(auth, (user) => {
 			});
 			addListeners();
 		});
+		
+		getDoc(doc(db, "settings", "versions")).then((vDoc) => {
+			let versionsDoc = vDoc.data();
+			document
+				.getElementById("menuFooter")
+				.insertAdjacentHTML("afterbegin", `<span>v${versionsDoc.current}</span>`);
+		});
+
 		for (let el of document.querySelectorAll(".userName")) {
 			el.innerText = user.displayName;
 		}

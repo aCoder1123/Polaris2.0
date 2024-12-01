@@ -1,3 +1,4 @@
+// import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
 import {
 	initializeAppCheck,
@@ -21,7 +22,14 @@ import {
 	connectFunctionsEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 import { firebaseConfig, siteKey } from "./config.js";
-import { dataToFullHTML, addListeners, getUserFromEmail, getMenuHTMLString, handleDBError, FunctionQueue } from "./util.js";
+import {
+	dataToFullHTML,
+	addListeners,
+	getUserFromEmail,
+	getMenuHTMLString,
+	handleDBError,
+	FunctionQueue,
+} from "./util.js";
 
 const app = initializeApp(firebaseConfig);
 if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
@@ -36,7 +44,7 @@ const functions = getFunctions(app);
 
 const handleSignupFunc = httpsCallable(functions, "handleSignup");
 const printRosterFunc = httpsCallable(functions, "printRoster");
-const manageAttendeesFunc = httpsCallable(functions, "manageAttendees")
+const manageAttendeesFunc = httpsCallable(functions, "manageAttendees");
 
 let scheduleType = "schedule";
 let userInformation;
@@ -51,21 +59,23 @@ let idAsArray;
 let openIDs = [];
 let signupQueue = new FunctionQueue(handleSignupFunc, (val) => {
 	if (val.message) {
-		alert("An error occurred when signing up for the trip. The page will reload and you can try again. If the error persists please fill out a bug report.")
-		window.location.reload()
-		return
+		alert(
+			"An error occurred when signing up for the trip. The page will reload and you can try again. If the error persists please fill out a bug report."
+		);
+		window.location.reload();
+		return;
 	}
 	setTimeout(() => {
 		for (let el of signupQueue.queue) {
 			document.querySelectorAll(".addIcon").forEach((node) => {
 				if (node.parentElement.parentElement.parentElement.id === el.id) {
-					if(!node.classList.contains("loading")) node.classList.toggle("loading");
+					if (!node.classList.contains("loading")) node.classList.toggle("loading");
 					node.innerText = "progress_activity";
 				}
 			});
 		}
 	}, 50);
-})
+});
 
 if (window.location.hostname === "127.0.0.1") {
 	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
@@ -132,8 +142,8 @@ onAuthStateChanged(auth, (user) => {
 						.catch((error) => {
 							alert(`Error saving statuses: ${error}`);
 						});
-					emailIn.value = ""
-					document.getElementById("attendeeNumIn").value = ""
+					emailIn.value = "";
+					document.getElementById("attendeeNumIn").value = "";
 					e.target.disabled = false;
 				};
 			}
@@ -171,12 +181,14 @@ onAuthStateChanged(auth, (user) => {
 				for (let node of nodes.querySelectorAll(".scheduleDay")) {
 					scheduleContainer.appendChild(node);
 				}
-				if (idAsArray) formatCheckIn()
+				if (idAsArray) formatCheckIn();
 			});
 		});
 
 		let adminDoc = getDoc(doc(db, "admin", user.email)).then((doc) => {
 			document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, false, doc.exists()));
+
+			
 
 			document.getElementById("signOutWrap").addEventListener("click", () => {
 				signOut(auth)
@@ -189,6 +201,13 @@ onAuthStateChanged(auth, (user) => {
 			});
 			addListeners(openIDs);
 		});
+
+		getDoc(doc(db, "settings", "versions")).then((doc) => {
+			let versionsDoc = doc.data();
+			document
+				.getElementById("menuFooter")
+				.insertAdjacentHTML("afterbegin", `<span>v${versionsDoc.current}</span>`);
+		});
 	} else {
 		window.location.href = `index.html`;
 	}
@@ -200,12 +219,12 @@ const handleSignup = async (e) => {
 	if (button.innerText === "progress_activity" || signupQueue.queue.includes({ id: eID })) return;
 	button.innerText = "progress_activity";
 	button.classList.toggle("loading");
-	signupQueue.add({id: eID})
+	signupQueue.add({ id: eID });
 };
 
 const formatCheckIn = () => {
 	let wrap = document.getElementById("attendeesWrap");
-	let event = weekendInformation.days[idAsArray[0]][idAsArray[1]]
+	let event = weekendInformation.days[idAsArray[0]][idAsArray[1]];
 	let signups = event.signups;
 	let attendeesEmails = [];
 	wrap.replaceChildren();
@@ -247,14 +266,14 @@ const formatCheckIn = () => {
 	}
 	document.querySelectorAll(".statusSelect").forEach((el) => {
 		el.onchange = () => {
-			saveCheckIn(true)
-		}
-	})
+			saveCheckIn(true);
+		};
+	});
 	document.getElementById("mailLink").href = `mailto:${attendeesEmails.join(",")}?subject=${
 		document.getElementById("windowHead").innerText
 	}`;
-	document.getElementById("numSpots").innerText = event.numSpots
-	document.getElementById("checkedInNum").innerText = attendeesEmails.length
+	document.getElementById("numSpots").innerText = event.numSpots;
+	document.getElementById("checkedInNum").innerText = attendeesEmails.length;
 };
 
 const handleCheckIn = (e) => {
@@ -296,10 +315,12 @@ const saveCheckIn = async (persist = false) => {
 			if (!persist) {
 				document.getElementById("checkInWindow").classList.toggle("active");
 			}
-			manageAttendeesFunc({id: idAsArray}).then(console.log).catch((error) => {
-				alert(`Error saving statuses: ${error}`);
-			});
-			formatCheckIn()
+			manageAttendeesFunc({ id: idAsArray })
+				.then(console.log)
+				.catch((error) => {
+					alert(`Error saving statuses: ${error}`);
+				});
+			formatCheckIn();
 		})
 		.catch((error) => {
 			alert(`Error saving statuses: ${error}`);

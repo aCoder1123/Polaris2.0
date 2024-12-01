@@ -73,8 +73,15 @@ onAuthStateChanged(auth, (user) => {
 			if (!data.isAdmin) window.location.href = "../index.html";
 			userInformation = data;
 		});
-
+		
 		document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, true, true));
+		
+		getDoc(doc(db, "settings", "versions")).then((vDoc) => {
+			let versionsDoc = vDoc.data()
+			document
+				.getElementById("menuFooter")
+				.insertAdjacentHTML("afterbegin", `<span>v${versionsDoc.current}</span>`);
+		})
 
 		document.getElementById("signOutWrap").addEventListener("click", () => {
 			signOut(auth)
