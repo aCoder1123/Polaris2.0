@@ -122,6 +122,7 @@ h6 {
 	height: 5vh;
 	fill: white;
 	transition: fill 0.3 ease-out;
+	cursor: pointer;
 }
 
 #menuToggle.open {

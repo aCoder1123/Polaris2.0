@@ -40,24 +40,25 @@ onAuthStateChanged(auth, (user) => {
 									</div>`;
 			}
 			if (pastEventsString) {
-				document.getElementById("eventsWrap").innerHTML = pastEventsString
+				document.getElementById("eventsWrap").innerHTML = pastEventsString;
 				document.getElementById("eventsHead").innerText = `Past Events: (${userInformation.events.length})`;
 			}
 		});
 
 		let adminDoc = getDoc(doc(db, "admin", user.email)).then((doc) => {
-			document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, false, doc.exists()));
-
-			document.getElementById("signOutWrap").addEventListener("click", () => {
-				signOut(auth)
-					.then(() => {
-						window.location.href = `../index.html`;
-					})
-					.catch((error) => {
-						alert(`There was a error signing out: ${error}`);
-					});
+			getMenuHTMLString(user, false, db, doc.exists()).then((menuString) => {
+				document.body.insertAdjacentHTML("afterbegin", menuString);
+				document.getElementById("signOutWrap").addEventListener("click", () => {
+					signOut(auth)
+						.then(() => {
+							window.location.href = `../index.html`;
+						})
+						.catch((error) => {
+							alert(`There was a error signing out: ${error}`);
+						});
+				});
+				addListeners();
 			});
-			addListeners();
 		});
 		for (let el of document.querySelectorAll(".userName")) {
 			el.innerText = user.displayName;

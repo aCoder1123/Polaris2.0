@@ -494,7 +494,9 @@ const getAdminLinks = (adminPage) => {
 			`;
 };
 
-const getMenuHTMLString = (user, adminPage, admin = false) => {
+const getMenuHTMLString = async (user, adminPage, db, admin = false) => {
+	let vDoc = await getDoc(doc(db, "settings", "versions"))
+	let versionsDoc = vDoc.data();
 	return `
 		<div id="sideMenuWrap" class="">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" id="menuToggle" class="collapse">
@@ -587,6 +589,7 @@ const getMenuHTMLString = (user, adminPage, admin = false) => {
 			</div>
 
 			<div id="menuFooter">
+				<span>v${versionsDoc.current}</span>
 				<a href="https://westtown.edu">Westtown School</a>
 				<span>975 Westtown Rd. West Chester, PA</span>
 			</div>

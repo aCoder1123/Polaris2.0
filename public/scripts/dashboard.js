@@ -64,16 +64,18 @@ onAuthStateChanged(auth, (user) => {
 			userInformation = data;
 		});
 
-		document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, true, true));
+		getMenuHTMLString(user, true, db, true).then((menuString) => {
+			document.body.insertAdjacentHTML("afterbegin", menuString);
 
-		document.getElementById("signOutWrap").addEventListener("click", () => {
-			signOut(auth)
-				.then(() => {
-					window.location.href = `../index.html`;
-				})
-				.catch((error) => {
-					alert(`There was a error signing out: ${error}`);
-				});
+			document.getElementById("signOutWrap").addEventListener("click", () => {
+				signOut(auth)
+					.then(() => {
+						window.location.href = `../index.html`;
+					})
+					.catch((error) => {
+						alert(`There was a error signing out: ${error}`);
+					});
+			});
 		});
 
 		getDocs(query(collection(db, "weekends")))
@@ -292,7 +294,7 @@ document.getElementById("sDataSheetSubmit").onclick = async (e) => {
 	e.target.disabled = true;
 	try {
 		let link = document.getElementById("studentDataSheetURLIn").value;
-		if (link.length <( 39+44-1) || link.substring(39, 39 + 44).includes("/")) {
+		if (link.length < 39 + 44 - 1 || link.substring(39, 39 + 44).includes("/")) {
 			alert("Cannot extract valid ID from link. Double check the link and try again.");
 			e.target.disabled = false;
 			return;
@@ -325,7 +327,7 @@ document.getElementById("aDataSheetSubmit").onclick = async (e) => {
 	e.target.disabled = true;
 	try {
 		let link = document.getElementById("subAdminDataSheetURLIn").value;
-		if (link.length <( 39+44-1) || link.substring(39, 39 + 44).includes("/")) {
+		if (link.length < 39 + 44 - 1 || link.substring(39, 39 + 44).includes("/")) {
 			alert("Cannot extract valid ID from link. Double check the link and try again.");
 			e.target.disabled = false;
 			return;
