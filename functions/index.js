@@ -1,11 +1,10 @@
 process.env.TZ = "America/New_York";
 
 const { log, info, debug, warn, error, write } = require("firebase-functions/logger");
-const { onCall, HttpsError, onRequest } = require("firebase-functions/v2/https");
+const { onCall } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
-const fs = require("fs");
 const PDFDocument = require("pdfkit");
 const { getTimezoneOffset } = require("date-fns-tz");
 
@@ -383,7 +382,8 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 							let data = await docRef.get();
 							data = data.data();
 							if (!data) continue;
-							data.credit += event.admission.credit || event.admission.credit === 0 ? event.admission.credit : 10;
+							data.credit +=
+								event.admission.credit || event.admission.credit === 0 ? event.admission.credit : 10;
 							let eventDate = new Date(activeWeekend.startDate + "T00:00:00");
 							eventDate.setDate(eventDate.getDate() + dayNum);
 							data.events.push({ title: event.title, date: eventDate.toDateString() });
@@ -393,7 +393,10 @@ exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => 
 							let data = await docRef.get();
 							if (!data.exists) continue;
 							data = data.data();
-							let creditLoss = event.admission.credit || event.admission.credit === 0 ? event.admission.credit / 2 | 0 : 5;
+							let creditLoss =
+								event.admission.credit || event.admission.credit === 0
+									? (event.admission.credit / 2) | 0
+									: 5;
 							data.credit = data.credit >= creditLoss ? data.credit - creditLoss : 0;
 							await docRef.set(data);
 						}
