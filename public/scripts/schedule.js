@@ -31,7 +31,7 @@ import {
 } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
-if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
 	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
@@ -40,6 +40,12 @@ const appCheck = initializeAppCheck(app, {
 const auth = getAuth(app);
 const db = getFirestore(app, "maindb");
 const functions = getFunctions(app);
+
+if (window.location.hostname === "localhost") {
+	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
+	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+	console.log("Connecting Firebase Emulator");
+}
 
 const handleSignupFunc = httpsCallable(functions, "handleSignup");
 const printRosterFunc = httpsCallable(functions, "printRoster");
@@ -75,12 +81,6 @@ let signupQueue = new FunctionQueue(handleSignupFunc, (val) => {
 		}
 	}, 50);
 });
-
-if (window.location.hostname === "127.0.0.1") {
-	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
-	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
-	console.log("Connecting Firebase Emulator");
-}
 
 onAuthStateChanged(auth, (user) => {
 	if (user) {
@@ -135,7 +135,6 @@ onAuthStateChanged(auth, (user) => {
 						information: JSON.stringify(weekendInformation),
 					})
 						.then((val) => {
-							// document.getElementById("checkInWindow").classList.toggle("active");
 							formatCheckIn();
 						})
 						.catch((error) => {
@@ -308,7 +307,6 @@ const saveCheckIn = async (persist = false) => {
 				document.getElementById("checkInWindow").classList.toggle("active");
 			}
 			manageAttendeesFunc({ id: idAsArray })
-				.then(console.log)
 				.catch((error) => {
 					alert(`Error saving statuses: ${error}`);
 				});

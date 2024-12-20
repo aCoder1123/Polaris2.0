@@ -603,8 +603,8 @@ exports.printRoster = onCall(
 
 		let messageOptions = emailOptions;
 		messageOptions.to = "pkkjx65dthv83@hpeprint.com";
-		messageOptions.cc = "polaris@westtown.edu";
-		messageOptions.subject = "Roster";
+		messageOptions.cc = `polaris@westtown.edu, ${request.auth.token.email}`;
+		messageOptions.subject = `Roster for ${event.title}`;
 		// messageOptions.text = request.data.text;
 		messageOptions.attachments = {
 			// path: "./testing.pdf",
