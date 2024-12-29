@@ -57,9 +57,7 @@ body {
 	display: block;
 }
 
-.checkInLaunch,
 #exitSignup,
-#sortType,
 .attendeeLink,
 #addAttendee {
 	cursor: pointer;
@@ -72,20 +70,37 @@ body {
 	color: black;
 }
 
-.checkInLaunch:hover,
 #exitSignup:hover,
-#sortType:hover,
 .attendeeLink:hover,
 #addAttendee:hover {
 	color: grey;
 }
 
-.checkInLaunch:active,
 #exitSignup:active,
-#sortType:active,
 .attendeeLink:active,
 #addAttendee:active {
 	color: darkgray;
+}
+
+.checkInLaunch {
+	font-family: inherit;
+	font-weight: 800;
+	color: black;
+	background-color: hsl(0, 0%, 97%);
+	border: .25vh solid black;
+	border-radius: .75vh;
+	margin: 0 2% 1% 1%;
+	cursor: pointer;
+	box-shadow: none;
+	transition: .2s all ease;
+}
+
+.checkInLaunch:hover {
+	filter: brightness(.925);
+}
+
+.checkInLaunch:active {
+	filter: brightness(1.1);
 }
 
 #checkInWindow {
@@ -144,12 +159,41 @@ body {
 	align-items: center;
 	justify-content: center;
 	margin: 2% 0;
-	width: 25%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	width: 40% !important;
+	min-width: 210px;
+}
+
+#sortBtn {
+	margin-left: 3%;
+	font-size: 3.5vh;
+	background-color: whitesmoke;
+	border: .3vh solid black;
+	border-radius: .75vh;
+	font-size: 2vh;
+	width: 50%;
+	cursor: pointer;
+	transition: .2s ease all;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
 }
 
 #sortType {
-	margin-left: 3%;
-	font-size: 3.5vh;
+	text-align: center;
+	padding: 0 .5vh;
+}
+
+#sortBtn:hover {
+	filter: brightness(0.925);
+}
+
+#sortBtn:active {
+	filter: brightness(1.1);
 }
 
 #attendeesWrap {
@@ -174,15 +218,21 @@ body {
 	cursor: pointer;
 }
 
-#attendeeLinks {
+.attendeeLinkWrap {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: center;
+	width: 100%;
+	height: 7%;
 }
 
-#attendeeLinks * {
+.attendeeLinkWrap * {
 	margin: 0 1%;
+}
+
+#attendeeCount * {
+	margin: 0;
 }
 
 @keyframes loading {

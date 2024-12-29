@@ -40,12 +40,6 @@ body {
 	--collapseTime: 0.2s;
 	--dayCollapseTime: 0.2s;
 	transition: width var(--dayCollapseTime) ease-out;
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
-}
-
-.dayWrap::-webkit-scrollbar {
-	display: none;
 }
 
 .dayWrap.open {
@@ -102,12 +96,6 @@ body {
 	font-size: 2vh;
 	height: 0;
 	transition: height var(--collapseTime) ease;
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: 0; /* Firefox */
-}
-
-.eventInfoWrap::-webkit-scrollbar {
-	display: none;
 }
 
 .eventWrap.open .eventInfoWrap {
@@ -297,10 +285,6 @@ body {
 	align-items: center;
 	justify-content: center;
 }
-
-/* .attendeesList::-webkit-scrollbar {
-	display: none;
-} */
 
 .attendee {
 	width: 100%;

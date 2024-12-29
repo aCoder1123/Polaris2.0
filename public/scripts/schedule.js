@@ -226,6 +226,9 @@ const formatCheckIn = () => {
 		document.getElementById("mailLink").href = `mailto:${userInformation.email}`;
 		return;
 	}
+
+	let attendeeStringsList = []
+
 	for (let i = 0; i < signups.length; i++) {
 		if (signups[i].status === "checkedIn") {
 			attendeesEmails.push(signups[i].email);
@@ -241,20 +244,24 @@ const formatCheckIn = () => {
 						<option ${signups[i].status === "removed" ? "selected" : ""} value="removed">Removed</option>
 					</select>
 				</div>`;
-		wrap.insertAdjacentHTML("beforeend", attendeeHTMLString);
+		attendeeStringsList.push({ name: signups[i].displayName, status: signups[i].status, val: attendeeHTMLString });
 	}
-	if (document.getElementById("sortType").innerHTML === "sort_by_alpha") {
-		let array = Array.from(wrap.children);
-		array.sort((a, b) => {
-			return [a.childNodes[3].innerText, b.childNodes[3].innerText].sort()[0] === a.childNodes[3].innerText
-				? -1
-				: 1;
-		});
-		wrap.replaceChildren();
-		for (let node of array) {
-			wrap.appendChild(node);
-		}
+	let sortType = document.getElementById("sortType").innerHTML
+	if (sortType === "Name") {
+		attendeeStringsList.sort((a, b) => {
+			return [a.name, b.name].sort()[0] === a.name ? -1 : 1
+		})
+	} else if (sortType === "Status") {
+		attendeeStringsList.sort((a, b) => {
+			let statusOrder = ["checkedIn", "approved", "pending", "noShow", "removed"]
+			return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+		})
 	}
+
+	for (let attendee of attendeeStringsList) {
+		wrap.insertAdjacentHTML("beforeend", attendee.val)
+	}
+
 	document.querySelectorAll(".statusSelect").forEach((el) => {
 		el.onchange = () => {
 			saveCheckIn(true);
@@ -281,9 +288,10 @@ document.getElementById("exitSignup").addEventListener("click", (e) => {
 	formatCheckIn();
 });
 
-document.getElementById("sortType").addEventListener("click", (e) => {
-	let button = e.target;
-	button.innerText = button.innerText === "format_list_numbered" ? "sort_by_alpha" : "format_list_numbered";
+document.getElementById("sortBtn").addEventListener("click", (e) => {
+	let button = document.getElementById("sortType")
+	let sortList = ["Signup Order", "Name", "Status"];
+	button.innerText = sortList[(sortList.indexOf(button.innerText) + 1) % 3];
 	formatCheckIn();
 });
 

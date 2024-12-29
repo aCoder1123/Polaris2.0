@@ -11,7 +11,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 import { getFirestore, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import { firebaseConfig, siteKey } from "./config.js";
-import { addListeners, getUserFromEmail, getAdminLinks, getMenuHTMLString } from "./util.js";
+import { addListeners, getUserFromEmail, getMenuHTMLString } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
 if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
@@ -27,6 +27,10 @@ addListeners();
 
 let firebaseUser;
 let userInformation;
+
+if (window.location.hostname === "127.0.0.1") {
+	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+}
 
 onAuthStateChanged(auth, (user) => {
 	if (user) {
@@ -54,10 +58,6 @@ onAuthStateChanged(auth, (user) => {
 		window.location.href = `index.html`;
 	}
 });
-
-if (window.location.hostname === "127.0.0.1") {
-	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
-}
 
 const bugReport = httpsCallable(functions, "bugReport");
 

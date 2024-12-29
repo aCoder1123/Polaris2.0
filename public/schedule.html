@@ -19,22 +19,28 @@
 			<h3 id="windowHead">Check In</h3>
 			<span class="material-symbols-outlined" id="exitSignup"> cancel </span>
 			<div id="sortWrap">
-				Sort by: <span class="material-symbols-outlined" id="sortType">format_list_numbered</span>
+				Sorted by:
+				<div id="sortBtn">
+					<span id="sortType">Signup Order</span>
+					<span class="material-symbols-outlined"> swap_vert </span>
+				</div>
 			</div>
-			<div id="attendeesWrap"></div>
-			<div id="attendeeLinks">
+			<div id="attendeesWrap" class="noScrollBar"></div>
+
+			<div id="topAttendeeLinksWrap" class="attendeeLinkWrap">
 				<span id="attendeeCount">Checked in: <b id="checkedInNum"></b>/<span id="numSpots"></span></span>
+				<datalist id="studentsList"> </datalist>
+				<input required type="email" list="studentsList" id="attendeeInput" placeholder="add attendee" />
+				<input type="number" required min="0" step="1" id="attendeeNumIn" placeholder="#" />
+				<span class="material-symbols-outlined" id="addAttendee"> add_circle </span>
+			</div>
+			<div id="btmAttendeeLinksWrap" class="attendeeLinkWrap">
+				<button id="checkInSaveButton">Save</button>
 				<a href="" id="mailLink" class="attendeeLink">
 					<span class="material-symbols-outlined" id="attendeesMail"> mail </span>
 				</a>
 				<span class="material-symbols-outlined attendeeLink" id="attendeesPrint"> print </span>
-				<datalist id="studentsList"> </datalist>
-				<span class="material-symbols-outlined" id="addAttendee"> add_circle </span>
-				<input required type="email" list="studentsList" id="attendeeInput" placeholder="add attendee" />
-				<input type="number" required min="0" step="1" id="attendeeNumIn" placeholder="#" />
 			</div>
-
-			<button id="checkInSaveButton">Save</button>
 		</div>
 		<section id="mySchedule">
 			<h2 id="scheduleHead">My Schedule</h2>

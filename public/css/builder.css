@@ -31,14 +31,8 @@ body section:last-of-type {
 	border-right: 0.15vw solid black;
 	flex-shrink: 0;
 	flex-grow: 0;
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: 0; /* Firefox */
 	position: fixed;
 	z-index: 200;
-}
-
-#weekendInfo::-webkit-scrollbar {
-	display: none;
 }
 
 #infoHead,
@@ -68,12 +62,6 @@ body section:last-of-type {
 	justify-content: flex-start;
 	margin: 0 auto;
 	overflow: scroll;
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
-}
-
-#weekendInfoContainer::-webkit-scrollbar {
-	display: none;
 }
 
 #settingsHead,
@@ -247,11 +235,6 @@ button {
 	text-wrap: wrap;
 	max-height: 50vh;
 	margin: 0 0 0.2vh 0;
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
-}
-#debug::-webkit-scrollbar {
-	display: none;
 }
 
 #debugCode.visible {
