@@ -5,6 +5,10 @@ body {
     align-items: center;
     justify-content: center;
     height: 100vh;
+    background-image: url("../images/starrySky.jpeg");
+	background-position: bottom;
+	background-size: cover;
+	overscroll-behavior: none;
 }
 
 main {

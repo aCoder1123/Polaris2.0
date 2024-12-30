@@ -7,9 +7,9 @@ const parser = new DOMParser();
 
 class WeekendEvent {
 	constructor(id) {
-		(this.saveAsTemplate = document.getElementById("saveAsTemplate").checked),
-			(this.id = id),
-			(this.title = document.getElementById("titleIn").value);
+		this.id = id;
+		this.saveAsTemplate = document.getElementById("saveAsTemplate").checked;
+		this.title = document.getElementById("titleIn").value;
 		this.timeStart = document.getElementById("eventStart").value;
 		this.timeEnd = document.getElementById("eventEnd").value;
 		this.location = document.getElementById("eventLocation").value;
@@ -60,8 +60,6 @@ class Weekend {
 		let oldEnd = this.endDate;
 		this.startDate = document.getElementById("startDate").value;
 		this.endDate = document.getElementById("endDate").value;
-
-		// this.collectFeedback = document.getElementById("feedback").checked;
 
 		if (this.startDate && this.endDate) {
 			let startDate = new Date(this.startDate);
@@ -120,13 +118,10 @@ class Weekend {
 		document.getElementById("startDate").value = info.startDate;
 		document.getElementById("endDate").value = info.endDate;
 		// document.getElementById("releaseDate").value = info.release.dateTime;
-		// document.getElementById("feedback").checked = info.collectFeedback;
 		this.startDate = info.startDate;
 		this.endDate = info.endDate;
 		this.release = info.release;
 		this.admission = info.admission;
-
-		// this.collectFeedback = info.collectFeedback;
 		this.days = info.days;
 	}
 
@@ -204,20 +199,6 @@ class Weekend {
 		return `${this.startDate}-${this.endDate}`;
 	}
 }
-
-const userDoc = {
-	isAdmin: false,
-	email: "",
-	events: [],
-	credit: 0,
-	emailPreferences: {
-		advLottery: true,
-		eventConf: true,
-		eventFeedback: true,
-		newEvent: true,
-	},
-	displayName: "",
-};
 
 class FunctionQueue {
 	constructor(func, callback = null) {
@@ -344,18 +325,20 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 				event.title
 			}</h2><span class="eventTime">${formatTime(event.timeStart)}-${formatTime(event.timeEnd)}</span>
 			${
-				type === "editor" && !event.admission.credited ? '<span class="material-symbols-outlined editButton">edit</span>' : ""
+				type === "editor" && !event.admission.credited
+					? '<span class="material-symbols-outlined editButton">edit</span>'
+					: ""
 			}
 			${
 				type === "editor" ? '<span class="material-symbols-outlined deleteButton">delete</span>' : ""
-			}</div><div class="eventInfoWrap ${
+			}</div><div class="eventInfoWrap noScrollBar ${
 				event.admission.val === "none" ? " noAdmit" : event.admission.name
 			}"><div class="eventLocationWrap eIWrap"><span class="material-symbols-outlined"> location_on </span><span class="eventAddress">${
 				event.location
 			}</span></div><div class="travelWrap eIWrap"><span class="material-symbols-outlined"> airport_shuttle </span><span class="travelTime">${
 				event.travelTime
 			} min</span></div><div class="eventLeadWrap eIWrap"><span class="material-symbols-outlined"> person </span><span class="eventLeader">T. ${
-				event.faculty /*[0].first*/
+				event.faculty
 			}</span></div><div class="descWrap eIWrap"><span class="material-symbols-outlined descIcon"> description </span><p class="eventDesc">${
 				event.description ? event.description : "<i>No description.</i>"
 			}</p></div>
@@ -365,17 +348,13 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 					? `<div class="attendeesWrap eIWrap">${
 							type === "editor"
 								? '<span class="material-symbols-outlined">block</span>'
+								: type === "admin"
+								? `
+								<button class="checkInLaunch">Check In</button>
+								`
 								: `<span class="material-symbols-outlined ${
-										type === "admin" ? "checkInLaunch" : eventPassed ? "addDisabled" : "addIcon"
-								  }"> ${
-										type === "admin"
-											? "task_alt"
-											: eventPassed
-											? "block"
-											: !inEvent
-											? "add_circle"
-											: "cancel"
-								  } </span>`
+										eventPassed ? "addDisabled" : "addIcon"
+								  }"> ${eventPassed ? "block" : !inEvent ? "add_circle" : "cancel"} </span>`
 					  }<span class="singedUpNum">${event.signups.length}</span>/<span class="eventSpots">${
 							event.numSpots
 								? event.numSpots
@@ -388,14 +367,19 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 									? `<i> ${event.admission.credit} credit</i>`
 									: "<i> 10 credit</i>"
 								: ""
-					}
+					  }
 					</span>
 					${
-							attendeesString
-								? `<ol class="attendeesList">${attendeesString}</ol>`
-								: '<div class="attendeesList empty">No Attendees</div>'
-						}</div>`
-					: ""
+						attendeesString
+							? `<ol class="attendeesList">${attendeesString}</ol>`
+							: '<div class="attendeesList empty">No Attendees</div>'
+					}</div>`
+					: `<div class="calAddWrap">
+					<span class="material-symbols-outlined">event</span>
+					<button class="calAddBtn" ${type === "editor" ? "disabled" : ""}>${
+						inEvent ? "Remove Event from" : "Add Event to"
+					} Google Calendar</button>
+					</div>`
 			}
 			
 			</div></div>`;
@@ -410,7 +394,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 			eventNum++;
 		}
 
-		fullHTMLString += `<section class="dayWrap open">
+		fullHTMLString += `<section class="dayWrap open noScrollBar">
 				<div class="dayHeadWrap">
 					<svg xmlns="http://www.w3.org/2000/svg" class="dayCollapse open" viewBox="0 -960 960 960" width="24px" fill="white"><path d="m480-340 180-180-57-56-123 123-123-123-57 56 180 180Zm0 260q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" /></svg>
 					<h2 class="dayHead">${daysOfTheWeek[(startDay + i) % 7]}</h2>
@@ -481,21 +465,8 @@ const getUserFromEmail = async (email, name, db, functions) => {
 	return information;
 };
 
-const getAdminLinks = (adminPage) => {
-	return `
-			<a id="dashWrap" class="menuWrap" href="${adminPage ? "." : "admin"}/">
-				<span class="material-symbols-outlined"> monitoring </span>
-				<span class="menuText">Admin Dashboard</span>
-			</a>
-			<a id="builderWrap" class="menuWrap" href="${adminPage ? "" : "admin/"}builder.html">
-				<span class="material-symbols-outlined"> edit_calendar </span>
-				<span class="menuText">Weekend Builder</span>
-			</a>
-			`;
-};
-
 const getMenuHTMLString = async (user, adminPage, db, admin = false) => {
-	let vDoc = await getDoc(doc(db, "settings", "versions"))
+	let vDoc = await getDoc(doc(db, "settings", "versions"));
 	let versionsDoc = vDoc.data();
 	return `
 		<div id="sideMenuWrap" class="">
@@ -568,6 +539,10 @@ const getMenuHTMLString = async (user, adminPage, db, admin = false) => {
 				<span class="material-symbols-outlined"> edit_calendar </span>
 				<span class="menuText">Weekend Builder</span>
 			</a>
+			<a id="settingsWrap" class="menuWrap" href="${adminPage ? "." : "admin"}/settings.html">
+				<span class="material-symbols-outlined"> settings </span>
+				<span class="menuText">Settings</span>
+			</a>
 			`
 					: ""
 			}
@@ -613,7 +588,6 @@ export {
 	WeekendEvent,
 	addListeners,
 	getUserFromEmail,
-	getAdminLinks,
 	handleDBError,
 	getMenuHTMLString,
 	FunctionQueue,

@@ -31,7 +31,8 @@ import {
 } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
-if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
+	self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
 	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
@@ -180,6 +181,12 @@ onAuthStateChanged(auth, (user) => {
 					scheduleContainer.appendChild(node);
 				}
 				if (idAsArray) formatCheckIn();
+
+				for (let node of document.querySelectorAll(".calAddBtn")) {
+					node.onclick = () => {
+						manageGCal(node);
+					};
+				}
 			});
 		});
 
@@ -227,7 +234,7 @@ const formatCheckIn = () => {
 		return;
 	}
 
-	let attendeeStringsList = []
+	let attendeeStringsList = [];
 
 	for (let i = 0; i < signups.length; i++) {
 		if (signups[i].status === "checkedIn") {
@@ -246,20 +253,20 @@ const formatCheckIn = () => {
 				</div>`;
 		attendeeStringsList.push({ name: signups[i].displayName, status: signups[i].status, val: attendeeHTMLString });
 	}
-	let sortType = document.getElementById("sortType").innerHTML
+	let sortType = document.getElementById("sortType").innerHTML;
 	if (sortType === "Name") {
 		attendeeStringsList.sort((a, b) => {
-			return [a.name, b.name].sort()[0] === a.name ? -1 : 1
-		})
+			return [a.name, b.name].sort()[0] === a.name ? -1 : 1;
+		});
 	} else if (sortType === "Status") {
 		attendeeStringsList.sort((a, b) => {
-			let statusOrder = ["checkedIn", "approved", "pending", "noShow", "removed"]
+			let statusOrder = ["checkedIn", "approved", "pending", "noShow", "removed"];
 			return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
-		})
+		});
 	}
 
 	for (let attendee of attendeeStringsList) {
-		wrap.insertAdjacentHTML("beforeend", attendee.val)
+		wrap.insertAdjacentHTML("beforeend", attendee.val);
 	}
 
 	document.querySelectorAll(".statusSelect").forEach((el) => {
@@ -289,7 +296,7 @@ document.getElementById("exitSignup").addEventListener("click", (e) => {
 });
 
 document.getElementById("sortBtn").addEventListener("click", (e) => {
-	let button = document.getElementById("sortType")
+	let button = document.getElementById("sortType");
 	let sortList = ["Signup Order", "Name", "Status"];
 	button.innerText = sortList[(sortList.indexOf(button.innerText) + 1) % 3];
 	formatCheckIn();
@@ -314,10 +321,9 @@ const saveCheckIn = async (persist = false) => {
 			if (!persist) {
 				document.getElementById("checkInWindow").classList.toggle("active");
 			}
-			manageAttendeesFunc({ id: idAsArray })
-				.catch((error) => {
-					alert(`Error saving statuses: ${error}`);
-				});
+			manageAttendeesFunc({ id: idAsArray }).catch((error) => {
+				alert(`Error saving statuses: ${error}`);
+			});
 			formatCheckIn();
 		})
 		.catch((error) => {
@@ -334,5 +340,18 @@ document.getElementById("attendeesPrint").onclick = async (e) => {
 		alert("Roster printed to the Marry Leads Room printer");
 	} catch (error) {
 		alert(`Error printing roster: ${error.message}`);
+	}
+};
+
+const manageGCal = async (button) => {
+	try {
+		button.disabled = true;
+		let res = await manageAttendeesFunc({
+			id: button.parentElement.parentElement.parentElement.id.split("-"),
+			addAttendee: true,
+		});
+	} catch (error) {
+		alert("There was an error adding event to your calendar. Reload the page and try again.");
+		console.log(error);
 	}
 };

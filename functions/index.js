@@ -2,7 +2,6 @@ process.env.TZ = "America/New_York";
 
 const { log, info, debug, warn, error, write } = require("firebase-functions/logger");
 const { onCall } = require("firebase-functions/v2/https");
-const admin = require("firebase-admin");
 const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const PDFDocument = require("pdfkit");
@@ -12,7 +11,6 @@ const { sendMail, emailOptions } = require("./gmail/main");
 const { createEventFromJSON, manageAttendees, eventTemplate, deleteCalendarEvent } = require("./calendar/main");
 const { getSheetAsJSON } = require("./drive/main");
 
-admin.initializeApp();
 const db = getFirestore("maindb");
 
 const send = async (options) => {
@@ -29,6 +27,7 @@ exports.sendEmail = onCall(
 		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
 	},
 	(request) => {
+		if (request.auth === null) return;
 		let messageOptions = emailOptions;
 		messageOptions.to = request.data.email;
 		messageOptions.subject = request.data.subject;
@@ -43,6 +42,7 @@ exports.bugReport = onCall(
 		enforceAppCheck: true,
 	},
 	(request) => {
+		if (request.auth === null) return;
 		let messageOptions = emailOptions;
 		messageOptions.to = "bailey.tuckman@westtown.edu";
 		messageOptions.cc = "polaris@westtown.edu";
@@ -65,7 +65,7 @@ exports.handleSignup = onCall(
 		enforceAppCheck: true,
 	},
 	async (request) => {
-		if (request.auth === null) return { status: "failed", information: "User not signed in." };
+		if (!request.auth) return;
 		let currentWeekendDoc = await db.collection("activeWeekend").doc("default").get();
 		let currentWeekend = JSON.parse(currentWeekendDoc.data().information);
 		let attendeeRemoved = false;
@@ -238,6 +238,7 @@ exports.saveWeekendEvents = onCall(
 		enforceAppCheck: true,
 	},
 	(request) => {
+		if (!request.auth) return;
 		try {
 			let res = saveEvents(request);
 			return { status: "success", information: res };
@@ -252,6 +253,7 @@ exports.deleteEvent = onCall(
 		enforceAppCheck: true,
 	},
 	async (request) => {
+		if (!request.auth) return;
 		if (request.data.eventID) return await deleteCalendarEvent(request.data.eventID);
 		try {
 			for (let id of request.data.eventIDs) {
@@ -268,6 +270,7 @@ exports.createNewUser = onCall(
 		enforceAppCheck: true,
 	},
 	async (request) => {
+		if (!request.auth) return;
 		const usersDoc = await db.collection("settings").doc("config").get();
 		let usersData = usersDoc.data().data;
 		const userDoc = {
@@ -505,6 +508,7 @@ exports.updateUserInfo = onCall(
 		enforceAppCheck: true,
 	},
 	async (request) => {
+		if (!request.auth) return;
 		await updateUserInfoFunc();
 	}
 );
@@ -514,6 +518,7 @@ exports.resetCredit = onCall(
 		enforceAppCheck: true,
 	},
 	async (request) => {
+		if (!request.auth) return;
 		let admin = await db.collection("admin").doc(request.auth.token.email).get();
 		if (!admin.exists) return { status: "error", information: "User not admin." };
 		let users = await db.collection("users").get();
@@ -538,6 +543,7 @@ exports.printRoster = onCall(
 		enforceAppCheck: true,
 	},
 	async (request) => {
+		if (!request.auth) return;
 		let activeWeekend = (await db.collection("activeWeekend").doc("default").get()).data();
 		if (!activeWeekend) return { status: "fail", information: "No active weekend found." };
 		activeWeekend = JSON.parse(activeWeekend.information);
@@ -621,15 +627,32 @@ exports.manageAttendees = onCall(
 		enforceAppCheck: true, // Reject requests with missing or invalid App Check tokens.
 	},
 	async (request) => {
+		if (!request.auth) return;
 		let id = request.data.id;
 		let activeWeekend = (await db.collection("activeWeekend").doc("default").get()).data();
 		activeWeekend = JSON.parse(activeWeekend.information);
 		let event = activeWeekend.days[id[0]][id[1]];
+		if (request.data.addAttendee && event.admission.val === "none") {
+			let removed = false;
+			for (let i in event.signups) {
+				if (event.signups[i].email === request.auth.token.email) {
+					removed = true;
+					event.signups.splice(i, 1);
+				}
+			}
+			if (!removed) {
+				event.signups.push({ status: "approved", email: request.auth.token.email });
+			}
+			db.collection("activeWeekend")
+				.doc("default")
+				.set({ information: JSON.stringify(activeWeekend) });
+		}
 		return await manageAttendees(event);
 	}
 );
 
 exports.test = onCall(async () => {
+	if (request.auth === null) return;
 	log("Running Test Function");
 	let current = new Date();
 	return { info: current.toString() };

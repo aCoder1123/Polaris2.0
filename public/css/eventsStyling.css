@@ -103,7 +103,7 @@ body {
 }
 
 .eventWrap.open .eventInfoWrap.noAdmit {
-	height: 17vh;
+	height: 18vh;
 }
 
 .dayCollapse {
@@ -331,6 +331,38 @@ body {
 }
 .approved {
 	color: blue;
+}
+
+.calAddWrap {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+.calAddBtn {
+	background-color: hsl(0, 0%, 97%);
+	outline: none;
+	cursor: pointer;
+	transition: .2s ease filter;
+	font-family: inherit;
+	font-weight: 600;
+	border: .3vh solid black;
+	border-radius: .8vh;
+	margin-left: 2%;
+}
+
+.calAddBtn:hover {
+	filter: brightness(.925);
+}
+
+.calAddBtn:active {
+	filter: brightness(1.1);
+}
+
+.calAddBtn:disabled {
+	filter: brightness(.8);
+	cursor: not-allowed;
 }
 
 @media screen and (orientation: portrait) {
