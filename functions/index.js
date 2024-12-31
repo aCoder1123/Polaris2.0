@@ -1,5 +1,6 @@
 process.env.TZ = "America/New_York";
 
+const { initializeApp } = require("firebase-admin/app");
 const { log, info, debug, warn, error, write } = require("firebase-functions/logger");
 const { onCall } = require("firebase-functions/v2/https");
 const { getFirestore } = require("firebase-admin/firestore");
@@ -11,6 +12,7 @@ const { sendMail, emailOptions } = require("./gmail/main");
 const { createEventFromJSON, manageAttendees, eventTemplate, deleteCalendarEvent } = require("./calendar/main");
 const { getSheetAsJSON } = require("./drive/main");
 
+initializeApp();
 const db = getFirestore("maindb");
 
 const send = async (options) => {
