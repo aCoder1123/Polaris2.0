@@ -1,9 +1,9 @@
 process.env.TZ = "America/New_York";
 
-const { initializeApp } = require("firebase-admin/app");
+const admin = require("firebase-admin");
 const { log, info, debug, warn, error, write } = require("firebase-functions/logger");
 const { onCall } = require("firebase-functions/v2/https");
-const { getFirestore } = require("firebase-admin/firestore");
+const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const PDFDocument = require("pdfkit");
 const { getTimezoneOffset } = require("date-fns-tz");
@@ -12,7 +12,7 @@ const { sendMail, emailOptions } = require("./gmail/main");
 const { createEventFromJSON, manageAttendees, eventTemplate, deleteCalendarEvent } = require("./calendar/main");
 const { getSheetAsJSON } = require("./drive/main");
 
-initializeApp();
+admin.initializeApp();
 const db = getFirestore("maindb");
 
 const send = async (options) => {
@@ -20,7 +20,7 @@ const send = async (options) => {
 		let messageId = await sendMail(options);
 		return messageId;
 	} catch (error) {
-		error("There was an error connecting to Gmail: ", { errorMsg: error });
+		console.log("There was an error connecting to Gmail: ", { errorMsg: error });
 	}
 };
 
@@ -43,7 +43,7 @@ exports.bugReport = onCall(
 	{
 		enforceAppCheck: true,
 	},
-	(request) => {
+	async (request) => {
 		if (request.auth === null) return;
 		let messageOptions = emailOptions;
 		messageOptions.to = "bailey.tuckman@westtown.edu";
@@ -56,7 +56,30 @@ exports.bugReport = onCall(
 			day: "numeric",
 		})} there was a bug reported on ${request.data.page} by ${
 			request.data.email ? request.data.email : "anonymous"
-		}.\n\nDescription:\n${request.data.description}\n\nSteps to Reproduce: ${request.data.repro}`;
+		}.\n\nDescription:\n${request.data.description}\n\nSteps to Reproduce: ${
+			request.data.repro
+		}\n\nCheck this bug report here: https://polaris-60dce.web.app/admin/settings.html`;
+
+		let currentNum = await db.collection("bugReports").count().get();
+		db.collection("bugReports")
+			.doc(`${currentNum.data().count}`)
+			.set({
+				date: Timestamp.fromDate(new Date()),
+				description: request.data.description,
+				page: request.data.page,
+				reporter: request.data.email,
+				reproduction: request.data.repro,
+				status: {
+					resolved: false,
+					dateResolved: null,
+					updateResolved: null,
+					bugBounty: {
+						awarded: false,
+						creditQuantity: 10,
+						dateAwarded: null
+					}
+				}
+			});
 
 		return send(messageOptions);
 	}
@@ -302,7 +325,9 @@ exports.createNewUser = onCall(
 	}
 );
 
-exports.updateWeekend = onSchedule("*/10 6-22 * 1-6,9-12 *", async (request) => {
+// At every 10th minute past every hour from 0 through 3 and every hour from 11 through 23 in every month from January through June and every month from September through December.
+//Adjusted for timezone
+exports.updateWeekend = onSchedule("*/10 0-3,11-23 * 1-6,9-12 *", async (request) => {
 	let queuedRef = await db.collection("activeWeekend").doc("queued").get();
 	let currentDate = new Date();
 	if (queuedRef.exists) {
@@ -428,7 +453,7 @@ const updateUserInfoFunc = async () => {
 	if (!configDoc.dataSheet) return;
 	let sheet = await getSheetAsJSON(configDoc.dataSheet.ID);
 	if (sheet.status === "error") {
-		error("Error getting student info Google Sheet.");
+		// error("Error getting student info Google Sheet.");
 		return;
 	}
 	let studentInfoJSON = {};
@@ -441,7 +466,7 @@ const updateUserInfoFunc = async () => {
 	let adminDataSheet = (await db.collection("settings").doc("adminList").get()).data();
 	let adminSheet = await getSheetAsJSON(adminDataSheet.dataSheet.ID);
 	if (adminSheet.status === "error") {
-		error("Error getting admin info Google Sheet");
+		// error("Error getting admin info Google Sheet");
 		return;
 	}
 	let adminInfoJSON = {};
@@ -499,8 +524,8 @@ const updateUserInfoFunc = async () => {
 		return { status: "error", information: JSON.stringify(e) };
 	});
 };
-
-exports.updateUserInfoPeriodic = onSchedule("0 12 * 1-6,9-12 fri", async (request) => {
+// At 17:00 on Friday in every month from January through June and every month from September through December.
+exports.updateUserInfoPeriodic = onSchedule("0 17 * 1-6,9-12 fri", async (request) => {
 	// https://crontab.guru/#0_12_*_1-6,9-12_fri
 	await updateUserInfoFunc();
 });
@@ -532,7 +557,7 @@ exports.resetCredit = onCall(
 		});
 		try {
 			await batch.commit();
-			log(`Credit Reset by: ${request.auth.token.email}`);
+			// log(`Credit Reset by: ${request.auth.token.email}`);
 			return { status: "success", information: "All credit set to zero." };
 		} catch (error) {
 			return { status: "error", information: error.message };
@@ -613,12 +638,19 @@ exports.printRoster = onCall(
 		messageOptions.to = "pkkjx65dthv83@hpeprint.com";
 		messageOptions.cc = `polaris@westtown.edu, ${request.auth.token.email}`;
 		messageOptions.subject = `Roster for ${event.title}`;
-		// messageOptions.text = request.data.text;
+		messageOptions.text = `${event.title}\n\n`
+
+		for (student of people) {
+			messageOptions.text += `${counter}. ${student.name} - ${student.email} - ${
+				student.cell ? student.cell : "no phone number"
+			} - ${student.grade}th\n`;
+		}
 		messageOptions.attachments = {
 			// path: "./testing.pdf",
 			filename: "Roster.pdf",
 			content: doc,
 		};
+		// console.log(messageOptions.text)
 
 		return send(messageOptions);
 	}
@@ -653,7 +685,7 @@ exports.manageAttendees = onCall(
 	}
 );
 
-exports.test = onCall(async () => {
+exports.test = onCall(async (request) => {
 	if (request.auth === null) return;
 	log("Running Test Function");
 	let current = new Date();

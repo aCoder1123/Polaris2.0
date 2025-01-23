@@ -81,7 +81,7 @@ emulatorsSave/*
 
 temp.md
 
-token.json
+token*.json
 
 OAuthClient.json
 

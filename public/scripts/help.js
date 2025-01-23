@@ -28,7 +28,7 @@ addListeners();
 let firebaseUser;
 let userInformation;
 
-if (window.location.hostname === "127.0.0.1") {
+if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") {
 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 }
 

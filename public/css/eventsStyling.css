@@ -103,7 +103,7 @@ body {
 }
 
 .eventWrap.open .eventInfoWrap.noAdmit {
-	height: 18vh;
+	height: 22vh;
 }
 
 .dayCollapse {
@@ -172,6 +172,10 @@ body {
 
 .eventHeadWrap.inEvent {
 	background-color: var(--inEventColor);
+}
+
+.eventHeadWrap.past {
+	opacity: .6;
 }
 
 .eventHeadWrap * {

@@ -319,7 +319,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 					: event.signups.length >= event.numSpots
 					? "full"
 					: ""
-			}"><span class="material-symbols-outlined eventCollapse${
+			} ${eventPassed ? "past" : ""}"><span class="material-symbols-outlined eventCollapse${
 				type != "editor" && openIDs.includes(eventID) ? " open" : ""
 			}"> expand_circle_right </span><h2 class="eventTitle">${
 				event.title
@@ -361,7 +361,7 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 								: '<span class="material-symbols-outlined">all_inclusive</span>'
 					  }</span> 
 					<span class = "smallText">
-					${event.admission.val && event.admission.val != "signup" ? `<b> ${event.admission.name}</b> -` : ""} ${
+					${event.admission.val ? `<b> ${event.admission.name}</b> -` : ""} ${
 							event.admission.val != "none"
 								? event.admission.credit || event.admission.credit === 0
 									? `<i> ${event.admission.credit} credit</i>`
@@ -377,8 +377,8 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 					: `<div class="calAddWrap">
 					<span class="material-symbols-outlined">event</span>
 					<button class="calAddBtn" ${type === "editor" ? "disabled" : ""}>${
-						inEvent ? "Remove Event from" : "Add Event to"
-					} Google Calendar</button>
+							inEvent ? "Remove Event from" : "Add Event to"
+					  } Google Calendar</button>
 					</div>`
 			}
 			
