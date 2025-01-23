@@ -19,12 +19,6 @@ body {
 	flex-shrink: 0;
 	flex-grow: 0;
 	overflow-y: scroll;
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
-}
-
-#weekendInfo::-webkit-scrollbar {
-	display: none;
 }
 
 #weekendInfo button {
@@ -111,105 +105,6 @@ body {
 
 .info {
 	color: blue;
-}
-
-#adminWrap, #subAdminWrap {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-	width: 100%;
-}
-
-
-
-#adminListWrap, #subAdminListWrap {
-	border: 1px solid black;
-	border-radius: 2vh;
-	width: 98%;
-	padding: .5vw;
-	background-color: whitesmoke;
-	max-height: 30vh;
-	overflow-y: scroll;
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
-}
-
-#adminListWrap::-webkit-scrollbar, #subAdminListWrap::-webkit-scrollbar {
-	display: none;
-}
-
-.admin, .subAdmin {
-	font-size: 1.5vh;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: flex-start;
-	width: 100%;
-}
-
-.removeAdmin, .removeSubAdmin {
-	margin-left: 2%;
-	font-size: 1vh;
-		cursor: pointer;
-	transition: .1s ease color;
-}
-
-.removeAdmin:hover, .removeSubAdmin:hover {
-	color: rgb(95, 95, 95);
-}
-
-.removeAdmin:active, .removeSubAdmin:active {
-	color: rgb(180, 180, 180);
-}
-
-#addWrap {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: center;
-	width: 100%;
-}
-
-#addWrap * {
-	margin: .5vh;
-}
-
-#dataSheetWrap {
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-}
-
-#dataSheetWrap input {
-	width: 95%;
-	font-size: 1.7vh;
-}
-
-#dataSheetWrap button {
-	margin: .5vh 0;
-}
-
-#dataSheetWrap h4 {
-	margin: 1.5vh 0;
-}
-
-#dataSheetWrap input, #dataSheetWrap div {
-	margin: .4vh 0;
-}
-
-#creditResetWrap {
-	width: 100%;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: flex-start;
-}
-
-#creditReset {
-	margin: 1vh 0;
 }
 
 @media all and (orientation: portrait) {

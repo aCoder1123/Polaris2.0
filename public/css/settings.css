@@ -1,0 +1,268 @@
+body {
+    display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	width: 100vw;
+	height: 100vh;
+	margin: 0;
+	position: static;
+}
+
+main {
+    width: 90%;
+    height: 90%;
+    border: .2vw solid black;
+    border-radius: 3vw;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+}
+
+#settingsHead {
+    width: 100%;
+    font-size: 6vh;
+    margin: 0;
+    height: 10vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-bottom: .15vw solid black;
+}
+
+#settingsContainer {
+    height: 80vh;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.settingColumn {
+    height: 100%;
+    width: 28vw;
+    padding: 0 .5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: scroll;
+}
+
+/* !Left! */
+
+#adminWrap, #subAdminWrap, #creditViewWrap {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	width: 100%;
+}
+
+#adminListWrap, #subAdminListWrap, #creditListWrap {
+	border: 1px solid black;
+	border-radius: 2vh;
+	width: 98%;
+	padding: .5vw;
+	background-color: whitesmoke;
+	max-height: 30vh;
+	overflow-y: scroll;
+}
+
+.admin, .subAdmin, .student {
+	font-size: 1.5vh;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	width: 100%;
+}
+
+.removeAdmin, .removeSubAdmin {
+	margin-left: 2%;
+	font-size: 1vh;
+		cursor: pointer;
+	transition: .1s ease color;
+}
+
+.removeAdmin:hover, .removeSubAdmin:hover {
+	color: rgb(95, 95, 95);
+}
+
+.removeAdmin:active, .removeSubAdmin:active {
+	color: rgb(180, 180, 180);
+}
+
+#addWrap {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+}
+
+#addWrap * {
+	margin: .5vh;
+}
+
+#creditViewWrap {
+	margin-bottom: 1vh;
+}
+
+.studentHousing {
+	margin: 0 2%;
+}
+
+.studentHousing.B {
+	color: #407ca2;
+
+}
+
+.studentHousing.D {
+	color: #623b2a;
+}
+
+.studentCredit {
+	color: blue;
+	margin-left: 2%;
+}
+
+#creditGraphWrap {
+	max-width: 100%;
+	overflow-x: scroll;
+	overflow-y: hidden;
+	scrollbar-color: #d3d3d3 rgba(0, 0, 0, 0);
+}
+
+/* !Middle! */
+
+#dataSheetWrap {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+#dataSheetWrap input {
+	width: 95%;
+	font-size: 1.7vh;
+}
+
+#dataSheetWrap button {
+	margin: .5vh 0;
+}
+
+#dataSheetWrap h4 {
+	margin: 1.5vh 0;
+}
+
+#dataSheetWrap input, #dataSheetWrap div {
+	margin: .4vh 0;
+}
+
+#creditResetWrap {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+#creditReset {
+	margin: 1vh 0;
+}
+
+#testButton {
+    cursor: pointer;
+    font-size: 2vh;
+    margin: 2vh 0;
+}
+
+/* !Right! */
+
+#rightColumn {
+	overflow-y: visible;
+}
+
+#bugReportsWrap {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	width: 100%;
+}
+
+#bugReportsHead {
+	width: 100%;
+	text-align: center;
+	height: 3vh;
+}
+
+#bugReportsListWrap {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	overflow-y: scroll;
+	height: 72vh;
+}
+
+.bugReport {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+	border: .2vh solid black;
+	background-color: whitesmoke;
+	border-radius: 3vh;
+	flex-shrink: 0;
+	margin-bottom: 3%;
+}
+
+.bugReportHead {
+	width: 80%;
+	border-bottom: .2vh solid black;
+	background-color: darkgrey;
+	color: white;
+	border-radius: 3vh 3vh 0 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	/* height: 5vh; */
+	margin: 0;
+	font-size: 2.5vh;
+	text-align: center;
+	text-wrap: wrap;
+	padding: 0 10%;
+}
+
+.bugInfoWrap {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: flex-start;
+	overflow-y: scroll;
+}
+
+.bugInfo {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	max-width: 90%;
+	margin: 1% 5%;
+}
+
+.reportInfo {
+	margin-left: 1vw;
+	font-size: 1.8vh;
+	font-weight: 400;
+}
+

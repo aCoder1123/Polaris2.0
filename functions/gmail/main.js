@@ -28,7 +28,6 @@ exports.sendMail = async (options) => {
 			raw: rawMessage,
 		},
 	});
-	console.log(data)
 	return data;
 };
 

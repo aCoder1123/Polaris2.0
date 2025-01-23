@@ -69,16 +69,12 @@ exports.bugReport = onCall(
 				page: request.data.page,
 				reporter: request.data.email,
 				reproduction: request.data.repro,
-				status: {
-					resolved: false,
-					dateResolved: null,
-					updateResolved: null,
-					bugBounty: {
-						awarded: false,
-						creditQuantity: 10,
-						dateAwarded: null
-					}
-				}
+				status: "open",
+					// bugBounty: {
+					// 	awarded: false,
+					// 	creditQuantity: 10,
+					// 	dateAwarded: null
+					// }
 			});
 
 		return send(messageOptions);

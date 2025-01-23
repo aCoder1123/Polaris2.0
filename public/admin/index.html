@@ -10,12 +10,12 @@
 		<link rel="stylesheet" href="../css/dashbaord.css" />
 		<link
 			rel="stylesheet"
-			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=block"
 		/>
 		<title>Polaris - Weekend Viewer</title>
 	</head>
 	<body>
-		<section id="weekendInfo">
+		<section id="weekendInfo" class="noScrollBar">
 			<h2 id="infoHead">Info</h2>
 			<div id="infoContainer">
 				<div id="selectorWrap">
@@ -25,38 +25,8 @@
 				</div>
 				<div id="infoWrap" class="active">
 					<span class="wkdInfo">Total Trips: <span id="tripNum" class="info">0</span></span>
+					<span class="wkdInfo">Total Off-Campus Trips: <span id="tripNumOC" class="info">0</span></span>
 					<span class="wkdInfo">Total Sign-ups: <span id="signupNum" class="info">0</span></span>
-					<div id="adminWrap">
-						<h3 id="adminHead">Manage Admin</h3>
-						<div id="adminListWrap"></div>
-						<div id="addWrap">
-							<input type="email" id="adminIn" required>
-							<button id="addAdminButton">Add</button>
-						</div>
-					</div>
-					<div id="subAdminWrap">
-						<h3 id="subAdminHead">Manage Sub-Admin</h3>
-						<div id="subAdminListWrap"></div>
-						<div id="addWrap">
-							<input type="email" id="subAdminIn" required>
-							<button id="addSubAdminButton">Add</button>
-						</div>
-					</div>
-					<div id="dataSheetWrap">
-						<h3 id="dataSheetHead">Personnel Data Sheets</h3>
-						<h4>Student Info Sheet</h4>
-						<input type="url" id="studentDataSheetURLIn" required>
-						<button id="sDataSheetSubmit">Save</button>
-						<h4>Sub-Admin Info Sheet</h4>
-						<input type="url" id="subAdminDataSheetURLIn" required>
-						<button id="aDataSheetSubmit">Save</button>
-						<button id="infoUpdateButton">Update All Information Now</button>
-					</div>
-					<div id="creditResetWrap">
-						<h3 id="creditResetHead">Reset Credit</h3>
-						<button id="creditReset">Reset Credit</button>
-					</div>
-					<!-- <button id="testButton">Run Test Function</button> -->
 				</div>
 			</div>
 		</section>
