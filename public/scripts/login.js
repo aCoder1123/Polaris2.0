@@ -6,7 +6,7 @@ import {
 import {
 	GoogleAuthProvider,
 	getAuth,
-	signInWithCredential
+	signInWithCredential,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 import { firebaseConfig, siteKey } from "./config.js";
 
@@ -26,14 +26,14 @@ function handleCredentialResponse(response) {
 
 	signInWithCredential(auth, credential)
 		.then((result) => {
-			window.location.href = "schedule.html"
+			window.location.href = "schedule.html";
 		})
 		.catch((error) => {
 			const errorCode = error.code;
 			const errorMessage = error.message;
 			// const email = error.email;
 			// const credential = GoogleAuthProvider.credentialFromError(error);
-			alert(`Error signing in: ${errorMessage}`)
+			alert(`Error signing in: ${errorMessage}`);
 		});
 }
 window.onload = function () {

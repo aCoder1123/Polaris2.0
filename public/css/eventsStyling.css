@@ -40,12 +40,6 @@ body {
 	--collapseTime: 0.2s;
 	--dayCollapseTime: 0.2s;
 	transition: width var(--dayCollapseTime) ease-out;
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: none; /* Firefox */
-}
-
-.dayWrap::-webkit-scrollbar {
-	display: none;
 }
 
 .dayWrap.open {
@@ -102,12 +96,6 @@ body {
 	font-size: 2vh;
 	height: 0;
 	transition: height var(--collapseTime) ease;
-	-ms-overflow-style: none; /* IE and Edge */
-	scrollbar-width: 0; /* Firefox */
-}
-
-.eventInfoWrap::-webkit-scrollbar {
-	display: none;
 }
 
 .eventWrap.open .eventInfoWrap {
@@ -115,7 +103,7 @@ body {
 }
 
 .eventWrap.open .eventInfoWrap.noAdmit {
-	height: 17vh;
+	height: 22vh;
 }
 
 .dayCollapse {
@@ -184,6 +172,10 @@ body {
 
 .eventHeadWrap.inEvent {
 	background-color: var(--inEventColor);
+}
+
+.eventHeadWrap.past {
+	opacity: .6;
 }
 
 .eventHeadWrap * {
@@ -298,10 +290,6 @@ body {
 	justify-content: center;
 }
 
-/* .attendeesList::-webkit-scrollbar {
-	display: none;
-} */
-
 .attendee {
 	width: 100%;
 	/* margin-left: 2%; */
@@ -347,6 +335,38 @@ body {
 }
 .approved {
 	color: blue;
+}
+
+.calAddWrap {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+}
+
+.calAddBtn {
+	background-color: hsl(0, 0%, 97%);
+	outline: none;
+	cursor: pointer;
+	transition: .2s ease filter;
+	font-family: inherit;
+	font-weight: 600;
+	border: .3vh solid black;
+	border-radius: .8vh;
+	margin-left: 2%;
+}
+
+.calAddBtn:hover {
+	filter: brightness(.925);
+}
+
+.calAddBtn:active {
+	filter: brightness(1.1);
+}
+
+.calAddBtn:disabled {
+	filter: brightness(.8);
+	cursor: not-allowed;
 }
 
 @media screen and (orientation: portrait) {

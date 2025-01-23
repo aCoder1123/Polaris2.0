@@ -21,10 +21,18 @@ import {
 	connectFunctionsEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 import { firebaseConfig, siteKey } from "./config.js";
-import { dataToFullHTML, addListeners, getUserFromEmail, getMenuHTMLString, handleDBError, FunctionQueue } from "./util.js";
+import {
+	dataToFullHTML,
+	addListeners,
+	getUserFromEmail,
+	getMenuHTMLString,
+	handleDBError,
+	FunctionQueue,
+} from "./util.js";
 
 const app = initializeApp(firebaseConfig);
-if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
+	self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
 	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
@@ -34,9 +42,15 @@ const auth = getAuth(app);
 const db = getFirestore(app, "maindb");
 const functions = getFunctions(app);
 
+if (window.location.hostname === "localhost") {
+	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
+	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+	console.log("Connecting Firebase Emulator");
+}
+
 const handleSignupFunc = httpsCallable(functions, "handleSignup");
 const printRosterFunc = httpsCallable(functions, "printRoster");
-const manageAttendeesFunc = httpsCallable(functions, "manageAttendees")
+const manageAttendeesFunc = httpsCallable(functions, "manageAttendees");
 
 let scheduleType = "schedule";
 let userInformation;
@@ -51,27 +65,23 @@ let idAsArray;
 let openIDs = [];
 let signupQueue = new FunctionQueue(handleSignupFunc, (val) => {
 	if (val.message) {
-		alert("An error occurred when signing up for the trip. The page will reload and you can try again. If the error persists please fill out a bug report.")
-		window.location.reload()
-		return
+		alert(
+			"An error occurred when signing up for the trip. The page will reload and you can try again. If the error persists please fill out a bug report."
+		);
+		window.location.reload();
+		return;
 	}
 	setTimeout(() => {
 		for (let el of signupQueue.queue) {
 			document.querySelectorAll(".addIcon").forEach((node) => {
 				if (node.parentElement.parentElement.parentElement.id === el.id) {
-					if(!node.classList.contains("loading")) node.classList.toggle("loading");
+					if (!node.classList.contains("loading")) node.classList.toggle("loading");
 					node.innerText = "progress_activity";
 				}
 			});
 		}
 	}, 50);
-})
-
-if (window.location.hostname === "127.0.0.1") {
-	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
-	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
-	console.log("Connecting Firebase Emulator");
-}
+});
 
 onAuthStateChanged(auth, (user) => {
 	if (user) {
@@ -126,14 +136,13 @@ onAuthStateChanged(auth, (user) => {
 						information: JSON.stringify(weekendInformation),
 					})
 						.then((val) => {
-							// document.getElementById("checkInWindow").classList.toggle("active");
 							formatCheckIn();
 						})
 						.catch((error) => {
 							alert(`Error saving statuses: ${error}`);
 						});
-					emailIn.value = ""
-					document.getElementById("attendeeNumIn").value = ""
+					emailIn.value = "";
+					document.getElementById("attendeeNumIn").value = "";
 					e.target.disabled = false;
 				};
 			}
@@ -171,21 +180,29 @@ onAuthStateChanged(auth, (user) => {
 				for (let node of nodes.querySelectorAll(".scheduleDay")) {
 					scheduleContainer.appendChild(node);
 				}
-				if (idAsArray) formatCheckIn()
+				if (idAsArray) formatCheckIn();
+
+				for (let node of document.querySelectorAll(".calAddBtn")) {
+					node.onclick = () => {
+						manageGCal(node);
+					};
+				}
 			});
 		});
 
 		let adminDoc = getDoc(doc(db, "admin", user.email)).then((doc) => {
-			document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, false, doc.exists()));
-
-			document.getElementById("signOutWrap").addEventListener("click", () => {
-				signOut(auth)
-					.then(() => {
-						window.location.href = `../index.html`;
-					})
-					.catch((error) => {
-						alert(`There was a error signing out: ${error}`);
-					});
+			getMenuHTMLString(user, false, db, doc.exists()).then((menuString) => {
+				document.body.insertAdjacentHTML("afterbegin", menuString);
+				document.getElementById("signOutWrap").addEventListener("click", () => {
+					signOut(auth)
+						.then(() => {
+							window.location.href = `../index.html`;
+						})
+						.catch((error) => {
+							alert(`There was a error signing out: ${error}`);
+						});
+				});
+				addListeners(openIDs);
 			});
 			addListeners(openIDs);
 		});
@@ -200,12 +217,12 @@ const handleSignup = async (e) => {
 	if (button.innerText === "progress_activity" || signupQueue.queue.includes({ id: eID })) return;
 	button.innerText = "progress_activity";
 	button.classList.toggle("loading");
-	signupQueue.add({id: eID})
+	signupQueue.add({ id: eID });
 };
 
 const formatCheckIn = () => {
 	let wrap = document.getElementById("attendeesWrap");
-	let event = weekendInformation.days[idAsArray[0]][idAsArray[1]]
+	let event = weekendInformation.days[idAsArray[0]][idAsArray[1]];
 	let signups = event.signups;
 	let attendeesEmails = [];
 	wrap.replaceChildren();
@@ -216,6 +233,9 @@ const formatCheckIn = () => {
 		document.getElementById("mailLink").href = `mailto:${userInformation.email}`;
 		return;
 	}
+
+	let attendeeStringsList = [];
+
 	for (let i = 0; i < signups.length; i++) {
 		if (signups[i].status === "checkedIn") {
 			attendeesEmails.push(signups[i].email);
@@ -231,30 +251,34 @@ const formatCheckIn = () => {
 						<option ${signups[i].status === "removed" ? "selected" : ""} value="removed">Removed</option>
 					</select>
 				</div>`;
-		wrap.insertAdjacentHTML("beforeend", attendeeHTMLString);
+		attendeeStringsList.push({ name: signups[i].displayName, status: signups[i].status, val: attendeeHTMLString });
 	}
-	if (document.getElementById("sortType").innerHTML === "sort_by_alpha") {
-		let array = Array.from(wrap.children);
-		array.sort((a, b) => {
-			return [a.childNodes[3].innerText, b.childNodes[3].innerText].sort()[0] === a.childNodes[3].innerText
-				? -1
-				: 1;
+	let sortType = document.getElementById("sortType").innerHTML;
+	if (sortType === "Name") {
+		attendeeStringsList.sort((a, b) => {
+			return [a.name, b.name].sort()[0] === a.name ? -1 : 1;
 		});
-		wrap.replaceChildren();
-		for (let node of array) {
-			wrap.appendChild(node);
-		}
+	} else if (sortType === "Status") {
+		attendeeStringsList.sort((a, b) => {
+			let statusOrder = ["checkedIn", "approved", "pending", "noShow", "removed"];
+			return statusOrder.indexOf(a.status) - statusOrder.indexOf(b.status);
+		});
 	}
+
+	for (let attendee of attendeeStringsList) {
+		wrap.insertAdjacentHTML("beforeend", attendee.val);
+	}
+
 	document.querySelectorAll(".statusSelect").forEach((el) => {
 		el.onchange = () => {
-			saveCheckIn(true)
-		}
-	})
+			saveCheckIn(true);
+		};
+	});
 	document.getElementById("mailLink").href = `mailto:${attendeesEmails.join(",")}?subject=${
 		document.getElementById("windowHead").innerText
 	}`;
-	document.getElementById("numSpots").innerText = event.numSpots
-	document.getElementById("checkedInNum").innerText = attendeesEmails.length
+	document.getElementById("numSpots").innerText = event.numSpots;
+	document.getElementById("checkedInNum").innerText = attendeesEmails.length;
 };
 
 const handleCheckIn = (e) => {
@@ -271,9 +295,10 @@ document.getElementById("exitSignup").addEventListener("click", (e) => {
 	formatCheckIn();
 });
 
-document.getElementById("sortType").addEventListener("click", (e) => {
-	let button = e.target;
-	button.innerText = button.innerText === "format_list_numbered" ? "sort_by_alpha" : "format_list_numbered";
+document.getElementById("sortBtn").addEventListener("click", (e) => {
+	let button = document.getElementById("sortType");
+	let sortList = ["Signup Order", "Name", "Status"];
+	button.innerText = sortList[(sortList.indexOf(button.innerText) + 1) % 3];
 	formatCheckIn();
 });
 
@@ -296,10 +321,10 @@ const saveCheckIn = async (persist = false) => {
 			if (!persist) {
 				document.getElementById("checkInWindow").classList.toggle("active");
 			}
-			manageAttendeesFunc({id: idAsArray}).then(console.log).catch((error) => {
+			manageAttendeesFunc({ id: idAsArray }).catch((error) => {
 				alert(`Error saving statuses: ${error}`);
 			});
-			formatCheckIn()
+			formatCheckIn();
 		})
 		.catch((error) => {
 			alert(`Error saving statuses: ${error}`);
@@ -315,5 +340,18 @@ document.getElementById("attendeesPrint").onclick = async (e) => {
 		alert("Roster printed to the Marry Leads Room printer");
 	} catch (error) {
 		alert(`Error printing roster: ${error.message}`);
+	}
+};
+
+const manageGCal = async (button) => {
+	try {
+		button.disabled = true;
+		let res = await manageAttendeesFunc({
+			id: button.parentElement.parentElement.parentElement.id.split("-"),
+			addAttendee: true,
+		});
+	} catch (error) {
+		alert("There was an error adding event to your calendar. Reload the page and try again.");
+		console.log(error);
 	}
 };

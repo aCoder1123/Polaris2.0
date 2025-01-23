@@ -74,16 +74,19 @@ onAuthStateChanged(auth, (user) => {
 			userInformation = data;
 		});
 
-		document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, true, true));
+		getMenuHTMLString(user, true, db, true).then((menuString) => {
+			document.body.insertAdjacentHTML("afterbegin", menuString);
 
-		document.getElementById("signOutWrap").addEventListener("click", () => {
-			signOut(auth)
-				.then(() => {
-					window.location.href = `../index.html`;
-				})
-				.catch((error) => {
-					alert(`There was a error signing out: ${error}`);
-				});
+			document.getElementById("signOutWrap").addEventListener("click", () => {
+				signOut(auth)
+					.then(() => {
+						window.location.href = `../index.html`;
+					})
+					.catch((error) => {
+						alert(`There was a error signing out: ${error}`);
+					});
+			});
+			addListeners();
 		});
 
 		getDocs(collection(db, "eventTemplates"))
@@ -166,7 +169,10 @@ const updateWeekend = () => {
 		}
 	}
 
-	document.getElementById("debugCode").innerText = JSON.stringify(workingWeekend).replaceAll(",", ",\n").replaceAll("{", "{\n").replaceAll("[", "[\n")
+	document.getElementById("debugCode").innerText = JSON.stringify(workingWeekend)
+		.replaceAll(",", ",\n")
+		.replaceAll("{", "{\n")
+		.replaceAll("[", "[\n");
 	addListeners();
 	for (let deleteButton of document.querySelectorAll(".deleteButton")) {
 		deleteButton.onclick = (e) => {
@@ -216,7 +222,9 @@ const updateWeekend = () => {
 							document.getElementById("mAttendeesList").insertAdjacentHTML(
 								"beforeend",
 								`<div class="mAttendeeWrap">
-									<input required type="email" list="studentsList" class="attendeeInput" onchange="verifyAttendee(this)" value="${attendee.email}"/>
+									<input required type="email" list="studentsList" class="attendeeInput" onchange="verifyAttendee(this)" value="${
+										attendee.email
+									}"/>
 									<select class="statusSelect" placeholder="Status: ">
 										<option ${attendee.status === "checkedIn" ? "selected" : ""} value="checkedIn">Checked In</option>
 										<option ${attendee.status === "approved" ? "selected" : ""} value="approved">Approved</option>
@@ -295,7 +303,6 @@ const saveEvent = () => {
 	let dayNum = Number(document.getElementById("daySelect").value);
 	let eventToAdd = new WeekendEvent(currentEventNum);
 	currentEventNum++;
-
 
 	for (let attendee of document.querySelectorAll(".attendeeInput")) {
 		let attendeeInfo;

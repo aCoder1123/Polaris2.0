@@ -14,7 +14,7 @@ import { firebaseConfig, siteKey } from "./config.js";
 import { getUserFromEmail, addListeners, getMenuHTMLString } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
-if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
@@ -26,6 +26,7 @@ const functions = getFunctions(app);
 const db = getFirestore(app, "maindb");
 let userInformation;
 let firebaseUser;
+
 onAuthStateChanged(auth, (user) => {
 	if (user) {
 		firebaseUser = user;
@@ -34,30 +35,31 @@ onAuthStateChanged(auth, (user) => {
 			document.getElementById("credit").innerText = userInformation.credit;
 			let pastEventsString = "";
 			for (let event of userInformation.events) {
-				pastEventsString += `<div class="pastEventWrap">
+				pastEventsString = `<div class="pastEventWrap">
 										<span class="eventDate">${event.date}</span> - 
 										<span class="eventTitle">${event.title}</span>
-									</div>`;
+									</div>` + pastEventsString;
 			}
 			if (pastEventsString) {
-				document.getElementById("eventsWrap").innerHTML = pastEventsString
+				document.getElementById("eventsWrap").innerHTML = pastEventsString;
 				document.getElementById("eventsHead").innerText = `Past Events: (${userInformation.events.length})`;
 			}
 		});
 
 		let adminDoc = getDoc(doc(db, "admin", user.email)).then((doc) => {
-			document.body.insertAdjacentHTML("afterbegin", getMenuHTMLString(user, false, doc.exists()));
-
-			document.getElementById("signOutWrap").addEventListener("click", () => {
-				signOut(auth)
-					.then(() => {
-						window.location.href = `../index.html`;
-					})
-					.catch((error) => {
-						alert(`There was a error signing out: ${error}`);
-					});
+			getMenuHTMLString(user, false, db, doc.exists()).then((menuString) => {
+				document.body.insertAdjacentHTML("afterbegin", menuString);
+				document.getElementById("signOutWrap").addEventListener("click", () => {
+					signOut(auth)
+						.then(() => {
+							window.location.href = `../index.html`;
+						})
+						.catch((error) => {
+							alert(`There was a error signing out: ${error}`);
+						});
+				});
+				addListeners();
 			});
-			addListeners();
 		});
 		for (let el of document.querySelectorAll(".userName")) {
 			el.innerText = user.displayName;
@@ -68,7 +70,7 @@ onAuthStateChanged(auth, (user) => {
 	}
 });
 
-if (window.location.hostname === "127.0.0.1") {
+if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") {
 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 }
 

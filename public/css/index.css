@@ -1,11 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Dosis:wght@200..800&family=Wittgenstein:ital,wght@0,400..900;1,400..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&display=swap");
 
-@font-face {
-  font-family: SF;
-  src: url("../fonts/SF-Pro.ttf");
-}
-
 html {
 	font-family: "Wittgenstein", serif;
 	font-optical-sizing: auto;
@@ -122,6 +117,7 @@ h6 {
 	height: 5vh;
 	fill: white;
 	transition: fill 0.3 ease-out;
+	cursor: pointer;
 }
 
 #menuToggle.open {
@@ -189,4 +185,13 @@ h6 {
 	bottom: 1%;
 	text-align: center;
 	text-wrap: wrap;
+}
+
+.noScrollBar {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: 0; /* Firefox */
+}
+
+.noScrollBar::-webkit-scrollbar {
+	display: none;
 }

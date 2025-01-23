@@ -23,6 +23,15 @@
 * [Basics](https://firebase.google.com/docs/app-check/web/recaptcha-provider)
 * [Dashboard](https://www.google.com/recaptcha/admin/site/707324660)
 
+##Google Charts API
+
+*[Overview](https://developers-dot-devsite-v2-prod.appspot.com/chart/interactive/docs/gallery/histogram)
+
+##Google Sign-In
+
+* [Setup](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid#one-tap-using-fedcm)
+* [Firebase Integration](https://firebase.google.com/docs/auth/web/google-signin#expandable-2)
+
 ##Firebase
 
 * [Firebase Setup](https://firebase.google.com/docs/web/setup#add-sdks-initialize)
@@ -45,5 +54,7 @@
 * [Pricing Calculator](https://cloud.google.com/products/calculator?hl=en&dl=CiRiNmNiNjUwMS1mNzBiLTQ5MmUtOGEyMC04NWRkZjU2MzgxYjAQExokNTJBQ0VFNzYtM0VDMC00NDBGLThBMDYtQkI5OUE3ODUwRDY2)
 * [Setting Organization](https://cloud.google.com/resource-manager/docs/handle-special-cases#migrating_projects_no_org)
 
+##Google Fonts and Icons
 
-TODO - https://github.com/firebase/firebase-tools/issues/4757
+* [Icons](https://fonts.google.com/icons)
+* [Fonts](https://fonts.google.com/)

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="shortcut icon" href="../images/favicon.svg" type="image/x-icon" />
+
+		<link rel="stylesheet" href="../css/index.css" />
+		<link rel="stylesheet" href="../css/settings.css" />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=block"
+		/>
+		<title>Polaris - Settings</title>
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	</head>
+	<body>
+		<main>
+			<h2 id="settingsHead">Settings</h2>
+			<div id="settingsContainer">
+				<section class="settingColumn noScrollBar">
+					<div id="adminWrap">
+						<h3 id="adminHead">Manage Admin</h3>
+						<div id="adminListWrap" class="noScrollBar"></div>
+						<div id="addWrap">
+							<input type="email" id="adminIn" required />
+							<button id="addAdminButton">Add</button>
+						</div>
+					</div>
+					<div id="subAdminWrap">
+						<h3 id="subAdminHead">Manage Sub-Admin</h3>
+						<div id="subAdminListWrap" class="noScrollBar"></div>
+						<div id="addWrap">
+							<input type="email" id="subAdminIn" required />
+							<button id="addSubAdminButton">Add</button>
+						</div>
+					</div>
+					<div id="creditViewWrap">
+						<h3 id="creditViewHead">Credit</h3>
+						<div id="creditListWrap" class="noScrollBar"></div>
+						<div id="creditGraphWrap"></div>
+						<div id="creditResetWrap">
+							<h3 id="creditResetHead">Reset Credit</h3>
+							<button id="creditReset">Reset Credit</button>
+						</div>
+					</div>
+				</section>
+				<section class="settingColumn noScrollBar">
+					<button id="testButton">Run System Tests</button>
+					<div id="dataSheetWrap">
+						<h3 id="dataSheetHead">Personnel Data Sheets</h3>
+						<h4>Student Info Sheet</h4>
+						<input type="url" id="studentDataSheetURLIn" required />
+						<button id="sDataSheetSubmit">Save</button>
+						<h4>Sub-Admin Info Sheet</h4>
+						<input type="url" id="subAdminDataSheetURLIn" required />
+						<button id="aDataSheetSubmit">Save</button>
+						<button id="infoUpdateButton">Update All Information Now</button>
+					</div>
+				</section>
+				<section id="rightColumn" class="settingColumn noScrollBar">
+					<div id="bugReportsWrap">
+						<h3 id="bugReportsHead">Polaris Bug Reports</h3>
+						<div id="bugReportsListWrap" class="noScrollBar">
+						</div>
+					</div>
+				</section>
+			</div>
+		</main>
+		<script type="module" src="../scripts/settings.js"></script>
+	</body>
+</html>

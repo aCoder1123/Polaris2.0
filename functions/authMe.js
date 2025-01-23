@@ -15,9 +15,9 @@ const SCOPES = [
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
-const TOKEN_PATH = path.join(process.cwd(), "./token.json");
-const CREDENTIALS_PATH = path.join(process.cwd(), "./OAuthClient.json");
 
+const CREDENTIALS_PATH = path.join(process.cwd(), "./OAuthClient.json");
+let TOKEN_PATH;
 /**
  * Reads previously authorized credentials from the save file.
  *
@@ -68,4 +68,18 @@ async function authorize() {
 	return client;
 }
 
-authorize()
+
+const readline = require("readline").createInterface({
+	input: process.stdin,
+	output: process.stdout,
+});
+
+readline.question("Use different account (y/n): ", (ans) => {
+	if (ans === "y") {
+		TOKEN_PATH = path.join(process.cwd(), "./tokenDiff.json");
+	} else {
+		TOKEN_PATH = path.join(process.cwd(), "./token.json");
+	}
+	readline.close();
+	authorize()
+});
