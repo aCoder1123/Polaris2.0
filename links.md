@@ -58,3 +58,7 @@
 
 * [Icons](https://fonts.google.com/icons)
 * [Fonts](https://fonts.google.com/)
+
+##PDF Parsing
+
+* [pdf2json](https://www.npmjs.com/package/pdf2json)

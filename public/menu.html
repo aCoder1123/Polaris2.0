@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Menu</title>
+		<link rel="stylesheet" href="css/index.css" />
+		<link rel="stylesheet" href="css/menu.css" />
+		<link rel="shortcut icon" href="images/favicon.svg" type="image/x-icon" />
+		<link
+			rel="stylesheet"
+			href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700&display=block"
+		/>
+	</head>
+	<body>
+		<main>
+			<h2 id="mainHeader">Menu</h2>
+			<div id="contentWrap">
+				<div id="selectorWrap">
+					<label>Parsed Menu: <input type="radio" name="menuType" id="parsed" checked /></label>
+					<label>Embedded Menu: <input type="radio" name="menuType" id="embed" /></label>
+				</div>
+				<embed
+					src="https://westtown.myschoolapp.com/ftpimages/1579/download/download_3308593.pdf?_=1737744546917"
+					type="application/pdf"
+					loading="lazy"
+					id="menuEmbed"
+					class="menuOption"
+				/>
+				<div id="parsedMenu" class="visible menuOption noScrollBar"></div>
+			</div>
+		</main>
+		<script type="module" src="scripts/menu.js"></script>
+	</body>
+</html>

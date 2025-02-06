@@ -7,6 +7,9 @@ const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const PDFDocument = require("pdfkit");
 const { getTimezoneOffset } = require("date-fns-tz");
+const https = require("https");
+const fs = require("fs");
+const PDFParser = require("pdf2json");
 
 const { sendMail, emailOptions } = require("./gmail/main");
 const { createEventFromJSON, manageAttendees, eventTemplate, deleteCalendarEvent } = require("./calendar/main");
@@ -70,11 +73,11 @@ exports.bugReport = onCall(
 				reporter: request.data.email,
 				reproduction: request.data.repro,
 				status: "open",
-					// bugBounty: {
-					// 	awarded: false,
-					// 	creditQuantity: 10,
-					// 	dateAwarded: null
-					// }
+				// bugBounty: {
+				// 	awarded: false,
+				// 	creditQuantity: 10,
+				// 	dateAwarded: null
+				// }
 			});
 
 		return send(messageOptions);
@@ -634,12 +637,14 @@ exports.printRoster = onCall(
 		messageOptions.to = "pkkjx65dthv83@hpeprint.com";
 		messageOptions.cc = `polaris@westtown.edu, ${request.auth.token.email}`;
 		messageOptions.subject = `Roster for ${event.title}`;
-		messageOptions.text = `${event.title}\n\n`
+		messageOptions.text = `${event.title}\n\n`;
 
+		counter = 1
 		for (student of people) {
 			messageOptions.text += `${counter}. ${student.name} - ${student.email} - ${
 				student.cell ? student.cell : "no phone number"
 			} - ${student.grade}th\n`;
+			counter ++
 		}
 		messageOptions.attachments = {
 			// path: "./testing.pdf",
@@ -680,6 +685,96 @@ exports.manageAttendees = onCall(
 		return await manageAttendees(event);
 	}
 );
+
+exports.getMenu = onSchedule("0 23 * 1-6,9-12 *", async (request) => {
+	// exports.getMenu = onCall(async (request) => {
+	try {
+		const fileUrl = (await db.collection("settings").doc("dataInputLinks").get()).data().lunchMenuURL;
+		const destination = "menu.pdf";
+
+		const file = fs.createWriteStream(destination);
+		const pdfParser = new PDFParser();
+
+		https
+			.get(fileUrl, (response) => {
+				response.pipe(file);
+				file.on("finish", () => {
+					file.close(() => {
+						pdfParser.loadPDF(destination);
+						console.log("Loading PDF");
+					});
+				});
+			})
+			.on("error", (err) => {
+				fs.unlink(destination, () => {
+					console.error("Error downloading file:", err);
+				});
+			});
+
+		pdfParser.on("pdfParser_dataError", (errData) => console.error(errData.parserError));
+		pdfParser.on("pdfParser_dataReady", async (jsonData) => {
+			let data = jsonData.Pages[0];
+			let hLines = [];
+			let vLines = [];
+			let textContent = [];
+			let headerText = "";
+			for (let i of data.VLines) {
+				vLines.push(i.x);
+				textContent.push([]);
+			}
+			textContent.pop();
+			for (let j of data.HLines) {
+				hLines.push(j.y);
+			}
+			for (let i in textContent) {
+				for (let j = 0; j < hLines.length - 1; j++) {
+					textContent[i].push("");
+				}
+			}
+
+			for (let text of data.Texts) {
+				let content = text.R[0].T;
+				content = content
+					.replaceAll("C%20", "C")
+					.replaceAll("%20", " ")
+					.replaceAll("%2C", ",")
+					.replaceAll("%E2%80%98", "‘")
+					.replaceAll("%E2%80%99", "’")
+					.replaceAll("%2F", "/");
+				let vertical = -1;
+				let horizontal = -1;
+				for (let i in hLines) {
+					if (hLines[i] > text.y) break;
+					vertical++;
+				}
+				for (let i in vLines) {
+					if (vLines[i] > text.x) break;
+					horizontal++;
+				}
+				if (horizontal === -1 || horizontal >= vLines.length || vertical >= hLines.length) continue;
+				if (vertical === -1) {
+					headerText += content;
+					continue;
+				}
+				textContent[horizontal][vertical] += content;
+			}
+			fs.unlinkSync(destination);
+			await db
+				.collection("lunchMenus")
+				.doc("latest")
+				.set({ header: headerText, information: JSON.stringify(textContent) });
+		});
+		await db
+			.collection("lunchMenus")
+			.doc("status")
+			.set({ time: Timestamp.fromDate(new Date()), info: "success" });
+	} catch (error) {
+		await db
+			.collection("lunchMenus")
+			.doc("status")
+			.set({ time: Timestamp.fromDate(new Date()), info: JSON.stringify(error) });
+	}
+});
 
 exports.test = onCall(async (request) => {
 	if (request.auth === null) return;
