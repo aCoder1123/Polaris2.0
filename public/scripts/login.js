@@ -7,6 +7,7 @@ import {
 	GoogleAuthProvider,
 	getAuth,
 	signInWithCredential,
+	onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 import { firebaseConfig, siteKey } from "./config.js";
 
@@ -47,3 +48,11 @@ window.onload = function () {
 	);
 	google.accounts.id.prompt(); // display the One Tap dialog
 };
+
+
+onAuthStateChanged(auth, (user) => {
+	if (user) {
+		window.location.href = "schedule.html";
+
+	}
+})
