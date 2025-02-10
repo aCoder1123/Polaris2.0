@@ -67,11 +67,16 @@ document.getElementById("reportForm").addEventListener("submit", async (e) => {
 	let formData = new FormData(e.target);
 	let data = {};
 	formData.forEach((value, key) => (data[key] = value));
+	data.email = data.email === "on" ? firebaseUser.email : "";
 	await bugReport(data)
 		.then((res) => {
 			if (res.data) {
 				alert("Thank you for submitting your bug. We will take care of it as soon as possible.");
 			}
+			document.getElementById("description").value = ""
+			document.getElementById("repro").value = ""
+			document.getElementById("emailIn").checked = true
+			document.getElementById("pageSelect").value = ""
 		})
 		.catch((error) => {
 			console.error(error);
