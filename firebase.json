@@ -1,7 +1,13 @@
 {
 	"hosting": {
 		"public": "public",
-		"ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+		"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+		"rewrites": [
+			{
+				"source": "/menu",
+				"destination": "/menu.html"
+			}
+		]
 	},
 	"emulators": {
 		"auth": {

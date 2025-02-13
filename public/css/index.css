@@ -29,6 +29,7 @@ body {
 	background-position: bottom;
 	background-size: cover;
 	overscroll-behavior: none;
+	margin: 0;
 }
 
 h1,

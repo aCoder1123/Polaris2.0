@@ -19,41 +19,47 @@
 			<div id="content">
 				<div id="leftWrap">
 					<form action="" method="post" id="reportForm">
-							<legend><h2>Bug Report Form</h2></legend>
-							<div class="inputWrap">
-								<label for="pageSelect">Page on which the error occurred:</label>
-								<select name="page" id="pageSelect" required>
-									<option value="" selected disabled hidden>Select an Option:</option>
-									<option value="login.html">Log In Page</option>
-									<option value="schedule.html">Main Schedule Page</option>
-									<option value="profile.html">Profile</option>
-									<option value="help.html">Help (this) Page</option>
-									<option value="404.html">404 Page</option>
-									<option value="admin/builder.html">Weekend Builder Page (admin)</option>
-									<option value="admin/index.html">Weekend Dashboard (admin)</option>
-									<option value="admin/settings.html">Settings (admin)</option>
-								</select>
-							</div>
-							<div class="inputWrap">
-								<label for="description">Description of error:</label>
-								<textarea name="description" id="description" cols="30" rows="2" placeholder="Description of error, the more detailed the better." required></textarea>
-								
-							</div>
-							<div class="inputWrap">
-								<label for="repro">Steps to reproduce:</label>
-								<textarea name="repro" id="repro" cols="30" rows="2" placeholder="Steps to reproduce the error if possible and relevant."></textarea>	
-							</div>
-							<div class="inputWrap">
-								<label for="emailIn">Email for followup:</label>
-								<input
-									type="email"
-									name="email"
-									id="emailIn"
-									placeholder="first.last@westtown.edu"
-									autocomplete="email"
-								/>
-							</div>
-							<input type="submit" value="Submit" name="submit" id="submitBtn" />
+						<legend><h2>Bug Report Form</h2></legend>
+						<div class="inputWrap">
+							<label for="pageSelect">Page on which the error occurred:</label>
+							<select name="page" id="pageSelect" required>
+								<option value="" selected disabled hidden>Select an Option:</option>
+								<option value="login.html">Log In Page</option>
+								<option value="schedule.html">Main Schedule Page</option>
+								<option value="profile.html">Profile</option>
+								<option value="help.html">Help (this) Page</option>
+								<option value="404.html">404 Page</option>
+								<option value="admin/builder.html">Weekend Builder Page (admin)</option>
+								<option value="admin/index.html">Weekend Dashboard (admin)</option>
+								<option value="admin/settings.html">Settings (admin)</option>
+							</select>
+						</div>
+						<div class="inputWrap">
+							<label for="description">Description of error:</label>
+							<textarea
+								name="description"
+								id="description"
+								cols="30"
+								rows="2"
+								placeholder="Description of error, the more detailed the better."
+								required
+							></textarea>
+						</div>
+						<div class="inputWrap">
+							<label for="repro">Steps to reproduce:</label>
+							<textarea
+								name="repro"
+								id="repro"
+								cols="30"
+								rows="2"
+								placeholder="Steps to reproduce the error if possible and relevant."
+							></textarea>
+						</div>
+						<div class="inputWrap">
+							<label for="emailIn">Include email for followup (recommended):</label>
+							 <input type="checkbox" name="email" id="emailIn" checked/>
+						</div>
+						<input type="submit" value="Submit" name="submit" id="submitBtn" />
 					</form>
 				</div>
 				<div id="rightWrap">
@@ -61,8 +67,8 @@
 					<video src="/images/PolarisExplanation.mp4" id="helpVideo" type="video/mp4" controls></video>
 					<span id="helpBlurb"
 						>For weekend program help <a href="mailto:robert.frazier@westtown.edu">email T. Robert</a> or
-						<a href="tel:+16103997971">call the DA</a>. 
-						For Polaris tech help fill out the bug report form and we will get back to you as soon as possible.
+						<a href="tel:+16103997971">call the DA</a>. For Polaris tech help fill out the bug report form
+						and we will get back to you as soon as possible.
 					</span>
 					<!-- <iframe
 						width="560"

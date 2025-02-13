@@ -1,0 +1,105 @@
+body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+}
+
+main {
+	background-color: white;
+	border: 0.1vh solid black;
+	border-radius: 3vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	width: 90vw;
+	height: 90vh;
+	overflow: none;
+}
+
+#mainHeader {
+	width: 100%;
+	height: 5%;
+	font-size: 4vh;
+	text-align: center;
+}
+
+#contentWrap {
+	width: 95%;
+	overflow: none;
+	height: 85%;
+	max-height: 85%;
+}
+
+#selectorWrap {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-around;
+}
+
+
+#menuEmbed {
+	height: 95%;
+	width: 100%;
+	object-position: top;
+	display: none;
+}
+
+#menuEmbed.visible {
+	display: block;
+}
+
+#parsedMenu {
+	width: 100%;
+	height: 95%;
+	background-color: lightgray;
+	border: 0.1vh solid black;
+	display: none;
+	grid-auto-flow: column;
+	grid-template-rows: repeat(6, 1fr);
+	row-gap: 0.1vh;
+	column-gap: 0.1vw;
+	overflow-y: scroll;
+	overflow-x: none;
+	padding: 0.2vw;
+}
+
+#parsedMenu.visible {
+	display: grid;
+}
+
+.menuItem {
+	border: 0.1vh solid black;
+	background-color: rgb(249, 249, 249);
+	width: 95%;
+	padding: 2.5%;
+}
+
+#signInPrompt {
+    width: 100%;
+    text-align: center;
+    font-size: 3vh;
+    margin: 0;
+    color: black;
+    cursor: default;
+}
+
+#signInWrap {
+    font-size: 3vh;
+    margin-top: 15%;
+
+}
+
+@media screen and (orientation: portrait) {
+	#mainHeader {
+		font-size: medium;
+	}
+	#contentWrap {
+		height: 90%;
+		max-height: 90%;
+	}
+}

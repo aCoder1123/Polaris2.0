@@ -150,6 +150,7 @@ onAuthStateChanged(auth, (user) => {
 			const unsub = onSnapshot(doc(db, "activeWeekend", "default"), (doc) => {
 				weekendInformation = JSON.parse(doc.data().information);
 				let wrap = document.body;
+				let sideScroll = wrap.scrollLeft;
 				let positionList = [];
 				for (let node of document.querySelectorAll("body .dayWrap")) {
 					positionList.push(node.scrollTop);
@@ -166,6 +167,7 @@ onAuthStateChanged(auth, (user) => {
 				for (let num = 0; num < wrapNodes.length; num++) {
 					wrapNodes[num].scroll(0, positionList[num]);
 				}
+				document.body.scroll(sideScroll, 0)
 
 				addListeners(openIDs);
 				document.querySelectorAll(".addIcon").forEach((el) => {
