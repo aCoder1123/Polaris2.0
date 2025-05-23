@@ -164,6 +164,7 @@ body {
 	overflow: hidden;
 	border-bottom: 0vh solid black;
 	transition: border-bottom ease var(--collapseTime);
+	cursor: pointer;
 }
 
 .eventHeadWrap.full {
