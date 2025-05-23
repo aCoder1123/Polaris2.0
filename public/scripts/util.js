@@ -413,10 +413,15 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 };
 
 const addListeners = (openIDs = undefined) => {
-	let collapsing = document.querySelectorAll(".eventCollapse, .dayCollapse, .collapse");
-
+	let collapsing = document.querySelectorAll(".eventHeadWrap, .dayCollapse, .collapse");
+	console.log("running")
 	for (let el of collapsing) {
-		if (el.classList.contains("eventCollapse") || el.classList.contains("dayCollapse")) {
+		if (el.classList.contains("collapse")) {
+			el.onclick = (click) => {
+				el.classList.toggle("open");
+				el.parentElement.classList.toggle("open");
+			};
+		} else if (el.classList.contains("dayCollapse")) {
 			el.onclick = (click) => {
 				el.classList.toggle("open");
 				el.parentElement.parentElement.classList.toggle("open");
@@ -428,8 +433,18 @@ const addListeners = (openIDs = undefined) => {
 			};
 		} else {
 			el.onclick = (click) => {
-				el.classList.toggle("open");
-				el.parentElement.classList.toggle("open");
+				
+				el.childNodes.forEach((node) => {
+					if (node.classList && node.classList.contains("eventCollapse")) {
+						node.classList.toggle("open");
+						node.parentElement.parentElement.classList.toggle("open");
+						if (openIDs != undefined && node.classList.contains("eventCollapse")) {
+							let id = node.parentElement.parentElement.id;
+							if (openIDs.includes(id)) openIDs.splice(openIDs.indexOf(id), 1);
+							else openIDs.push(id);
+						}
+					}
+				})
 			};
 		}
 	}

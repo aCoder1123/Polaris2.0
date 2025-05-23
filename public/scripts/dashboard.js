@@ -117,6 +117,8 @@ const updateWeekend = () => {
 	let signUpsNum = 0;
 	let tripNum = 0;
 	let tripNumOC = 0;
+	let checkedInNum = 0;
+	let noShowNum = 0;
 
 	for (let day of viewingWeekend.days) {
 		tripNum += day.length;
@@ -125,11 +127,19 @@ const updateWeekend = () => {
 			if (event.admission.val != "none") {
 				tripNumOC += 1;
 			}
+			for (let signup of event.signups) {
+				if (signup.status == "checkedIn") checkedInNum++;
+				if (signup.status == "noShow") noShowNum++;
+			}
+
 		}
 	}
 	document.getElementById("tripNum").innerText = tripNum;
 	document.getElementById("tripNumOC").innerText = tripNumOC;
 	document.getElementById("signupNum").innerText = signUpsNum;
+	document.getElementById("checkedInNum").innerText = checkedInNum;
+	document.getElementById("noShowNum").innerText = noShowNum;
+
 
 	if (weekendSelect.selectedIndex === 0) {
 		document.getElementById("infoWrap").classList.add("active");

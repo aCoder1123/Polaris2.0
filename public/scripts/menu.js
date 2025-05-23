@@ -6,31 +6,12 @@ import {
 import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 import {
 	getFirestore,
-	collection,
-	getDocs,
 	getDoc,
 	doc,
-	setDoc,
-	onSnapshot,
-	deleteDoc,
-	updateDoc,
-	query,
-	where,
-	connectFirestoreEmulator,
 } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
 import {
-	getFunctions,
-	httpsCallable,
-	connectFunctionsEmulator,
-} from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
-import {
-	dataToFullHTML,
 	daysOfTheWeek as weekDays,
 	addListeners,
-	Weekend,
-	WeekendEvent,
-	getUserFromEmail,
-	handleDBError,
 	getMenuHTMLString,
 	getMenuSignInHTMLString,
 } from "./util.js";
@@ -72,26 +53,3 @@ onAuthStateChanged(auth, (user) => {
 		addListeners();
 	}
 });
-
-
-const switchView = () => {
-	Array.from(document.getElementsByClassName("menuOption")).forEach((element) => {
-		element.classList.toggle("visible");
-	});
-}
-document.getElementById("embed").onchange = switchView
-document.getElementById("parsed").onchange = switchView
-
-let unsub = onSnapshot(doc(db, "lunchMenus", "latest"), (doc) => {
-	let data = doc.data()
-	let header = data.header
-	let schedule = JSON.parse(data.information)
-	document.getElementById("mainHeader").innerText = header
-	let wrap = document.getElementById("parsedMenu")
-	wrap.replaceChildren()
-	for (let column of schedule) {
-		for (let item of column) {
-			wrap.insertAdjacentHTML("beforeend", `<div class=\"menuItem\">${item}</div>`)
-		}
-	}
-})

@@ -96,7 +96,8 @@ body section:last-of-type {
 }
 
 #settingsHead.open ~ #settingsInfoWrap {
-	height: 20vh;
+	height: 22vh;
+	overflow-y: scroll;
 }
 
 #settingsWrap {

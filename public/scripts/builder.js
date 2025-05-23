@@ -158,6 +158,7 @@ const updateWeekend = () => {
 		const startDate = new Date(workingWeekend.startDate + "T00:00:00");
 		const startDay = startDate.getDay();
 		let select = document.getElementById("daySelect");
+		let selectedIndex = select.selectedIndex
 		select.replaceChildren();
 		let option = document.createElement("option");
 
@@ -165,6 +166,7 @@ const updateWeekend = () => {
 			option = document.createElement("option");
 			option.value = i;
 			option.innerText = weekDays[(startDay + i) % 7];
+			if (i == selectedIndex) option.selected = true
 			select.appendChild(option);
 		}
 	}
@@ -416,7 +418,7 @@ document.getElementById("attendeeAdd").onclick = addAttendee;
 
 const editCurrentWeekend = (e) => {
 	if (!editingActiveWeekend && !editingQueuedWeekend) {
-		e.target.innerText = "Edit New Weekend";
+		e.target.innerText = "Create New Weekend";
 		if (queuedWeekend) {
 			let choice = confirm(
 				"There appears to be a weekend currently scheduled for release. Would you like to edit that weekend instead?"
@@ -451,13 +453,14 @@ const editCurrentWeekend = (e) => {
 		else lottery.value = "";
 		document.getElementById("weekendDefaultTimes").disabled = true;
 	} else {
-		e.target.innerText = "Edit Active Weekend";
+		e.target.innerText = "Edit Current Weekend";
 		editingActiveWeekend = false;
 		editingQueuedWeekend = false;
 		document.getElementById("startDate").disabled = false;
 		document.getElementById("endDate").disabled = false;
 		document.getElementById("releaseDate").disabled = false;
 		document.getElementById("weekendDefaultTimes").disabled = false;
+		workingWeekend = new Weekend();
 	}
 	updateWeekend();
 };
