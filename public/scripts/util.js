@@ -335,7 +335,9 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 				event.admission.val === "none" ? " noAdmit" : event.admission.name
 			}"><div class="eventLocationWrap eIWrap"><span class="material-symbols-outlined"> location_on </span><span class="eventAddress">${
 				event.location
-			}</span></div><div class="travelWrap eIWrap"><span class="material-symbols-outlined"> airport_shuttle </span><span class="travelTime">${
+			}</span></div>
+			${event.admission.val != "none" ? `<div class='mapWrap closed' id='${event.location}'>Show Map</div>` : ""}
+			<div class="travelWrap eIWrap"><span class="material-symbols-outlined"> airport_shuttle </span><span class="travelTime">${
 				event.travelTime
 			} min</span></div><div class="eventLeadWrap eIWrap"><span class="material-symbols-outlined"> person </span><span class="eventLeader">T. ${
 				event.faculty
@@ -414,7 +416,6 @@ const dataToFullHTML = (information, type = "schedule" | "editor" | "admin", ema
 
 const addListeners = (openIDs = undefined) => {
 	let collapsing = document.querySelectorAll(".eventHeadWrap, .dayCollapse, .collapse");
-	console.log("running")
 	for (let el of collapsing) {
 		if (el.classList.contains("collapse")) {
 			el.onclick = (click) => {
@@ -457,6 +458,17 @@ const addListeners = (openIDs = undefined) => {
 			document.getElementById("sideMenuWrap").classList.toggle("open");
 			document.getElementById("menuToggle").classList.toggle("open");
 		});
+	}
+
+	let mapWraps = document.getElementsByClassName("mapWrap")
+	
+	for (let el of mapWraps) {
+		el.addEventListener("click", (ev) => {
+			let wrap = ev.target
+			if (!wrap.classList.contains("closed")) return
+			wrap.classList.toggle("closed")
+			wrap.innerHTML = `<iframe style="border:0; display:block;" loading="lazy" allowfullscreen src="https://www.google.com/maps/embed/v1/directions?origin=place_id:ChIJVVUuHOjxxokRLiwFDWCDJKs&destination=${encodeURIComponent(el.id)}&key=AIzaSyBMqazhP7Ev6lSwtClxmW9-qrUn_Q4VeKk&zoom=9"></iframe>`	
+		})
 	}
 };
 

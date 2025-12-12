@@ -632,6 +632,9 @@ exports.printRoster = onCall(
 			counter++;
 		}
 		doc.end();
+		
+		let copiedFile = new PDFDocument()
+		copiedFile.addContent(doc.toString())
 
 		let messageOptions = emailOptions;
 		messageOptions.to = "pkkjx65dthv83@hpeprint.com";
@@ -646,12 +649,19 @@ exports.printRoster = onCall(
 			} - ${student.grade}th\n`;
 			counter ++
 		}
-		messageOptions.attachments = {
-			// path: "./testing.pdf",
+		messageOptions.attachments = [
+			{
 			filename: "Roster.pdf",
 			content: doc,
-		};
-		// console.log(messageOptions.text)
+			}
+		];
+		if (request.data.secondEmail) {
+			messageOptions.cc += ", " + request.data.secondEmail;
+			messageOptions.attachments.push({
+				filename: "Roster.pdf",
+				content: copiedFile,
+			});
+		}
 
 		return send(messageOptions);
 	}
