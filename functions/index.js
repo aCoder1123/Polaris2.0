@@ -634,7 +634,7 @@ exports.printRoster = onCall(
 		doc.end();
 
 		let messageOptions = emailOptions;
-		// messageOptions.to = "pkkjx65dthv83@hpeprint.com";
+		messageOptions.to = "pkkjx65dthv83@hpeprint.com";
 		messageOptions.subject = `Roster for ${event.title}`;
 		messageOptions.text = `${event.title}\n\n`;
 
