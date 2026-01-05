@@ -634,8 +634,7 @@ exports.printRoster = onCall(
 		doc.end();
 
 		let messageOptions = emailOptions;
-		messageOptions.to = "pkkjx65dthv83@hpeprint.com";
-		messageOptions.cc = `polaris@westtown.edu, ${request.auth.token.email}`;
+		// messageOptions.to = "pkkjx65dthv83@hpeprint.com";
 		messageOptions.subject = `Roster for ${event.title}`;
 		messageOptions.text = `${event.title}\n\n`;
 
@@ -653,8 +652,10 @@ exports.printRoster = onCall(
 			}
 		];
 		if (request.data.secondEmail) {
-			messageOptions.cc += ", " + request.data.secondEmail;
+			messageOptions.cc = request.data.secondEmail;
+			send(messageOptions)
 		}
+		messageOptions.cc = `polaris@westtown.edu, ${request.auth.token.email}`;
 
 		return send(messageOptions);
 	}
@@ -688,96 +689,6 @@ exports.manageAttendees = onCall(
 		return await manageAttendees(event);
 	}
 );
-
-// exports.getMenu = onSchedule("0 23 * 1-6,9-12 *", async (request) => {
-// 	// exports.getMenu = onCall(async (request) => {
-// 	try {
-// 		const fileUrl = (await db.collection("settings").doc("dataInputLinks").get()).data().lunchMenuURL;
-// 		const destination = "menu.pdf";
-
-// 		const file = fs.createWriteStream(destination);
-// 		const pdfParser = new PDFParser();
-
-// 		https
-// 			.get(fileUrl, (response) => {
-// 				response.pipe(file);
-// 				file.on("finish", () => {
-// 					file.close(() => {
-// 						pdfParser.loadPDF(destination);
-// 						console.log("Loading PDF");
-// 					});
-// 				});
-// 			})
-// 			.on("error", (err) => {
-// 				fs.unlink(destination, () => {
-// 					console.error("Error downloading file:", err);
-// 				});
-// 			});
-
-// 		pdfParser.on("pdfParser_dataError", (errData) => console.error(errData.parserError));
-// 		pdfParser.on("pdfParser_dataReady", async (jsonData) => {
-// 			let data = jsonData.Pages[0];
-// 			let hLines = [];
-// 			let vLines = [];
-// 			let textContent = [];
-// 			let headerText = "";
-// 			for (let i of data.VLines) {
-// 				vLines.push(i.x);
-// 				textContent.push([]);
-// 			}
-// 			textContent.pop();
-// 			for (let j of data.HLines) {
-// 				hLines.push(j.y);
-// 			}
-// 			for (let i in textContent) {
-// 				for (let j = 0; j < hLines.length - 1; j++) {
-// 					textContent[i].push("");
-// 				}
-// 			}
-
-// 			for (let text of data.Texts) {
-// 				let content = text.R[0].T;
-// 				content = content
-// 					.replaceAll("C%20", "C")
-// 					.replaceAll("%20", " ")
-// 					.replaceAll("%2C", ",")
-// 					.replaceAll("%E2%80%98", "‘")
-// 					.replaceAll("%E2%80%99", "’")
-// 					.replaceAll("%2F", "/");
-// 				let vertical = -1;
-// 				let horizontal = -1;
-// 				for (let i in hLines) {
-// 					if (hLines[i] > text.y) break;
-// 					vertical++;
-// 				}
-// 				for (let i in vLines) {
-// 					if (vLines[i] > text.x) break;
-// 					horizontal++;
-// 				}
-// 				if (horizontal === -1 || horizontal >= vLines.length || vertical >= hLines.length) continue;
-// 				if (vertical === -1) {
-// 					headerText += content;
-// 					continue;
-// 				}
-// 				textContent[horizontal][vertical] += content;
-// 			}
-// 			fs.unlinkSync(destination);
-// 			await db
-// 				.collection("lunchMenus")
-// 				.doc("latest")
-// 				.set({ header: headerText, information: JSON.stringify(textContent) });
-// 		});
-// 		await db
-// 			.collection("lunchMenus")
-// 			.doc("status")
-// 			.set({ time: Timestamp.fromDate(new Date()), info: "success" });
-// 	} catch (error) {
-// 		await db
-// 			.collection("lunchMenus")
-// 			.doc("status")
-// 			.set({ time: Timestamp.fromDate(new Date()), info: JSON.stringify(error) });
-// 	}
-// });
 
 exports.test = onCall(async (request) => {
 	if (request.auth === null) return;
