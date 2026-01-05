@@ -467,7 +467,11 @@ const addListeners = (openIDs = undefined) => {
 			let wrap = ev.target
 			if (!wrap.classList.contains("closed")) return
 			wrap.classList.toggle("closed")
-			wrap.innerHTML = `<iframe style="border:0; display:block;" loading="lazy" allowfullscreen src="https://www.google.com/maps/embed/v1/directions?origin=place_id:ChIJVVUuHOjxxokRLiwFDWCDJKs&destination=${encodeURIComponent(el.id)}&key=AIzaSyBMqazhP7Ev6lSwtClxmW9-qrUn_Q4VeKk&zoom=9"></iframe>`	
+			let time = wrap.parentElement.childNodes[4].lastChild.innerText;
+			time = Number(time.slice(0, (time.length-4)))
+			wrap.innerHTML = `<iframe style="border:0; display:block;" loading="lazy" allowfullscreen src="https://www.google.com/maps/embed/v1/directions?origin=place_id:ChIJVVUuHOjxxokRLiwFDWCDJKs&destination=${encodeURIComponent(
+				el.id
+			)}&key=AIzaSyBMqazhP7Ev6lSwtClxmW9-qrUn_Q4VeKk&zoom=${Math.max(5, 10 - Math.round(time / 30))}"></iframe>`;	
 		})
 	}
 };
@@ -495,6 +499,12 @@ const getUserFromEmail = async (email, name, db, functions) => {
 const getMenuHTMLString = async (user, adminPage, db, admin = false) => {
 	let vDoc = await getDoc(doc(db, "settings", "versions"));
 	let versionsDoc = vDoc.data();
+	let information;
+	await getDoc(doc(db, "users", user.email)).then((docSnap) => {
+		if (docSnap.exists()) {
+			information = docSnap.data();
+		}
+	});
 	return `
 		<div id="sideMenuWrap" class="">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" id="menuToggle" class="collapse">
@@ -551,6 +561,10 @@ const getMenuHTMLString = async (user, adminPage, db, admin = false) => {
 				/>
 				<h2 id="userName">${user ? user.displayName : ""}</h2>
 			</a>
+			<div id="menuCreditWrap" class="menuWrap">
+				<span>Credit: </span>
+				<span id="creditNum" class="menuText">${information ? (information.isAdmin ? 1799 : information.credit) : 0}</span>
+			</div>
 			<a class="menuWrap" href="${adminPage ? "../schedule.html" : "./schedule.html"}">
 				<span class="material-symbols-outlined">calendar_month</span>
 				<span class="menuText">Schedule</span>
