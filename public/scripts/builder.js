@@ -32,7 +32,7 @@ import {
 import { firebaseConfig, siteKey } from "./config.js";
 
 const app = initializeApp(firebaseConfig);
-if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
 	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.
@@ -45,7 +45,7 @@ const functions = getFunctions(app);
 const createWeekendEvents = httpsCallable(functions, "saveWeekendEvents");
 const deleteEvent = httpsCallable(functions, "deleteEvent");
 
-if (window.location.hostname === "127.0.0.1") {
+if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost") {
 	// connectFirestoreEmulator(db, "127.0.0.1", 8080);
 	connectFunctionsEmulator(functions, "127.0.0.1", 5001);
 	console.log("Connecting Firebase Emulator");
@@ -429,6 +429,7 @@ const editCurrentWeekend = (e) => {
 			else workingWeekend.updateFromString(activeWeekend);
 		} else {
 			editingActiveWeekend = true;
+			editingQueuedWeekend = false;
 			workingWeekend.updateFromString(activeWeekend);
 		}
 		currentEventNum = 0;

@@ -187,7 +187,6 @@ class Weekend {
 				await setDoc(doc(db, "activeWeekend", "default"), this.getInformation());
 			}
 		} else {
-			console.log("setting queue");
 			await setDoc(doc(db, "activeWeekend", "queued"), this.getInformation());
 		}
 	}

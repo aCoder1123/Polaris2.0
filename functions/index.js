@@ -232,6 +232,7 @@ const saveEvents = async (request) => {
 			template.summary = event.title;
 			template.description = event.description;
 			template.location = event.location;
+			template.attendees = [];
 			for (let signup of event.signups) {
 				if (signup.status === "approved" || signup.status === "checkedIn") {
 					template.attendees.push({ email: signup.email });
