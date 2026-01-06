@@ -370,6 +370,34 @@ body {
 	cursor: not-allowed;
 }
 
+.mapWrap {
+	width: 100%;
+	/* aspect-ratio: 4 / 3; */
+}
+
+.mapWrap.closed {
+	border: .3vh solid black;
+	cursor: pointer;
+	border-radius: .6vh;
+	text-align: center;
+	height: 2.5vh;
+	width: 40%;
+	font-family: inherit;
+	font-weight: 800;
+	font-size: 1.7vh;
+	transition: .09s all ease;
+}
+
+.mapWrap.closed:hover {
+	color: hsl(0, 0%, 30%);
+	border-color: hsl(0, 0%, 30%);
+}
+
+.mapWrap.closed:active {
+	color: hsl(0, 0%, 60%);
+	border-color: hsl(0, 0%, 60%);
+}
+
 @media screen and (orientation: portrait) {
 	.eventTitle {
 		font-size: 6vw;

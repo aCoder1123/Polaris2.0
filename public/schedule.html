@@ -21,7 +21,7 @@
 			<div id="sortWrap">
 				Sorted by:
 				<div id="sortBtn">
-					<span id="sortType">Signup Order</span>
+					<span id="sortType">Order</span>
 					<span class="material-symbols-outlined"> swap_vert </span>
 				</div>
 			</div>
@@ -35,11 +35,14 @@
 				<span class="material-symbols-outlined" id="addAttendee"> add_circle </span>
 			</div>
 			<div id="btmAttendeeLinksWrap" class="attendeeLinkWrap">
-				<button id="checkInSaveButton">Save</button>
+				<!-- <button id="checkInSaveButton">Save</button> -->
 				<a href="" id="mailLink" class="attendeeLink">
 					<span class="material-symbols-outlined" id="attendeesMail"> mail </span>
 				</a>
-				<span class="material-symbols-outlined attendeeLink" id="attendeesPrint"> print </span>
+				<div id="attendeesPrintWrap">
+					<span class="material-symbols-outlined attendeeLink" id="attendeesPrint"> print </span>
+					<input id="secondPrintEmail" type="email" placeholder="Second email to send roster to">
+				</div>
 			</div>
 		</div>
 		<section id="mySchedule">

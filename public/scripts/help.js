@@ -14,7 +14,8 @@ import { firebaseConfig, siteKey } from "./config.js";
 import { addListeners, getUserFromEmail, getMenuHTMLString } from "./util.js";
 
 const app = initializeApp(firebaseConfig);
-if (window.location.hostname === "127.0.0.1") self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+if (window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost")
+	self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 const appCheck = initializeAppCheck(app, {
 	provider: new ReCaptchaV3Provider(siteKey),
 	// Optional argument. If true, the SDK automatically refreshes App Check tokens as needed.

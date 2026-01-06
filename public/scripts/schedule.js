@@ -299,7 +299,7 @@ document.getElementById("exitSignup").addEventListener("click", (e) => {
 
 document.getElementById("sortBtn").addEventListener("click", (e) => {
 	let button = document.getElementById("sortType");
-	let sortList = ["Signup Order", "Name", "Status"];
+	let sortList = ["Order", "Name", "Status"];
 	button.innerText = sortList[(sortList.indexOf(button.innerText) + 1) % 3];
 	formatCheckIn();
 });
@@ -333,12 +333,17 @@ const saveCheckIn = async (persist = false) => {
 		});
 };
 
-document.getElementById("checkInSaveButton").onclick = saveCheckIn;
+// document.getElementById("checkInSaveButton").onclick = saveCheckIn;
 
 document.getElementById("attendeesPrint").onclick = async (e) => {
+	let secondEmail = document.getElementById("secondPrintEmail")
+	if (secondEmail.value && !secondEmail.checkValidity()) {
+		secondEmail.value = prompt("Enter a valid email or leave blank to send without additional email: ")
+
+	}
 	await saveCheckIn();
 	try {
-		await printRosterFunc({ idAsArray: idAsArray });
+		await printRosterFunc({ idAsArray: idAsArray, secondEmail: secondEmail.checkValidity() ? secondEmail.value : "" });
 		alert("Roster printed to the Marry Leads Room printer");
 	} catch (error) {
 		alert(`Error printing roster: ${error.message}`);
