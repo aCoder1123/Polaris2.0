@@ -234,7 +234,7 @@ onAuthStateChanged(auth, (user) => {
 				let report = {status: reportData.status, num: doc.id}
 				report.htmlString = `<div class="bugReport noScrollBar">
 								<h4 class="bugReportHead">Bug Report #${doc.id} - ${reportData.date.toDate().toString().substring(0, 21)}</h4>
-								<div class="bugInfoWrap">
+								<div class="bugInfoWrap noScrollBar">
 									<div class="pageWrap bugInfo">
 										<span class="material-symbols-outlined"> web </span>
 										<span class="reportInfo"><b>${reportData.page}</b></span>

@@ -223,6 +223,7 @@ main {
 	border-radius: 3vh;
 	flex-shrink: 0;
 	margin-bottom: 3%;
+	overflow: none;
 }
 
 .bugReportHead {

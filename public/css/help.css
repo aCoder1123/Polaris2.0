@@ -96,10 +96,6 @@ legend h2 {
 	max-height: min-content;
 }
 
-.inputWrap:last-of-type {
-	flex-direction: row;
-}
-
 input,
 select,
 textarea {
@@ -114,9 +110,6 @@ input[type="text"] {
 	height: 5vh;
 }
 
-input[type="checkbox"] {
-	margin: auto 2%;
-}
 
 #rightWrap {
 	width: 50%;

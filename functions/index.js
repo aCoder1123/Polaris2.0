@@ -49,7 +49,7 @@ exports.bugReport = onCall(
 	async (request) => {
 		if (request.auth === null) return;
 		let messageOptions = emailOptions;
-		messageOptions.to = "bailey.tuckman@westtown.edu";
+		messageOptions.to = "bailey.tuckman@gmail.com";
 		messageOptions.cc = "polaris@westtown.edu";
 		messageOptions.subject = `Polaris bug report: ${request.data.page}`;
 		messageOptions.text = `On ${new Date().toLocaleString("en-US", {
@@ -61,7 +61,7 @@ exports.bugReport = onCall(
 			request.data.email ? request.data.email : "anonymous"
 		}.\n\nDescription:\n${request.data.description}\n\nSteps to Reproduce: ${
 			request.data.repro
-		}\n\nCheck this bug report here: https://polaris-60dce.web.app/admin/settings.html`;
+		}\n\nCheck this bug report here: https://polaris.westtown.edu/admin/settings.html`;
 
 		let currentNum = await db.collection("bugReports").count().get();
 		db.collection("bugReports")
