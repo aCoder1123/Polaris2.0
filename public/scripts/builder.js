@@ -533,6 +533,13 @@ const clearDays = () => {
 
 document.getElementById("clearBtn").onclick = clearDays;
 
+document.getElementById("eventClearBtn").onclick = () => {
+	document.querySelectorAll("#eventCreatorWrap input").forEach((e) => {
+		e.value = null;
+	})
+	document.getElementById("desc").value = ""
+};
+
 addListeners();
 
 document.getElementById("settingsCollapse").onclick = (e) =>

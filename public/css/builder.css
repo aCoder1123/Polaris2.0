@@ -144,6 +144,11 @@ body section:last-of-type {
 	width: 80%;
 }
 
+#eventClearBtn {
+	margin: -1vh auto 1.5vh;
+	font-size: 1vh;
+}
+
 input[type="number"] {
 	width: 20%;
 }
